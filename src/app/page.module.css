@@ -166,3 +166,15 @@ a.secondary {
     filter: invert();
   }
 }
+
+/* Asegúrate de que SweetAlert2 tenga la mayor prioridad de z-index */
+.swal2-container {
+  z-index: 9999 !important;
+  /* Sobrescribe cualquier otro z-index */
+}
+
+/* Estilo adicional si es necesario */
+.swal2-popup {
+  z-index: 10000 !important;
+  /* Asegura que el contenido del modal esté encima */
+}

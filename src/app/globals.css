@@ -40,3 +40,20 @@ a {
     color-scheme: dark;
   }
 }
+
+
+.swal2-shown {
+  z-index: 9999 !important;
+}
+
+.swal2-container {
+  position: fixed !important;
+  /* Asegura que se coloque de forma fija */
+  z-index: 9999 !important;
+  /* Ajusta el z-index a un valor alto */
+}
+
+body.swal2-shown {
+  padding-right: 0 !important;
+  /* Quita el padding-right */
+}
