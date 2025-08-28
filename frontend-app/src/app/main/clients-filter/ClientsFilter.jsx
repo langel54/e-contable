@@ -220,7 +220,7 @@ const clientColumns = (
               label={estadoInicial ? "Sí" : "No"}
             />
             <Tooltip
-              title="Tramites y consultas"
+              title="Trámites y consultas"
               arrow
               placement="left"
               slots={{
