@@ -1,0 +1,13 @@
+npm install express prisma @prisma/client jsonwebtoken bcryptjs cors dotenv
+
+Exportar
+C:\Program Files\MySQL\MySQL Server 8.0\bin> ./mysqldump -P 3307 -u root -p --no-create-info --skip-triggers --default-character-set=utf8mb4 db_solconsab > d:/data_cont.sql
+
+Importar:
+ Get-Content "d:/data_cont.sql" | ./mysql -P 3307 -u root -p --default-character-set=utf8mb4 sys_cont
+
+ Antes de importar agregar al archivo:
+ ------
+    SET SESSION sql_mode = '';
+    SET foreign_key_checks = 0;
+
