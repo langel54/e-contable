@@ -1,0 +1,294 @@
+model ActEspecifica {
+  nact_especifica   String  @id
+  idact_especifica  Int?
+}
+
+model CajaAnual {
+  nro             Int?
+  codcaja_a       String     @id
+  fecha_apertura  DateTime?
+  monto_inicial_a Float?
+  ingreso_a       Float?
+  salida_a        Float?
+  saldo_a         Float?
+  fechacierre     DateTime?
+  registra        String?
+  estado_c_a      String?
+  caja_mes        CajaMes[]
+}
+
+model CajaMes {
+  nro             Int?
+  codcaja_m       String    @id
+  fecha_apertura  DateTime?
+  monto_inicial_m Float?
+  ingreso_mes     Float?
+  salida_mes      Float?
+  saldo_mes       Float?
+  fechacierre     DateTime?
+  codcaja_a       String
+  registra        String?
+  estado_c_m      String?
+  caja_anual      CajaAnual @relation(fields: [codcaja_a], references: [codcaja_a])
+  ingreso         Ingreso[]
+  salida          Salida[]
+}
+
+model ClienteProv {
+  nro              Int?
+  idclienteprov    String   @id
+  nregimen         String?
+  razonsocial      String?  @db.VarChar(85)
+  u_digito         String?  @db.Char(2)
+  ruc              String?  @db.VarChar(11)
+  c_usuario        String?  @db.VarChar(20)
+  c_passw          String?  @db.VarChar(45)
+  dni              String?  @db.VarChar(8)
+  cod_envio        String?
+  pdt_621          String?  @db.Char(2)
+  planilla_elect   String?  @db.Char(2)
+  fact_elect       String?  @db.Char(2)
+  libro_elect      String?  @db.Char(2)
+  tipo_cronog      String?  @db.Char(2)
+  ple_desde        DateTime? @db.Date
+  cta_detraccion   String?
+  paga_detraccion  String?  @db.Char(2)
+  paga_percepcion  String?  @db.Char(2)
+  compensa_percepcion String? @db.Char(2)
+  sujeta_retencion String?  @db.Char(2)
+  clave_afpnet     String?
+  clave_rnp        String?  @db.Char(2)
+  nrubro           String?
+  nact_especifica  String?
+  fecha_ingreso    DateTime? @db.Date
+  contacto         String?
+  telefono         Int?
+  direccion        String?
+  responsable      String?
+  montoref         Float?
+  honorario_anual  String?
+  obs              String?
+  idfacturador     Int
+  f_usuario        String
+  f_pass           String   @db.VarChar(50)
+  estado           String   @db.Char(2)
+  declarado        String   @db.VarChar(2)
+  regimen          Regimen? @relation(fields: [nregimen], references: [nregimen])
+  rubro            Rubro?   @relation(fields: [nrubro], references: [nrubro])
+  facturador       Facturador @relation(fields: [idfacturador], references: [idfacturador])
+  ingreso          Ingreso[]
+  salida           Salida[]
+  tributos         Tributos[]
+}
+
+model Concepto {
+  idconcepto      Int      @id @default(autoincrement())
+  nombre_concepto String?
+  ingreso         Ingreso[]
+  salida          Salida[]
+}
+
+model Configuracion {
+  idconfig       Int      @id @default(autoincrement())
+  e_razonsocial  String?
+  e_ncomercial   String?
+  igv            Float?
+  tim            Float?
+  e_ruc          String?
+}
+
+model Estado {
+  idestado    Int       @id @default(autoincrement())
+  nom_estado  String?
+  ingreso     Ingreso[]
+  salida      Salida[]
+}
+
+model Facturador {
+  idfacturador  Int           @id @default(autoincrement())
+  n_facturador  String?
+  f_obs         String?
+  cliente_prov  ClienteProv[]
+}
+
+model FormaPagoTrib {
+  idforma_pago_trib  String  @id
+  descripcion        String?
+}
+
+model Ingreso {
+  idingreso     Int       @id @default(autoincrement())
+  fecha         DateTime?
+  idtipo_op     Int?
+  idtipo_doc    Int?
+  serie_doc     Int?
+  num_doc       Int?
+  idclienteprov String
+  idconcepto    Int
+  idperiodo     Int
+  anio          Int?
+  importe       Float?
+  idestado      Int?
+  observacion   String?
+  registra      String?
+  codcaja_m     String
+  cliente_prov  ClienteProv @relation(fields: [idclienteprov], references: [idclienteprov])
+  concepto      Concepto    @relation(fields: [idconcepto], references: [idconcepto])
+  periodo       Periodo     @relation(fields: [idperiodo], references: [idperiodo])
+  tipo_doc      TipoDocumento? @relation(fields: [idtipo_doc], references: [idtipo_doc])
+  tipo_op       TipoOperacion? @relation(fields: [idtipo_op], references: [idtipo_op])
+  estado        Estado?     @relation(fields: [idestado], references: [idestado])
+  caja_mes      CajaMes     @relation(fields: [codcaja_m], references: [codcaja_m])
+}
+
+model Notas {
+  idnotas       Int       @id @default(autoincrement())
+  n_fecha       DateTime? @db.Date
+  idclienteprov String?   @db.Char(5)
+  contenido     String?   @db.Text
+  fecha_ed      DateTime  @db.Date
+  ncreador      String?
+  neditor       String?
+}
+
+model Pagos {
+  idpagos           Int      @id @default(autoincrement())
+  idtributos        Int
+  fecha_p           DateTime? @db.Date
+  importe_p         Float
+  idforma_pago_trib String
+  detalles          String?
+}
+
+model Periodo {
+  idperiodo    Int       @id @default(autoincrement())
+  nom_periodo  String?
+  ingreso      Ingreso[]
+  salida       Salida[]
+}
+
+model Personal {
+  id_personal  Int       @id @default(autoincrement())
+  nombres      String?
+  apellidos    String?
+  direccion    String?
+  telefono     String?   @db.Char(9)
+  personalcol  String?
+  usuario      Usuario[]
+}
+
+model Regimen {
+  nregimen    String        @id
+  idregimen   Int?
+  cliente_prov ClienteProv[]
+}
+
+model Rubro {
+  nrubro       String        @id
+  idrubro      Int?
+  cliente_prov ClienteProv[]
+}
+
+model Salida {
+  idsalida      Int       @id @default(autoincrement())
+  fecha         DateTime?
+  idtipo_op     Int?
+  idtipo_doc    Int?
+  serie_doc     Int?
+  num_doc       Int?
+  idclienteprov String
+  idconcepto    Int
+  idperiodo     Int
+  anio          Int?
+  importe       Float?
+  idestado      Int?
+  observacion   String?
+  registra      String?
+  codcaja_m     String
+  cliente_prov  ClienteProv @relation(fields: [idclienteprov], references: [idclienteprov])
+  concepto      Concepto    @relation(fields: [idconcepto], references: [idconcepto])
+  periodo       Periodo     @relation(fields: [idperiodo], references: [idperiodo])
+  tipo_doc      TipoDocumento? @relation(fields: [idtipo_doc], references: [idtipo_doc])
+  tipo_op       TipoOperacion? @relation(fields: [idtipo_op], references: [idtipo_op])
+  estado        Estado?     @relation(fields: [idestado], references: [idestado])
+  caja_mes      CajaMes     @relation(fields: [codcaja_m], references: [codcaja_m])
+}
+
+model TipoDocumento {
+  idtipo_doc  Int       @id
+  descripcion String?
+  ingreso     Ingreso[]
+  salida      Salida[]
+}
+
+model TipoOperacion {
+  idtipo_op  Int       @id
+  nombre_op  String?
+  ingreso    Ingreso[]
+  salida     Salida[]
+}
+
+model TipoTrib {
+  idtipo_trib   String     @id
+  descripcion_t String?
+  tributos      Tributos[]
+}
+
+model TipoUsuario {
+  id_tipo     Int       @id @default(autoincrement())
+  descripcion String?
+  usuario     Usuario[]
+}
+
+model Tmp {
+  idtmp             Int      @id @default(autoincrement())
+  fecha_p           DateTime @db.Date
+  importe_p         Float
+  idforma_pago_trib String?
+  detalles          String?
+  session_id        String
+}
+
+model Tributos {
+  idtributos    Int       @id @default(autoincrement())
+  fecha_v       DateTime  @db.Date
+  idclienteprov String
+  anio          String?   @db.Char(4)
+  mes           String?   @db.Char(2)
+  idtipo_trib   String
+  importe_reg   Float?
+  importe_pc    Int?
+  importe_pend  Int?
+  importe_pag   Float?
+  estado        String    @db.Char(1)
+  obs           String?
+  fecha_reg     DateTime? @db.Date
+  cliente_prov  ClienteProv @relation(fields: [idclienteprov], references: [idclienteprov])
+  tipo_trib     TipoTrib   @relation(fields: [idtipo_trib], references: [idtipo_trib])
+}
+
+model Usuario {
+  id_usuario  Int         @id @default(autoincrement())
+  usuario     String?
+  password    String?
+  id_personal Int
+  id_tipo     Int
+  personal    Personal    @relation(fields: [id_personal], references: [id_personal])
+  tipo_usuario TipoUsuario @relation(fields: [id_tipo], references: [id_tipo])
+}
+
+model Vencimientos {
+  idvencimientos Int      @id @default(autoincrement())
+  d0             DateTime @db.Date
+  d1             DateTime @db.Date
+  d2             DateTime @db.Date
+  d3             DateTime @db.Date
+  d4             DateTime @db.Date
+  d5             DateTime @db.Date
+  d6             DateTime @db.Date
+  d7             DateTime @db.Date
+  d8             DateTime @db.Date
+  d9             DateTime @db.Date
+  anio_v         String   @db.Char(4)
+  mes_v          String   @db.VarChar(2)
+}
