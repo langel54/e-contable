@@ -13,7 +13,7 @@ export default function RootLayout({ children }) {
           <AuthProvider>
             <CssBaseline />
             {children}
-          </AuthProvider>{" "}
+          </AuthProvider>
         </ThemeCustomization>
       </body>
     </html>
