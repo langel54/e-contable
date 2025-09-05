@@ -308,11 +308,15 @@ const ClientPage = () => {
     }
   }, [pagination, estadoClientesProvider, searchTermValue]);
 
-  const columns = clientColumns(
-    setEditedClient,
-    () => setOpenAddModal(true),
-    () => setOpenStatusModal(true),
-    () => setOpenDetailsModal(true)
+  const columns = React.useMemo(
+    () =>
+      clientColumns(
+        setEditedClient,
+        () => setOpenAddModal(true),
+        () => setOpenStatusModal(true),
+        () => setOpenDetailsModal(true)
+      ),
+    [setEditedClient]
   );
   return (
     <Box>

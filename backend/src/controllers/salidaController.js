@@ -1,17 +1,30 @@
 const salidaService = require("../services/salidaService");
 
 const salidaController = {
-  // Obtener todos los registros con paginación
+  // Obtener todos los registros con paginación y filtros
   async getAll(req, res) {
     try {
-      const { page = 1, limit = 10 } = req.query;
+      const {
+        page = 1,
+        limit = 10,
+        startDate,
+        endDate,
+        concept,
+        period,
+        year,
+        status,
+      } = req.query;
       const skip = (page - 1) * limit;
-
       const { salidas, total } = await salidaService.getAll(
         skip,
-        Number(limit)
+        Number(limit),
+        startDate,
+        endDate,
+        Number(concept),
+        Number(period),
+        Number(year),
+        Number(status)
       );
-
       res.json({
         salidas,
         pagination: {

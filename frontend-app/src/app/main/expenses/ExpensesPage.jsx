@@ -1,5 +1,5 @@
 import CustomTable from "@/app/components/CustonTable";
-import { getIngresos } from "@/app/services/incomesServices";
+import { getExpenses } from "@/app/services/expensesServices";
 import {
   Clear,
   MoreVert,
@@ -31,10 +31,9 @@ import {
   CircularProgress,
 } from "@mui/material";
 import React, { useCallback, useEffect, useState } from "react";
-import IncomeForm from "./IncomesForm";
+import ExpensesForm from "./ExpensesForm";
 import ModalComponent from "@/app/components/ModalComponent";
 import PDFPreviewModal from "./components/PDFPreviewModal";
-
 import dayjs from "dayjs";
 import "../../components/date-picker/date-picker.css";
 import DatePicker from "react-datepicker";
@@ -49,21 +48,13 @@ import { getColumns } from "./components/TableColumns";
 
 dayjs.extend(utc);
 
-const IncomesPage = () => {
-  const [incomesData, setIncomesData] = useState();
-  const [pagination, setPagination] = useState({
-    page: 0,
-    pageSize: 10,
-  });
+const ExpensesPage = () => {
+  const [expensesData, setExpensesData] = useState();
+  const [pagination, setPagination] = useState({ page: 0, pageSize: 10 });
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [exportingExcel, setExportingExcel] = useState(false);
-
   const [openFormModal, setOpenFormModal] = useState(false);
-
-  const [editIncomeData, setEditIncomeData] = useState(null);
-  // console.log eliminado para producción
-  // const [startDate, setStartDate] = useState("");
+  const [editSalidaData, setEditSalidaData] = useState(null);
   const [periodosList, setPeriodosList] = useState([]);
   const [conceptFilter, setConceptFilter] = useState("");
   const [conceptos, setConceptos] = useState([]);
@@ -72,14 +63,11 @@ const IncomesPage = () => {
   const [estados, setEstados] = useState([]);
   const [selectedEstado, setSelectedEstado] = useState("");
   const [dateRange, setDateRange] = useState([null, null]);
-  const [startDate, endDate] = dateRange;
-  // const anioActual = dayjs().year() + 1;
-  // const anios = Array.from({ length: 10 }, (_, i) => anioActual - i); // Últimos 10 años
-
   const [anchorElPop, setAnchorElPop] = useState(null);
   const [openPDFModal, setOpenPDFModal] = useState(false);
   const [selectedPDFData, setSelectedPDFData] = useState(null);
- 
+  const [exportingExcel, setExportingExcel] = useState(false);
+  const [startDate, endDate] = dateRange;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -89,7 +77,6 @@ const IncomesPage = () => {
           getPeriodos(),
           getEstados(),
         ]);
-
         setConceptos(conceptosData.conceptos);
         setPeriodosList(periodosData.periodos);
         setEstados(estadosData.estados);
@@ -97,11 +84,10 @@ const IncomesPage = () => {
         console.error("Error al obtener los datos:", error);
       }
     };
-
     fetchData();
   }, []);
 
-  const fetchDataIncomes = useCallback(
+  const fetchDataExpenses = useCallback(
     async (
       page,
       pageSize,
@@ -113,24 +99,22 @@ const IncomesPage = () => {
       selectedEstado
     ) => {
       setLoading(true);
-
       try {
-        const data = await getIngresos(
-          //
+        const data = await getExpenses(
           page,
           pageSize,
-          "", //search
-          selectedEstado, //"", //status
+          "",
+          selectedEstado,
           startDate,
           endDate,
           conceptFilter,
           periodo,
           selectedAnio
         );
-        setIncomesData(data.ingresos);
-        setTotal(data.pagination.total);
+        setExpensesData(data.salidas);
+        setTotal(data.pagination?.total || 0);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching egresos:", error);
       } finally {
         setLoading(false);
       }
@@ -138,35 +122,22 @@ const IncomesPage = () => {
     []
   );
 
-  const handleCloseFormModal = () => {
-    console.log("Cerrar");
-    setOpenFormModal(!openFormModal);
-    setEditIncomeData(null);
-  };
-
   useEffect(() => {
     const fechasValidas = (startDate && endDate) || (!startDate && !endDate);
     const periodoValido =
       (periodo && selectedAnio) || (!periodo && !selectedAnio);
-
     let startDateFormat = "";
     let endDateFormat = "";
-
     if (startDate && endDate) {
       let start = new Date(startDate);
       let end = new Date(endDate);
-
-      // Ajustar horas: startDate a 00:00:00.000 y endDate a 23:59:59.999
       start.setHours(0, 0, 0, 0);
       end.setHours(23, 59, 59, 999);
-
-      // Formatear a ISO 8601 con zona horaria UTC
       startDateFormat = dayjs(start).utc().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
       endDateFormat = dayjs(end).utc().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
     }
-
     if (fechasValidas && periodoValido) {
-      fetchDataIncomes(
+      fetchDataExpenses(
         pagination.page + 1,
         pagination.pageSize,
         startDateFormat,
@@ -199,19 +170,12 @@ const IncomesPage = () => {
     selectedEstado,
   ]);
 
-  // Función para manejar el cambio de año
   const handleYearChange = (date) => {
-    if (date) {
-      setSelectedAnio(date.getFullYear()); // Actualizar el estado con el año seleccionado
-    }
+    if (date) setSelectedAnio(date.getFullYear());
   };
-
-  // Función para personalizar el contenido de los años (tooltip u otras personalizaciones)
-  const renderYearContent = (year) => {
-    const tooltipText = `Año: ${year}`;
-    return <span title={tooltipText}>{year}</span>;
-  };
-
+  const renderYearContent = (year) => (
+    <span title={`Año: ${year}`}>{year}</span>
+  );
   const handleResetFilter = () => {
     setDateRange([null, null]);
     setConceptFilter("");
@@ -219,133 +183,16 @@ const IncomesPage = () => {
     setSelectedAnio("");
     setSelectedEstado("");
   };
-
   const handleClickPop = (event) => setAnchorElPop(event.currentTarget);
-
-  const handleActionOpen = () => {
-    setAnchorElPop(null);
+  const handleActionOpen = () => setAnchorElPop(null);
+  const handleCloseFormModal = () => {
+    setOpenFormModal(!openFormModal);
+    setEditSalidaData(null);
   };
-
-  const fetchAllIngresos = async (
-    startDate,
-    endDate,
-    conceptFilter,
-    periodo,
-    selectedAnio,
-    selectedEstado
-  ) => {
-    let allData = [];
-    let currentPage = 1;
-    const pageSize = 100; // Tamaño de página
-
-    try {
-      while (true) {
-        const data = await getIngresos(
-          currentPage,
-          pageSize,
-          "", // search
-          selectedEstado,
-          startDate,
-          endDate,
-          conceptFilter,
-          periodo,
-          selectedAnio
-        );
-
-        allData = [...allData, ...data.ingresos];
-
-        if (data.ingresos.length < pageSize) {
-          break; // Sale del bucle si la última página tiene menos elementos que el tamaño máximo
-        }
-
-        currentPage++;
-      }
-    } catch (error) {
-      console.error("Error al obtener ingresos:", error);
-    }
-
-    return allData;
-  };
-
-  const handleGenerateExcel = async () => {
-    setExportingExcel(true);
-    const selectedColumns = {
-      idingreso: "Nro",
-      fecha: "FECHA",
-      idclienteprov: "ID Cliente",
-      razonsocial: "Razon Social",
-      periodo: "PERIODO",
-      anio: "AÑO",
-      concepto: "CONCEPTO",
-      importe: "IMPORTE",
-      estado: "ESTADO",
-      observacion: "OBS",
-      registra: "REGISTRA",
-      codcaja_m: "CAJA",
-    };
-    let startDateFormat = "";
-    let endDateFormat = "";
-
-    if (startDate && endDate) {
-      let start = new Date(startDate);
-      let end = new Date(endDate);
-
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-
-      startDateFormat = dayjs(start).utc().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
-      endDateFormat = dayjs(end).utc().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
-    }
-
-    try {
-      const fetchedData = await fetchAllIngresos(
-        startDateFormat,
-        endDateFormat,
-        conceptFilter,
-        periodo,
-        selectedAnio,
-        selectedEstado
-      );
-      
-      const transformedData = fetchedData.map((item) => ({
-        idingreso: item.idingreso,
-        fecha: dayjs(item.fecha).format("DD/MM/YYYY HH:mm"),
-        idclienteprov: item.idclienteprov,
-        razonsocial: item.cliente_prov ? item.cliente_prov.razonsocial : "",
-        periodo: item.periodo ? item.periodo.nom_periodo : "",
-        anio: item.anio,
-        concepto: item.concepto ? item.concepto.nombre_concepto : "",
-        importe: item.importe,
-        estado: item.estado ? item.estado.nom_estado : "",
-        observacion: item.observacion,
-        registra: item.registra,
-        codcaja_m: item.codcaja_m,
-      }));
-
-      const imageUrl = "/images/users/avatar-1.png";
-
-      const generateReport = excelExport({
-        data: transformedData,
-        imageUrl: imageUrl,
-        fileName: "Ingresos.xlsx",
-        title: "Reporte de Ingresos",
-        columnsToShow: selectedColumns,
-      });
-
-      generateReport();
-    } catch (error) {
-      console.error("Error al generar el reporte:", error);
-    } finally {
-      setExportingExcel(false);
-      handleActionOpen();
-    }
-  };
-
   const handleOpenPDFModal = (row) => {
-    setSelectedPDFData(row);
     setOpenPDFModal(true);
+    setSelectedPDFData(row);
   };
-
   const handleClosePDFModal = () => {
     setOpenPDFModal(false);
     setSelectedPDFData(null);
@@ -360,18 +207,16 @@ const IncomesPage = () => {
         justifyContent={"space-between"}
       >
         <Typography variant="h4" fontWeight={"100"}>
-          Ingresos
+          Egresos
         </Typography>
         <Button
           size="medium"
           color="success"
           variant="contained"
-          onClick={() => {
-            setOpenFormModal(true);
-          }}
+          onClick={() => setOpenFormModal(true)}
           startIcon={<PostAdd fontSize="inherit" />}
         >
-          Registrar Ingreso
+          Registrar Egreso
         </Button>
       </Stack>
       <Divider></Divider>
@@ -387,12 +232,6 @@ const IncomesPage = () => {
         }}
         width={"100%"}
       >
-        {/* <SearchComponent
-        // handleClearSearch={handleClearSearch}
-        // handleSearchButton={handleSearchButton}
-        // handleSearchChange={handleSearchChange}
-        // searchTerm={searchTerm}
-        /> */}
         <Stack direction={"row"} justifyContent={"start"} spacing={2}>
           <FormControl sx={{ width: 250 }}>
             <InputLabel>Concepto</InputLabel>
@@ -410,11 +249,8 @@ const IncomesPage = () => {
                         <IconButton
                           size="small"
                           edge="end"
-                          onClick={() => setConceptFilter("")} // Limpia el filtro
-                          sx={{
-                            // pr: 2,
-                            borderRadius: "50%",
-                          }}
+                          onClick={() => setConceptFilter("")}
+                          sx={{ borderRadius: "50%" }}
                         >
                           <Clear sx={{ height: 14 }} />
                         </IconButton>
@@ -424,7 +260,6 @@ const IncomesPage = () => {
                 />
               }
             >
-              {/* <MenuItem value="">Todos</MenuItem> */}
               {conceptos.map((c) => (
                 <MenuItem key={c.idconcepto} value={c.idconcepto}>
                   {c.nombre_concepto}
@@ -433,7 +268,6 @@ const IncomesPage = () => {
             </Select>
           </FormControl>
           <FormControl>
-            {/* <InputLabel>Inicio - Fin</InputLabel> */}
             <DatePicker
               locale={"es"}
               dateFormat="dd/MM/yyyy "
@@ -441,7 +275,6 @@ const IncomesPage = () => {
               startDate={startDate}
               endDate={endDate}
               onChange={(update) => setDateRange(update)}
-              // isClearable={false}
               customInput={
                 <TextField
                   label="Fecha de pago"
@@ -452,7 +285,7 @@ const IncomesPage = () => {
                         <InputAdornment position="end">
                           <IconButton
                             sx={{ borderRadius: "50%" }}
-                            onClick={() => setDateRange([null, null])} // Limpia las fechas
+                            onClick={() => setDateRange([null, null])}
                             size="small"
                           >
                             <Clear sx={{ height: 14 }} />
@@ -480,34 +313,18 @@ const IncomesPage = () => {
               ))}
             </Select>
           </FormControl>
-          {/* <FormControl size="medium" sx={{ width: 100 }}>
-            <InputLabel>Año</InputLabel>
-            <Select
-              value={selectedAnio}
-              onChange={(e) => setSelectedAnio(e.target.value)}
-            >
-              <MenuItem value="">Todos</MenuItem>
-              {anios.map((anio) => (
-                <MenuItem key={anio} value={anio}>
-                  {anio}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl> */}
           <FormControl size="medium" sx={{ width: 150 }}>
             <DatePicker
-              selected={selectedAnio ? new Date(selectedAnio, 0, 1) : null} // Seleccionar el año completo
-              onChange={handleYearChange} // Actualiza el año seleccionado
-              showYearPicker // Solo mostrar años
-              dateFormat="yyyy" // Formato de solo año
-              renderYearContent={renderYearContent} // Personalización de cada año con un tooltip
+              selected={selectedAnio ? new Date(selectedAnio, 0, 1) : null}
+              onChange={handleYearChange}
+              showYearPicker
+              dateFormat="yyyy"
+              renderYearContent={renderYearContent}
               customInput={
                 <TextField
                   label="Seleccionar Año"
-                  value={selectedAnio || ""} // Mostrar el año seleccionado o vacío
-                  InputProps={{
-                    readOnly: true, // Solo de lectura
-                  }}
+                  value={selectedAnio || ""}
+                  InputProps={{ readOnly: true }}
                 />
               }
             />
@@ -536,71 +353,25 @@ const IncomesPage = () => {
           <IconButton onClick={handleClickPop}>
             <MoreVert />
           </IconButton>
-          <Popover
-            open={Boolean(anchorElPop)}
-            anchorEl={anchorElPop}
-            onClose={handleActionOpen}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "right",
-            }}
-          >
-            <List>
-              <ListItem
-                sx={{ cursor: "pointer" }}
-                onClick={() => {
-                  handleGenerateExcel();
-                }}
-                disabled={exportingExcel}
-              >
-                <ListItemIcon
-                  sx={(theme) => ({ color: theme.palette.success.main })}
-                >
-                  {exportingExcel ? (
-                    <CircularProgress size={20} color="success" />
-                  ) : (
-                    <FileExcelFilled />
-                  )}
-                </ListItemIcon>
-                <ListItemText 
-                  primary={exportingExcel ? "Exportando..." : "Exportar Excel"} 
-                />
-              </ListItem>
-              <Divider />
-              <ListItem
-                sx={{ cursor: "pointer" }}
-                onClick={() => {
-                  onOtherAction();
-                  handleClosePop();
-                }}
-              >
-                <ListItemIcon
-                  sx={(theme) => ({ color: theme.palette.error.main })}
-                >
-                  <FilePdfFilled />
-                </ListItemIcon>
-                <ListItemText primary="Imprimir PDF" />
-              </ListItem>
-            </List>
-          </Popover>
+          {/* Popover para acciones adicionales, como exportar o imprimir PDF */}
         </Stack>
       </Stack>
       <CustomTable
         columns={getColumns({
-          setEditIncomeData,
+          setEditSalidaData,
           setOpenFormModal,
           handleOpenPDFModal,
         })}
-        data={incomesData || []}
+        data={expensesData || []}
         paginationModel={pagination}
         setPaginationModel={setPagination}
         rowCount={total}
         loading={loading}
-        getRowId={(row) => row.idingreso}
+        getRowId={(row) => row.idsalida}
       />
       <ModalComponent
         icon={
-          editIncomeData ? (
+          editSalidaData ? (
             <DriveFileRenameOutline color="success" />
           ) : (
             <PostAdd color="success" />
@@ -608,22 +379,24 @@ const IncomesPage = () => {
         }
         open={openFormModal}
         content={
-          <IncomeForm
-            ingresoEdit={editIncomeData}
+          <ExpensesForm
+            salidaEdit={editSalidaData}
             handleCloseModal={handleCloseFormModal}
           />
         }
         handleClose={handleCloseFormModal}
-        title={editIncomeData ? "Editar Ingreso" : "Registrar un Ingreso"}
+        title={editSalidaData ? "Editar Egreso" : "Registrar un Egreso"}
         width="600px"
       />
-      <PDFPreviewModal
-        open={openPDFModal}
-        handleClose={handleClosePDFModal}
-        data={selectedPDFData}
-      />
+      {openPDFModal && (
+        <PDFPreviewModal
+          open={openPDFModal}
+          handleClose={handleClosePDFModal}
+          data={selectedPDFData}
+        />
+      )}
     </Box>
   );
 };
 
-export default IncomesPage;
+export default ExpensesPage;
