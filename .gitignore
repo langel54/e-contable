@@ -16,8 +16,8 @@ package-lock.json
 yarn.lock
 .vscode/
 .idea/
-frontend-app/temp/
-frontend-app/temp-pdf/
-backend/temp/
-backend/temp-pdf/
+# frontend-app/temp/
+# frontend-app/temp-pdf/
+# backend/temp/
+# backend/temp-pdf/
 template/

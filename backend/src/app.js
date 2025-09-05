@@ -33,6 +33,7 @@ const validateTokenRoutes = require("./routes/validateTokenRoutes");
 const estadoClienteRoutes = require("./routes/estadoClienteRoutes");
 const misDeclaracionesRoutes = require("./routes/misDeclaracionesRoutes");
 const pdfIncomeRoutes = require("./routes/pdfIncomeRoutes");
+const pdfSalidaRoutes = require("./routes/pdfSalidaRoutes");
 const sunafilRoutes = require("./routes/sunafilRoutes");
 const checkOrigin = require("./middlewares/checkOrigin");
 const corsOptions = require("./config/corsConfig");
@@ -51,33 +52,14 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/auth", authRoutes);
+// Ruta para acceso a SUNAT
 app.post("/api/access-sunat", async (req, res) => {
   const { ruc, usuario, password } = req.body;
-
   if (!ruc || !usuario || !password) {
     return res.status(400).json({
       error: "Todos los campos (RUC, usuario, contraseña) son obligatorios.",
     });
   }
-
-  try {
-    const result = await accessSunat({ ruc, usuario, password });
-    res.status(200).json({ message: "Acceso completado", result });
-  } catch (error) {
-    console.error("Error en el acceso a SUNAT:", error);
-    res.status(500).json({ error: "Hubo un problema al acceder a SUNAT." });
-  }
-});
-
-app.post("/api/access-sunat", async (req, res) => {
-  const { ruc, usuario, password } = req.body;
-
-  if (!ruc || !usuario || !password) {
-    return res.status(400).json({
-      error: "Todos los campos (RUC, usuario, contraseña) son obligatorios.",
-    });
-  }
-
   try {
     const result = await accessSunat({ ruc, usuario, password });
     res.status(200).json({ message: "Acceso completado", result });
@@ -118,6 +100,7 @@ app.use("/api/validate-token", validateTokenRoutes);
 app.use("/api/estado-cliente", estadoClienteRoutes);
 app.use("/api/misdeclaraciones", misDeclaracionesRoutes);
 app.use("/api/pdf-income", pdfIncomeRoutes);
+app.use("/api/pdf-salida", pdfSalidaRoutes);
 app.use("/api/sunafil", sunafilRoutes);
 
 // Error Handler

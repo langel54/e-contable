@@ -38,11 +38,7 @@ import SwitchIosComponent from "@/app/components/SwitchIosComponent";
 import ConfirmDialog from "@/app/components/ConfirmAlert";
 import Swal from "sweetalert2";
 import excelExport from "@/app/components/excelReport";
-import {
-  FileExcelFilled,
-  FileExcelOutlined,
-  FilePdfFilled,
-} from "@ant-design/icons";
+import { FileExcelFilled, FilePdfFilled } from "@ant-design/icons";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import { accessSunafil } from "@/app/services/sunafilServices";
 
@@ -317,9 +313,13 @@ const ClientsFilter = () => {
     filterWithPlanilla,
   ]);
 
-  const columns = clientColumns(
-    () => setOpenAddModal(true),
-    () => setOpenStatusModal(true)
+  // Memoiza las columnas para evitar recrearlas en cada render
+  const columns = React.useMemo(
+    () => clientColumns(
+      () => setOpenAddModal(true),
+      () => setOpenStatusModal(true)
+    ),
+    []
   );
 
   const confirmDialog = ConfirmDialog({

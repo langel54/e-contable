@@ -5,6 +5,7 @@ import BarChartIcon from "@mui/icons-material/BarChart";
 import GroupIcon from "@mui/icons-material/Group";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ReceiptIcon from "@mui/icons-material/Receipt";
+import { AccountBalance } from "@mui/icons-material";
 
 const menuItemsByRole = {
   1: [
@@ -60,6 +61,16 @@ const menuItemsByRole = {
       children: [
         { text: "General", path: "/main/settings/general" },
         { text: "Seguridad", path: "/main/settings/security" },
+      ],
+    },
+    {
+      text: "Caja",
+      path: "/main/incomes",
+      icon: <AccountBalance />,
+      allowedRoles: [1],
+      children: [
+        { text: "Ingresos", path: "/main/incomes" },
+        { text: "Egresos", path: "/main/expenses" },
       ],
     },
   ],
