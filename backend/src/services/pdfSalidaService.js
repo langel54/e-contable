@@ -14,8 +14,6 @@ const pdfService = {
       tipo: "egreso",
       tipoRecibo,
       titulo: "RECIBO DE EGRESO",
-      concepto: "* OTROS GASTOS",
-      pagadoA: "ENTREGADO A:",
     };
     return new Promise((resolve, reject) => {
       const folderPath = path.dirname(filePath);
