@@ -14,12 +14,16 @@ function drawRecibo(doc, recibo, options = {}) {
     estado = recibo.estado?.nom_estado || recibo.estado,
     idestado = recibo.idestado,
     tipo = "ingreso", // "ingreso" o "egreso"
-    concepto = options.concepto ||
+    concepto = recibo.concepto?.nombre_concepto ||
+      options.concepto ||
       (tipo === "ingreso" ? "* OTROS INGRESOS" : "* OTROS GASTOS"),
     titulo = options.titulo ||
       (tipo === "ingreso" ? "RECIBO DE INGRESO" : "RECIBO DE EGRESO"),
-    pagadoA = options.pagadoA ||
-      (tipo === "ingreso" ? "RECIBIDO DE:" : "ENTREGADO A:"),
+    pagadoA = tipo === "ingreso"
+      ? "RECIBIDO DE:"
+      : tipo === "egreso"
+        ? "ENTREGADO A:"
+        : options.pagadoA || "RECIBIDO DE:",
   } = options;
 
   const nombre =
