@@ -20,7 +20,6 @@ const PDFPreviewModal = ({ open, handleClose, data }) => {
         const pdfUrl = URL.createObjectURL(pdfBlob);
 
         setPdfUrl(pdfUrl);
-        console.log("🚀 ~ generatePDF ~ pdfUrl:", pdfUrl)
       } catch (error) {
         console.error("Error al generar el PDF:", error);
       } finally {

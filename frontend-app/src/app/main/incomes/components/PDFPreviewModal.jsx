@@ -7,7 +7,6 @@ import { pdfIncomeService } from "@/app/services/pdfServices";
 const PDFPreviewModal = ({ open, handleClose, data }) => {
   const [loading, setLoading] = useState(true);
   const [pdfUrl, setPdfUrl] = useState(null);
-  console.log("🚀 ~ PDFPreviewModal ~ pdfUrl:", pdfUrl)
 
   useEffect(() => {
     const generatePDF = async () => {

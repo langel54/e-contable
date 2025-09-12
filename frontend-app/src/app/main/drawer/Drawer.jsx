@@ -21,8 +21,6 @@ import { useAuth } from "@/app/provider";
 export default function MiniDrawer({ children }) {
   const [open, setOpen] = useState(true);
   const { userType, user } = useAuth();
-  console.log("🚀 ~ MiniDrawer ~ userType:", userType);
-  console.log("🚀 ~ MiniDrawer ~ user:", user?.tipo_usuario?.id_tipo);
 
   const pathname = usePathname();
   const router = useRouter();

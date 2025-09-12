@@ -142,15 +142,12 @@ const ClientForm = ({
 
       if (initialData) {
         // Modo edición
-        console.log("🚀 EditIFFFFFFFFFFF");
 
         result = await updateClient(values.idclienteprov, values);
       } else {
-        console.log("🚀 AdddddddddddIff");
         // Modo creación
         result = await addClient(values);
       }
-      console.log("🚀 ~ handleSubmit ~ result:", result);
 
       if (!result.success) {
         setFieldError(
@@ -218,7 +215,6 @@ const ClientForm = ({
   const isLarge = useMediaQuery(theme.breakpoints.up("md"));
 
   const getValidationSchema = (action) => {
-    console.log("🚀 ~ getValidationSchema ~ action:", action)
     switch (activeStep) {
       case 0:
         return step1ValidationSchema(action, idclienteprov);

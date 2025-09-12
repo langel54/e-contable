@@ -230,7 +230,6 @@ const ClientPage = () => {
   const [openDetailsModal, setOpenDetailsModal] = useState(false);
 
   const [editedClient, setEditedClient] = useState(null);
-  console.log("🚀 ~ ClientPage ~ editedClient:", editedClient);
 
   // const fetchDataCliente = async (
   //   currentPage,

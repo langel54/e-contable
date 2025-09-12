@@ -16,7 +16,6 @@ export const clientsStore = create((set, get) => ({
     set({ loading: true });
     try {
       const data = await getClientesProvs(page, pageSize, search, estado);
-      //   console.log("🚀 ~ data:", data)
       set({
         clients: data.clientesProvs,
         total: data.pagination.total,
@@ -32,7 +31,6 @@ export const clientsStore = create((set, get) => ({
   addClient: async (newClientData) => {
     try {
       const res = await createClienteProv(newClientData);
-      console.log("🚀 ~ res:", res)
       if (res) {
         const newClient = res.data;
         set((state) => ({
@@ -52,7 +50,6 @@ export const clientsStore = create((set, get) => ({
   updateClient: async (id, updatedData) => {
     try {
       const res = await updateClienteProv(id, updatedData);
-      console.log("🚀 ~ res:", res.status);
       if (res) {
         set((state) => ({
           clients: state.clients.map((c) =>

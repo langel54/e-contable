@@ -255,12 +255,9 @@ export default function UsersPage() {
   };
 
   useEffect(() => {
-    
-    console.log("🚀 ~ Efect111:")
     fetchTiposUsuario();
   }, []);
   useEffect(() => {
-     console.log("🚀 ~ Efect222:")
     let shouldCancel = false;
     const loadUsers = async () => {
       if (debouncedSearchTerm.length === 0 || debouncedSearchTerm.length >= 2) {
