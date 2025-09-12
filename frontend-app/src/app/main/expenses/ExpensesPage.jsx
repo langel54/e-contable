@@ -30,29 +30,38 @@ import {
   Typography,
   CircularProgress,
 } from "@mui/material";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ExpensesForm from "./ExpensesForm";
 import ModalComponent from "@/app/components/ModalComponent";
 import PDFPreviewModal from "./components/PDFPreviewModal";
-import dayjs from "dayjs";
 import "../../components/date-picker/date-picker.css";
 import DatePicker from "react-datepicker";
 import { getConceptos } from "@/app/services/conceptoServices";
 import { getPeriodos } from "@/app/services/periodoServices";
-import utc from "dayjs/plugin/utc";
 import EstadoChip from "@/app/components/EstadoChip";
 import { getEstados } from "@/app/services/estadoDocServices";
 import { FileExcelFilled, FilePdfFilled } from "@ant-design/icons";
-import excelExport from "@/app/components/excelReport";
 import { getColumns } from "./components/TableColumns";
-
-dayjs.extend(utc);
+import { useExpensesData } from "./hooks/useExpensesData";
+import {
+  fetchAllExpenses,
+  handleGenerateExcel,
+  handleYearChange,
+  renderYearContent,
+  handleResetFilter,
+} from "./utils/expensesUtils";
 
 const ExpensesPage = () => {
-  const [expensesData, setExpensesData] = useState();
-  const [pagination, setPagination] = useState({ page: 0, pageSize: 10 });
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
+  // State and hooks
+  const {
+    expensesData,
+    setExpensesData,
+    pagination,
+    setPagination,
+    total,
+    loading,
+    fetchDataExpenses,
+  } = useExpensesData();
   const [openFormModal, setOpenFormModal] = useState(false);
   const [editSalidaData, setEditSalidaData] = useState(null);
   const [periodosList, setPeriodosList] = useState([]);
@@ -87,41 +96,6 @@ const ExpensesPage = () => {
     fetchData();
   }, []);
 
-  const fetchDataExpenses = useCallback(
-    async (
-      page,
-      pageSize,
-      startDate,
-      endDate,
-      conceptFilter,
-      periodo,
-      selectedAnio,
-      selectedEstado
-    ) => {
-      setLoading(true);
-      try {
-        const data = await getExpenses(
-          page,
-          pageSize,
-          "",
-          selectedEstado,
-          startDate,
-          endDate,
-          conceptFilter,
-          periodo,
-          selectedAnio
-        );
-        setExpensesData(data.salidas);
-        setTotal(data.pagination?.total || 0);
-      } catch (error) {
-        console.error("Error fetching egresos:", error);
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
-
   useEffect(() => {
     const fechasValidas = (startDate && endDate) || (!startDate && !endDate);
     const periodoValido =
@@ -133,8 +107,8 @@ const ExpensesPage = () => {
       let end = new Date(endDate);
       start.setHours(0, 0, 0, 0);
       end.setHours(23, 59, 59, 999);
-      startDateFormat = dayjs(start).utc().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
-      endDateFormat = dayjs(end).utc().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
+      startDateFormat = start.toISOString();
+      endDateFormat = end.toISOString();
     }
     if (fechasValidas && periodoValido) {
       fetchDataExpenses(
@@ -170,19 +144,7 @@ const ExpensesPage = () => {
     selectedEstado,
   ]);
 
-  const handleYearChange = (date) => {
-    if (date) setSelectedAnio(date.getFullYear());
-  };
-  const renderYearContent = (year) => (
-    <span title={`Año: ${year}`}>{year}</span>
-  );
-  const handleResetFilter = () => {
-    setDateRange([null, null]);
-    setConceptFilter("");
-    setPeriodo("");
-    setSelectedAnio("");
-    setSelectedEstado("");
-  };
+  // Handlers
   const handleClickPop = (event) => setAnchorElPop(event.currentTarget);
   const handleActionOpen = () => setAnchorElPop(null);
   const handleCloseFormModal = () => {
@@ -353,7 +315,42 @@ const ExpensesPage = () => {
           <IconButton onClick={handleClickPop}>
             <MoreVert />
           </IconButton>
-          {/* Popover para acciones adicionales, como exportar o imprimir PDF */}
+          <Popover
+            open={Boolean(anchorElPop)}
+            anchorEl={anchorElPop}
+            onClose={handleActionOpen}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          >
+            <List>
+              <ListItem
+                sx={{ cursor: "pointer" }}
+                onClick={handleGenerateExcel}
+                disabled={exportingExcel}
+              >
+                <ListItemIcon sx={(theme) => ({ color: theme.palette.success.main })}>
+                  {exportingExcel ? (
+                    <CircularProgress size={20} color="success" />
+                  ) : (
+                    <FileExcelFilled />
+                  )}
+                </ListItemIcon>
+                <ListItemText primary={exportingExcel ? "Exportando..." : "Exportar Excel"} />
+              </ListItem>
+              <Divider />
+              <ListItem
+                sx={{ cursor: "pointer" }}
+                onClick={() => {
+                  // Acción PDF, igual que IncomesPage
+                  handleActionOpen();
+                }}
+              >
+                <ListItemIcon sx={(theme) => ({ color: theme.palette.error.main })}>
+                  <FilePdfFilled />
+                </ListItemIcon>
+                <ListItemText primary="Imprimir PDF" />
+              </ListItem>
+            </List>
+          </Popover>
         </Stack>
       </Stack>
       <CustomTable
