@@ -43,6 +43,20 @@ import { getEstados } from "@/app/services/estadoDocServices";
 import { FileExcelFilled, FilePdfFilled } from "@ant-design/icons";
 import { getColumns } from "./components/TableColumns";
 import { useExpensesData } from "./hooks/useExpensesData";
+// Helper to get formatted start/end dates
+const getDateFormats = (startDate, endDate) => {
+  let startDateFormat = "";
+  let endDateFormat = "";
+  if (startDate && endDate) {
+    let start = new Date(startDate);
+    let end = new Date(endDate);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+    startDateFormat = start.toISOString();
+    endDateFormat = end.toISOString();
+  }
+  return { startDateFormat, endDateFormat };
+};
 import {
   fetchAllExpenses,
   handleGenerateExcel,
@@ -100,16 +114,7 @@ const ExpensesPage = () => {
     const fechasValidas = (startDate && endDate) || (!startDate && !endDate);
     const periodoValido =
       (periodo && selectedAnio) || (!periodo && !selectedAnio);
-    let startDateFormat = "";
-    let endDateFormat = "";
-    if (startDate && endDate) {
-      let start = new Date(startDate);
-      let end = new Date(endDate);
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-      startDateFormat = start.toISOString();
-      endDateFormat = end.toISOString();
-    }
+    const { startDateFormat, endDateFormat } = getDateFormats(startDate, endDate);
     if (fechasValidas && periodoValido) {
       fetchDataExpenses(
         pagination.page + 1,
@@ -145,11 +150,26 @@ const ExpensesPage = () => {
   ]);
 
   // Handlers
+
+  const tableRefresh = () => {
+    const { startDateFormat, endDateFormat } = getDateFormats(startDate, endDate);
+    fetchDataExpenses(
+      pagination.page + 1,
+      pagination.pageSize,
+      startDateFormat,
+      endDateFormat,
+      conceptFilter,
+      periodo,
+      selectedAnio,
+      selectedEstado
+    );
+  };
   const handleClickPop = (event) => setAnchorElPop(event.currentTarget);
   const handleActionOpen = () => setAnchorElPop(null);
   const handleCloseFormModal = () => {
     setOpenFormModal(!openFormModal);
     setEditSalidaData(null);
+    tableRefresh();
   };
   const handleOpenPDFModal = (row) => {
     setOpenPDFModal(true);
@@ -173,7 +193,7 @@ const ExpensesPage = () => {
         </Typography>
         <Button
           size="medium"
-          color="success"
+          color="error"
           variant="contained"
           onClick={() => setOpenFormModal(true)}
           startIcon={<PostAdd fontSize="inherit" />}
@@ -308,7 +328,13 @@ const ExpensesPage = () => {
         </Stack>
         <Stack direction={"row"} spacing={1}>
           <Tooltip arrow title="Quitar FIltros" placement="left">
-            <IconButton onClick={() => handleResetFilter()}>
+            <IconButton onClick={() => handleResetFilter({
+              setDateRange,
+              setConceptFilter,
+              setPeriodo,
+              setSelectedAnio,
+              setSelectedEstado,
+            })}>
               <RestartAlt />
             </IconButton>
           </Tooltip>
@@ -324,17 +350,32 @@ const ExpensesPage = () => {
             <List>
               <ListItem
                 sx={{ cursor: "pointer" }}
-                onClick={handleGenerateExcel}
+                onClick={() =>
+                  handleGenerateExcel({
+                    startDate,
+                    endDate,
+                    conceptFilter,
+                    periodo,
+                    selectedAnio,
+                    selectedEstado,
+                    setExportingExcel,
+                    handleActionOpen,
+                  })
+                }
                 disabled={exportingExcel}
               >
-                <ListItemIcon sx={(theme) => ({ color: theme.palette.success.main })}>
+                <ListItemIcon
+                  sx={(theme) => ({ color: theme.palette.success.main })}
+                >
                   {exportingExcel ? (
                     <CircularProgress size={20} color="success" />
                   ) : (
                     <FileExcelFilled />
                   )}
                 </ListItemIcon>
-                <ListItemText primary={exportingExcel ? "Exportando..." : "Exportar Excel"} />
+                <ListItemText
+                  primary={exportingExcel ? "Exportando..." : "Exportar Excel"}
+                />
               </ListItem>
               <Divider />
               <ListItem
@@ -344,7 +385,9 @@ const ExpensesPage = () => {
                   handleActionOpen();
                 }}
               >
-                <ListItemIcon sx={(theme) => ({ color: theme.palette.error.main })}>
+                <ListItemIcon
+                  sx={(theme) => ({ color: theme.palette.error.main })}
+                >
                   <FilePdfFilled />
                 </ListItemIcon>
                 <ListItemText primary="Imprimir PDF" />
