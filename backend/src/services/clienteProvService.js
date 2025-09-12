@@ -117,7 +117,6 @@ const clienteProvService = {
       const estadoData = await prisma.estado.findFirst({
         where: { idestado: existingClient.estado },
       });
-      console.log("🚀 ~ create ~ estadoData:", estadoData);
       throw new Error(`Ya existe un cliente con el RUC ${data.ruc}. 
         ID ClienteProv: ${existingClient.idclienteprov}, 
         Razón Social: ${existingClient.razonsocial}, 

@@ -2,7 +2,6 @@ function checkOrigin(req, res, next) {
   const allowedOrigins = ["http://127.0.0.1:3000", "http://localhost:3000"]; // Asegúrate de incluir ambos orígenes
 
   const origin = req.headers.origin;
-  console.log("🚀 ~ checkOrigin ~ origin:", origin);
 
   if (allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin); // Permitir el origen

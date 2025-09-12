@@ -17,7 +17,6 @@ const formaPagoTribController = {
 
   // Obtener un registro por su ID
   async getById(req, res) {
-    console.log("🚀 ~ getById ~ req:", req.params);
     const { id } = req.params;
     try {
       const formaPagoTrib = await formaPagoTribService.getById(id);

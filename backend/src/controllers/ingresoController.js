@@ -68,7 +68,6 @@ const ingresoController = {
   // Actualizar un registro existente
   async update(req, res) {
     const { idingreso } = req.params;
-    console.log("🚀 Apii:", idingreso);
     try {
       const ingresoActualizado = await ingresoService.update(
         Number(idingreso),

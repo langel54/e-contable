@@ -4,7 +4,6 @@ const sunafilController = {
   async login(req, res) {
     
     const { ruc, usuario, password } = req.body;
-    console.log("🚀 ~ AAAAAAAAAAA:", password)
 
     if (!ruc || !usuario || !password) {
       return res.status(400).json({ error: "Faltan campos obligatorios." });
