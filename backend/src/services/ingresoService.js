@@ -194,7 +194,7 @@ const ingresoService = {
 
     return await prisma.ingreso.update({
       where: { idingreso },
-      data: { estado: 0 },
+      data: { estado: { connect: { idestado: 2 } } },
     });
   },
 };

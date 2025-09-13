@@ -5,6 +5,7 @@ import {
   // MoreVert,
   PostAdd,
   DriveFileRenameOutline,
+  DeleteOutline,
   // RestartAlt,
 } from "@mui/icons-material";
 import { Box, Button, Divider, Stack, Typography } from "@mui/material";
@@ -14,6 +15,7 @@ import ModalComponent from "@/app/components/ModalComponent";
 import PDFPreviewModal from "./components/PDFPreviewModal";
 
 import dayjs from "dayjs";
+import { deleteIngreso } from "@/app/services/incomesServices";
 import "../../components/date-picker/date-picker.css";
 // ...existing code...
 import { getConceptos } from "@/app/services/conceptoServices";
@@ -46,6 +48,39 @@ const getDateFormats = (startDate, endDate) => {
 };
 
 const IncomesPage = () => {
+  // Estado para el modal de anulación
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+  // Abrir modal de confirmación
+  const handleOpenDeleteModal = (id) => {
+    setDeleteId(id);
+    setOpenDeleteModal(true);
+    setDeleteError("");
+  };
+
+  // Cerrar modal de confirmación
+  const handleCloseDeleteModal = () => {
+    setOpenDeleteModal(false);
+    setDeleteId(null);
+    setDeleteError("");
+  };
+
+  // Confirmar anulación lógica
+  const handleConfirmDelete = async (id) => {
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      await deleteIngreso(id);
+      handleCloseDeleteModal();
+      refreshTable();
+    } catch (error) {
+      setDeleteError(error.message || "Error al anular el ingreso");
+    } finally {
+      setDeleting(false);
+    }
+  };
   // Datos y paginación con hook
   const {
     incomesData,
@@ -96,7 +131,10 @@ const IncomesPage = () => {
     const fechasValidas = (startDate && endDate) || (!startDate && !endDate);
     const periodoValido =
       (periodo && selectedAnio) || (!periodo && !selectedAnio);
-    const { startDateFormat, endDateFormat } = getDateFormats(startDate, endDate);
+    const { startDateFormat, endDateFormat } = getDateFormats(
+      startDate,
+      endDate
+    );
     if (fechasValidas && periodoValido) {
       fetchDataIncomes(
         pagination.page + 1,
@@ -132,7 +170,10 @@ const IncomesPage = () => {
   ]);
 
   const refreshTable = () => {
-    const { startDateFormat, endDateFormat } = getDateFormats(startDate, endDate);
+    const { startDateFormat, endDateFormat } = getDateFormats(
+      startDate,
+      endDate
+    );
     fetchDataIncomes(
       pagination.page + 1,
       pagination.pageSize,
@@ -245,6 +286,7 @@ const IncomesPage = () => {
           setEditIncomeData,
           setOpenFormModal,
           handleOpenPDFModal,
+          openDeleteModal: handleOpenDeleteModal,
         })}
         data={incomesData || []}
         paginationModel={pagination}
@@ -252,6 +294,51 @@ const IncomesPage = () => {
         rowCount={total}
         loading={loading}
         getRowId={(row) => row.idingreso}
+      />
+      <ModalComponent
+        open={openDeleteModal}
+        handleClose={handleCloseDeleteModal}
+        title="Confirmar anulación"
+        icon={<DeleteOutline color="error" />}
+        width="400px"
+        content={
+          <>
+            <Typography>
+              ¿Está seguro que desea anular el Ingreso N° <b>{deleteId}</b>?
+              Esta acción no puede deshacerse.
+            </Typography>
+            {deleteError && (
+              <Typography color="error" sx={{ mt: 2 }}>
+                {deleteError}
+              </Typography>
+            )}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: 2,
+                mt: 3,
+              }}
+            >
+              <Button
+                onClick={handleCloseDeleteModal}
+                color="error"
+                variant="outlined"
+                disabled={deleting}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => handleConfirmDelete(deleteId)}
+                color="error"
+                variant="contained"
+                disabled={deleting}
+              >
+                {deleting ? "Anulando..." : "Anular"}
+              </Button>
+            </Box>
+          </>
+        }
       />
       <ModalComponent
         icon={

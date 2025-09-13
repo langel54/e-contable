@@ -70,6 +70,6 @@ export const updateIngreso = async (idingreso, data) => {
 // Eliminar un ingreso
 export const deleteIngreso = async (idingreso) => {
   return fetchWithAuth(`/ingreso/${idingreso}`, {
-    method: "DELETE",
+    method: "PATCH",
   });
 };

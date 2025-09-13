@@ -6,6 +6,7 @@ import {
   PostAdd,
   DriveFileRenameOutline,
   RestartAlt,
+  DeleteOutline,
 } from "@mui/icons-material";
 import {
   Box,
@@ -66,6 +67,42 @@ import {
 } from "./utils/expensesUtils";
 
 const ExpensesPage = () => {
+  // Estado para el modal de anulación lógica
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  // Abrir modal de confirmación
+  const handleOpenDeleteModal = (id) => {
+    setDeleteId(id);
+    setOpenDeleteModal(true);
+    setDeleteError("");
+  };
+
+  // Cerrar modal de confirmación
+  const handleCloseDeleteModal = () => {
+    setOpenDeleteModal(false);
+    setDeleteId(null);
+    setDeleteError("");
+  };
+
+  // Confirmar anulación lógica
+  const handleConfirmDelete = async (id) => {
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      // Importa el servicio de eliminación lógica de gastos
+      const { deleteSalida } = await import("@/app/services/expensesServices");
+      await deleteSalida(id);
+      handleCloseDeleteModal();
+      tableRefresh();
+    } catch (error) {
+      setDeleteError(error.message || "Error al anular el egreso");
+    } finally {
+      setDeleting(false);
+    }
+  };
   // State and hooks
   const {
     expensesData,
@@ -114,7 +151,10 @@ const ExpensesPage = () => {
     const fechasValidas = (startDate && endDate) || (!startDate && !endDate);
     const periodoValido =
       (periodo && selectedAnio) || (!periodo && !selectedAnio);
-    const { startDateFormat, endDateFormat } = getDateFormats(startDate, endDate);
+    const { startDateFormat, endDateFormat } = getDateFormats(
+      startDate,
+      endDate
+    );
     if (fechasValidas && periodoValido) {
       fetchDataExpenses(
         pagination.page + 1,
@@ -152,7 +192,10 @@ const ExpensesPage = () => {
   // Handlers
 
   const tableRefresh = () => {
-    const { startDateFormat, endDateFormat } = getDateFormats(startDate, endDate);
+    const { startDateFormat, endDateFormat } = getDateFormats(
+      startDate,
+      endDate
+    );
     fetchDataExpenses(
       pagination.page + 1,
       pagination.pageSize,
@@ -328,13 +371,17 @@ const ExpensesPage = () => {
         </Stack>
         <Stack direction={"row"} spacing={1}>
           <Tooltip arrow title="Quitar FIltros" placement="left">
-            <IconButton onClick={() => handleResetFilter({
-              setDateRange,
-              setConceptFilter,
-              setPeriodo,
-              setSelectedAnio,
-              setSelectedEstado,
-            })}>
+            <IconButton
+              onClick={() =>
+                handleResetFilter({
+                  setDateRange,
+                  setConceptFilter,
+                  setPeriodo,
+                  setSelectedAnio,
+                  setSelectedEstado,
+                })
+              }
+            >
               <RestartAlt />
             </IconButton>
           </Tooltip>
@@ -401,6 +448,7 @@ const ExpensesPage = () => {
           setEditSalidaData,
           setOpenFormModal,
           handleOpenPDFModal,
+          openDeleteModal: handleOpenDeleteModal,
         })}
         data={expensesData || []}
         paginationModel={pagination}
@@ -409,6 +457,52 @@ const ExpensesPage = () => {
         loading={loading}
         getRowId={(row) => row.idsalida}
       />
+      <ModalComponent
+        open={openDeleteModal}
+        handleClose={handleCloseDeleteModal}
+        title="Confirmar anulación"
+        icon={<DeleteOutline color="error" />}
+        width="400px"
+        content={
+          <>
+            <Typography>
+              ¿Está seguro que desea anular el Egreso N° <b>{deleteId}</b>? Esta
+              acción no puede deshacerse.
+            </Typography>
+            {deleteError && (
+              <Typography color="error" sx={{ mt: 2 }}>
+                {deleteError}
+              </Typography>
+            )}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: 2,
+                mt: 3,
+              }}
+            >
+              <Button
+                onClick={handleCloseDeleteModal}
+                color="error"
+                variant="outlined"
+                disabled={deleting}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => handleConfirmDelete(deleteId)}
+                color="error"
+                variant="contained"
+                disabled={deleting}
+              >
+                {deleting ? "Anulando..." : "Anular"}
+              </Button>
+            </Box>
+          </>
+        }
+      />
+
       <ModalComponent
         icon={
           editSalidaData ? (

@@ -90,7 +90,7 @@ const ingresoController = {
       if (!deleted) {
         return res.status(404).json({ message: "Ingreso no encontrado" });
       }
-      res.status(204).json();
+      res.json({ success: true, ingreso: deleted });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

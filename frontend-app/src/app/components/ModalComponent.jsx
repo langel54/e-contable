@@ -51,6 +51,7 @@ const ModalComponent = ({
             position: "sticky",
             top: 0,
             zIndex: 10,
+            borderRadius: "8px 8px 0 0",
           }}
         >
           <Stack direction="row" spacing={2} alignItems="center">

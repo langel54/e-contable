@@ -350,6 +350,23 @@ const IncomeForm = ({ ingresoEdit = null, handleCloseModal }) => {
               </Grid>
               <Grid item xs={12} md={4}>
                 <FormControl fullWidth size="medium">
+                  <InputLabel>Año</InputLabel>
+                  <Select
+                    name="anio"
+                    value={values.anio}
+                    onChange={handleChange}
+                    displayEmpty
+                  >
+                    {anios.map((anio) => (
+                      <MenuItem key={anio} value={anio}>
+                        {anio}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth size="medium">
                   <InputLabel>Forma de Pago</InputLabel>
                   <Select
                     name="idtipo_doc"
@@ -383,23 +400,7 @@ const IncomeForm = ({ ingresoEdit = null, handleCloseModal }) => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={4}>
-                <FormControl fullWidth size="medium">
-                  <InputLabel>Año</InputLabel>
-                  <Select
-                    name="anio"
-                    value={values.anio}
-                    onChange={handleChange}
-                    displayEmpty
-                  >
-                    {anios.map((anio) => (
-                      <MenuItem key={anio} value={anio}>
-                        {anio}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
+
               <Grid item xs={12} md={4}>
                 <TextField
                   disabled
