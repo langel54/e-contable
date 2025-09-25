@@ -79,6 +79,42 @@ const tributosController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  async getFilter(req, res) {
+    try {
+      const {
+        page = 1,
+        limit = 10,
+        idclienteprov = "",
+        idtipo_trib = "",
+        anio = "",
+        mes = "",
+        estado = "",
+      } = req.query;
+      const skip = (page - 1) * limit;
+
+      const { tributos, total } = await tributosService.getFilter(
+        skip,
+        limit,
+        idclienteprov,
+        idtipo_trib,
+        anio,
+        mes,
+        estado
+      );
+
+      res.json({
+        tributos,
+        pagination: {
+          total,
+          page: Number(page),
+          pages: Math.ceil(total / limit),
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 module.exports = tributosController;

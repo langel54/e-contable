@@ -16,32 +16,36 @@ const excelExport = ({
 
     try {
       // Manejo de la imagen
-      let imageBase64 = imageUrl;
-      if (!imageUrl.startsWith("data:image")) {
-        const imageResponse = await fetch(imageUrl);
-        const imageBlob = await imageResponse.blob();
-        imageBase64 = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(imageBlob);
+      if (imageUrl) {
+        let imageBase64 = imageUrl;
+        if (!imageUrl.startsWith("data:image")) {
+          const imageResponse = await fetch(imageUrl);
+          const imageBlob = await imageResponse.blob();
+          imageBase64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(imageBlob);
+          });
+        }
+
+        const imageId = workbook.addImage({
+          base64: imageBase64,
+          extension: "png",
+        });
+
+        worksheet.addImage(imageId, {
+          tl: { col: 0, row: 0 },
+          ext: { width: 50, height: 50 },
         });
       }
 
-      const imageId = workbook.addImage({
-        base64: imageBase64,
-        extension: "png",
-      });
-
-      worksheet.addImage(imageId, {
-        tl: { col: 0, row: 0 },
-        ext: { width: 50, height: 50 },
-      });
-
-      const totalColumns = Object.keys(columnsToShow).length; // Número total de columnas enviadas
+      const totalColumns = Object.keys(columnsToShow || {}).length || (data[0] ? Object.keys(data[0]).length : 1); // Número total de columnas
+      console.log("🚀 ~ exportToExcel ~ totalColumns:", totalColumns);
       const titleCellRange = `A2:${String.fromCharCode(
         65 + totalColumns - 1
       )}2`; // Desde 'A2' hasta la última columna
+      console.log("🚀 ~ exportToExcel ~ titleCellRange:", titleCellRange);
 
       worksheet.mergeCells(titleCellRange);
       const titleCell = worksheet.getCell("A2");
@@ -56,10 +60,12 @@ const excelExport = ({
       };
 
       // Filtrar y renombrar columnas según el parámetro columnsToShow
-      const filteredData = data.map((row) => {
+      const filteredData = (data || []).map((row) => {
         const filteredRow = {};
         Object.keys(row).forEach((key) => {
-          if (columnsToShow[key]) {
+          if (!columnsToShow) {
+            filteredRow[key] = row[key];
+          } else if (columnsToShow[key]) {
             filteredRow[columnsToShow[key]] = row[key];
           }
         });
@@ -67,7 +73,7 @@ const excelExport = ({
       });
 
       // Obtener las columnas renombradas y agregar el encabezado
-      const renamedColumns = Object.values(columnsToShow);
+      const renamedColumns = columnsToShow ? Object.values(columnsToShow) : (filteredData[0] ? Object.keys(filteredData[0]) : []);
       const headerRow = worksheet.addRow(renamedColumns);
 
       // Configurar formato solo para el encabezado

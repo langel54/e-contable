@@ -78,6 +78,52 @@ const tributosService = {
       where: { idtributos: id },
     });
   },
+
+  async getFilter(skip, limit, idclienteprov, idtipo_trib, anio, mes, estado) {
+    const whereConditions = {
+      AND: [],
+    };
+
+    if (idclienteprov) {
+      whereConditions.AND.push({ idclienteprov });
+    }
+
+    if (idtipo_trib) {
+      whereConditions.AND.push({ idtipo_trib });
+    }
+
+    if (anio) {
+      whereConditions.AND.push({ anio });
+    }
+
+    if (mes) {
+      whereConditions.AND.push({ mes });
+    }
+
+    if (estado) {
+      whereConditions.AND.push({ estado });
+    }
+
+    const [tributos, total] = await Promise.all([
+      prisma.tributos.findMany({
+        skip,
+        take: Number(limit),
+        where: whereConditions,
+        include: {
+          cliente_prov: true,
+          tipo_trib: true,
+        },
+        orderBy: {
+          fecha_v: "desc",
+        },
+      }),
+      prisma.tributos.count({
+        where: whereConditions,
+      }),
+    ]);
+
+    return { tributos, total };
+  },
 };
 
 module.exports = tributosService;

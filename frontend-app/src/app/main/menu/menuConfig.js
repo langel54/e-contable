@@ -5,7 +5,7 @@ import BarChartIcon from "@mui/icons-material/BarChart";
 import GroupIcon from "@mui/icons-material/Group";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ReceiptIcon from "@mui/icons-material/Receipt";
-import { AccountBalance } from "@mui/icons-material";
+import { AccountBalance, AccountBalanceWallet } from "@mui/icons-material";
 
 const menuItemsByRole = {
   1: [
@@ -46,6 +46,12 @@ const menuItemsByRole = {
         { text: "Filtro avanzado", path: "/main/clients-filter" },
         { text: "Gestión de Directorio", path: "/main/clients" },
       ],
+    },
+    {
+      text: "Tributos",
+      path: "/main/tributos-filter",
+      icon: <AccountBalanceWallet />,
+      allowedRoles: [1, 2, 3],
     },
     {
       text: "Reportes",
