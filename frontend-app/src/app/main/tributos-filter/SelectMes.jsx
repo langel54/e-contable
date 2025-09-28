@@ -24,7 +24,7 @@ const SelectMes = ({ selected, setSelected }) => {
   return (
     <FormControl>
       <InputLabel id="mes-tributo-label">Mes</InputLabel>
-      <Select sx={{ width: 130 }} value={selected} onChange={handleChange}>
+      <Select sx={{ width: 110 }} value={selected} onChange={handleChange}>
         <MenuItem key="mes_def" value="">
           Todos
         </MenuItem>

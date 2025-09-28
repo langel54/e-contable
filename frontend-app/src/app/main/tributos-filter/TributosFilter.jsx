@@ -29,6 +29,9 @@ import SelectEstadoTrib from "./SelectEstadoTrib";
 import Swal from "sweetalert2";
 import excelExport from "@/app/components/excelReport";
 import { FileExcelFilled } from "@ant-design/icons";
+import ModalComponent from "@/app/components/ModalComponent";
+import DrawerComponent from "@/app/components/DrawerComponent";
+import TributoForm from "./TributoForm";
 
 const tributoColumns = (
   setEditedTributo,
@@ -352,6 +355,9 @@ const TributosFilter = () => {
   const [selectedAnio, setSelectedAnio] = useState("");
   const [selectedMes, setSelectedMes] = useState("");
   const [selectedEstado, setSelectedEstado] = useState("");
+  const [openAddModal, setOpenAddModal] = useState(false);
+  const [editedTributo, setEditedTributo] = useState(null);
+  const [openStatusModal, setOpenStatusModal] = useState(false);
 
   const fetchDataTributos = useCallback(
     async (
@@ -422,10 +428,14 @@ const TributosFilter = () => {
   const columns = React.useMemo(
     () =>
       tributoColumns(
-        () => setOpenAddModal(true),
-        () => setOpenStatusModal(true)
+        (data) => {
+          setEditedTributo(data);
+          setOpenAddModal(true);
+        },
+        setOpenAddModal,
+        setOpenStatusModal
       ),
-    []
+    [setOpenAddModal, setOpenStatusModal]
   );
 
   const handleExportExcel = async () => {
@@ -440,7 +450,6 @@ const TributosFilter = () => {
         selectedMes,
         selectedEstado
       );
-      console.log("🚀 ~ handleExportExcel ~ data:", data);
 
       const exportData =
         data.tributos?.map((tributo) => {
@@ -478,6 +487,7 @@ const TributosFilter = () => {
               : "-";
 
           return {
+            idtributo: tributo.idtributos,
             fecha_registro: fechaFormateada,
             periodo: periodo,
             razonsocial: tributo.cliente_prov?.razonsocial || "-",
@@ -501,7 +511,7 @@ const TributosFilter = () => {
           };
         }) || [];
       const selectedColumns = {
-        idtributos: "Nro Reg.",
+        idtributo: "Nro Reg.",
         fecha_registro: "Fecha Registrada",
         periodo: "Periodo",
         razonsocial: "Razón Social",
@@ -512,8 +522,10 @@ const TributosFilter = () => {
         dias_atrasados: "Atrasado",
         interes: "Interes",
         deuda_actual: "Deuda Actual",
-        observaciones: " ",
+        observaciones: "Obs.",
       };
+      console.log("🚀 ~ handleExportExcel ~ exportData:", exportData);
+
       excelExport({
         data: exportData, // Usamos los datos devueltos por fetchAllDataCliente
         imageUrl: "",
@@ -537,21 +549,31 @@ const TributosFilter = () => {
 
   return (
     <Box sx={{ p: 0 }}>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          Filtro de Tributos
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Gestiona y filtra los tributos de tus clientes
-        </Typography>
-      </Box>
+      <Stack
+        sx={{ mb: 3 }}
+        flexDirection="row"
+        flexWrap={"wrap"}
+        // spacing={4}
+        alignItems={"start"}
+        justifyContent={"space-between"}
+        gap={4}
+      >
+        <Stack>
+          <Typography variant="h4" gutterBottom>
+            Filtro de Tributos
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Gestiona y filtra los tributos de tus clientes
+          </Typography>
+        </Stack>
+        <SelectCliente
+          selected={selectedCliente}
+          setSelected={setSelectedCliente}
+        />
+      </Stack>
 
       {/* Filtros */}
       <Box sx={{ mb: 3, display: "flex", gap: 2, flexWrap: "wrap" }}>
-        {/* <SelectCliente
-          selected={selectedCliente}
-          setSelected={setSelectedCliente}
-        /> */}
         <SelectTipoTrib
           selected={selectedTipoTrib}
           setSelected={setSelectedTipoTrib}
@@ -565,9 +587,20 @@ const TributosFilter = () => {
 
         <Button
           variant="contained"
-          startIcon={<FileExcelFilled />}
+          // startIcon={<FileExcelFilled />}
           onClick={handleExportExcel}
-          sx={{ ml: "auto" }}
+          sx={{ ml: "auto", minWidth: 0 }}
+          color="success"
+        >
+          <FileExcelFilled />
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={<FileExcelFilled />}
+          onClick={() => {
+            setEditedTributo(null);
+            setOpenAddModal(true);
+          }}
         >
           Registrar Tributo
         </Button>
@@ -584,6 +617,31 @@ const TributosFilter = () => {
         rowCount={total}
         loading={loading}
         getRowId={(row) => row.idtributos}
+      />
+
+      {/* Drawer Registrar/Editar Tributo */}
+      <DrawerComponent
+        open={openAddModal}
+        onClose={() => setOpenAddModal(false)}
+        title={editedTributo ? "Editar Tributo" : "Registrar Tributo"}
+        width={480}
+        content={
+          <TributoForm
+            tributoEdit={editedTributo}
+            handleCloseModal={() => setOpenAddModal(false)}
+            onSaved={() => {
+              fetchDataTributos(
+                pagination.page + 1,
+                pagination.pageSize,
+                selectedCliente,
+                selectedTipoTrib,
+                selectedAnio,
+                selectedMes,
+                selectedEstado
+              );
+            }}
+          />
+        }
       />
     </Box>
   );

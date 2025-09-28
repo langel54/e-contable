@@ -25,7 +25,7 @@ const SelectTipoTrib = ({ selected, setSelected }) => {
   return (
     <FormControl>
       <InputLabel id="tipo-tributo-label">Tipo Tributo</InputLabel>
-      <Select sx={{ width: 150 }} value={selected} onChange={handleChange}>
+      <Select sx={{ width: 140 }} value={selected} onChange={handleChange}>
         <MenuItem key="tipo_def" value="">
           Todos
         </MenuItem>

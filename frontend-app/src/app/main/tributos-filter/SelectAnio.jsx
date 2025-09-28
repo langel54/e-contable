@@ -12,7 +12,7 @@ const SelectAnio = ({ selected, setSelected }) => {
   return (
     <FormControl>
       <InputLabel id="anio-tributo-label">Año</InputLabel>
-      <Select sx={{ width: 120 }} value={selected} onChange={handleChange}>
+      <Select sx={{ width: 100}} value={selected} onChange={handleChange}>
         <MenuItem key="anio_def" value="">
           Todos
         </MenuItem>

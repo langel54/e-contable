@@ -15,7 +15,7 @@ const SelectEstadoTrib = ({ selected, setSelected }) => {
   return (
     <FormControl>
       <InputLabel id="estado-tributo-label">Estado</InputLabel>
-      <Select sx={{ width: 130 }} value={selected} onChange={handleChange}>
+      <Select sx={{ width: 110 }} value={selected} onChange={handleChange}>
         <MenuItem key="est_def" value="">
           Todos
         </MenuItem>

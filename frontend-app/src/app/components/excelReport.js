@@ -6,7 +6,7 @@ const excelExport = ({
   imageUrl,
   fileName = "exported_data.xlsx",
   title = "Reporte de Datos",
-  columnsToShow, // Parámetro para seleccionar y renombrar columnas
+  columnsToShow, // Parámetro para seleccionar y renombrar columnas / en orden de la data sin variar 
 }) => {
   const exportToExcel = async () => {
     const workbook = new ExcelJS.Workbook();
