@@ -9,6 +9,8 @@ import {
   Select,
   TextField,
   Typography,
+  CircularProgress,
+  Stack,
 } from "@mui/material";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
@@ -18,15 +20,17 @@ import { NumericFormat } from "react-number-format";
 import {
   createTributo,
   updateTributo,
+  deleteTributo,
   getTiposTributo,
 } from "@/app/services/tributosService";
 import { getClientesProvs } from "@/app/services/clienteProvService";
 import { useAuth } from "@/app/provider";
+import Swal from "sweetalert2";
 
 const validationSchema = Yup.object({
   fecha_v: Yup.date().required("La fecha de vencimiento es obligatoria"),
-  idclienteprov: Yup.number().required("El cliente es obligatorio"),
-  idtipo_trib: Yup.number().required("El tipo de tributo es obligatorio"),
+  idclienteprov: Yup.string().required("El cliente es obligatorio"),
+  idtipo_trib: Yup.string().required("El tipo de tributo es obligatorio"),
   anio: Yup.number().required("El año es obligatorio"),
   mes: Yup.string().required("El mes es obligatorio"),
   importe_reg: Yup.number()
@@ -68,7 +72,7 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
       importe_pc: 0,
       estado: "0",
       obs: "",
-      registra: user?.personal?.nombres || user?.username || "",
+      //registra: user?.personal?.nombres || user?.username || "",
     }
   );
 
@@ -76,9 +80,9 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
     tributoEdit ? { ...tributoEdit.cliente_prov } : null
   );
   const [tiposTributo, setTiposTributo] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Cuando cambia el registro a editar, reestablecer los valores iniciales y el cliente seleccionado
     if (tributoEdit) {
       const mapped = {
         ...tributoEdit,
@@ -99,11 +103,11 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
         importe_reg: tributoEdit.importe_reg ?? "",
         estado: tributoEdit.estado ?? "0",
         obs: tributoEdit.obs ?? "",
-        registra:
-          tributoEdit.registra ||
-          user?.personal?.nombres ||
-          user?.username ||
-          "",
+        // registra:
+        //   tributoEdit.registra ||
+        //   user?.personal?.nombres ||
+        //   user?.username ||
+        //   "",
       };
       setInitialValues(mapped);
       setSelectedClient(
@@ -120,7 +124,7 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
         importe_reg: "",
         estado: "0",
         obs: "",
-        registra: user?.personal?.nombres || user?.username || "",
+        // registra: user?.personal?.nombres || user?.username || "",
       }));
       setSelectedClient(null);
     }
@@ -156,23 +160,86 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
   };
 
   const handleSubmit = async (values, setFieldError, setSubmitting) => {
+    console.log("🚀 ~ handleSubmit ~ values:", values);
+    setLoading(true);
     try {
       const payload = {
-        ...values,
+        // ...values,
+        fecha_v: values.fecha_v,
+        idclienteprov: values.idclienteprov,
+        idtipo_trib: values.idtipo_trib,
+        anio: values.anio?.toString?.() || String(values.anio),
+        mes: values.mes,
+        importe_reg: values.importe_reg,
+        importe_pc: values.importe_pc ?? 0,
+        estado: values.estado,
+        obs: values.obs,
       };
 
       if (tributoEdit?.idtributos) {
         await updateTributo(tributoEdit.idtributos, payload);
+        Swal.fire({
+          title: "¡Actualizado!",
+          text: "El tributo ha sido actualizado correctamente",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
       } else {
         await createTributo(payload);
+        Swal.fire({
+          title: "¡Registrado!",
+          text: "El tributo ha sido registrado correctamente",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
       }
       if (onSaved) onSaved();
       handleCloseModal();
     } catch (error) {
       const message = error?.message || "Error al guardar tributo";
       setFieldError("general", message);
+      Swal.fire({ title: "Error", text: message, icon: "error" });
     } finally {
       setSubmitting(false);
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!tributoEdit?.idtributos) return;
+
+    const result = await Swal.fire({
+      title: "¿Estás seguro?",
+      text: "No podrás revertir esta acción.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!result.isConfirmed) return;
+
+    setLoading(true);
+    try {
+      await deleteTributo(tributoEdit.idtributos);
+      Swal.fire({
+        title: "¡Eliminado!",
+        text: "El tributo ha sido eliminado correctamente",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      if (onSaved) onSaved();
+      handleCloseModal();
+    } catch (error) {
+      const message = error?.message || "Error al eliminar tributo";
+      Swal.fire({ title: "Error", text: message, icon: "error" });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -346,36 +413,57 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
                 />
               </Grid>
 
-              <Grid item xs={12} md={6}>
-                <TextField
-                  disabled
-                  fullWidth
-                  size="medium"
-                  label="Registrado por"
-                  name="registra"
-                  value={values.registra}
-                  onChange={handleChange}
-                />
-              </Grid>
+              {/*<Grid item xs={12} md={6}>
+              <TextField
+                disabled
+                fullWidth
+                size="medium"
+                label="Registrado por"
+                name="registra"
+                value={values.registra}
+                onChange={handleChange}
+              />
+            </Grid>*/}
 
               <Grid item xs={12}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  sx={{ mt: 1 }}
-                  onClick={async () => {
-                    const formErrors = await validateForm();
-                    if (Object.keys(formErrors).length === 0) {
-                      setSubmitting(true);
-                      handleSubmit(values, setFieldError, setSubmitting);
-                    } else {
-                      setSubmitting(false);
-                    }
-                  }}
-                >
-                  {tributoEdit ? "Actualizar Tributo" : "Registrar Tributo"}
-                </Button>
+                <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    disabled={loading}
+                    onClick={async () => {
+                      const formErrors = await validateForm();
+                      if (Object.keys(formErrors).length === 0) {
+                        setSubmitting(true);
+                        handleSubmit(values, setFieldError, setSubmitting);
+                      } else {
+                        setSubmitting(false);
+                      }
+                    }}
+                    startIcon={loading ? <CircularProgress size={20} /> : null}
+                  >
+                    {loading
+                      ? "Procesando..."
+                      : tributoEdit
+                      ? "Actualizar Tributo"
+                      : "Registrar Tributo"}
+                  </Button>
+
+                  {tributoEdit && (
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      disabled={loading}
+                      onClick={handleDelete}
+                      startIcon={
+                        loading ? <CircularProgress size={20} /> : null
+                      }
+                    >
+                      Eliminar
+                    </Button>
+                  )}
+                </Stack>
               </Grid>
             </Grid>
           </Form>

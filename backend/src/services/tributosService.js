@@ -114,7 +114,7 @@ const tributosService = {
           tipo_trib: true,
         },
         orderBy: {
-          fecha_v: "desc",
+          idtributos: "desc",
         },
       }),
       prisma.tributos.count({
