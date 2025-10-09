@@ -1,139 +1,162 @@
-const prisma = require("../config/database");
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 
-const vencimientosService = {
-  async getAll(skip, limit) {
-    const [vencimientos, total] = await Promise.all([
-      prisma.vencimientos.findMany({
-        skip,
-        take: Number(limit),
-        orderBy: [{ anio_v: "desc" }, { mes_v: "desc" }],
-      }),
-      prisma.vencimientos.count(),
-    ]);
+// Get vencimientos by filters (anio, mes, u_digito)
+const getVencimientosByFilters = async (anio, mes, u_digito) => {
+  try {
+    // Validar el último dígito
+    if (isNaN(u_digito) || u_digito < 0 || u_digito > 9) {
+      throw new Error("El último dígito debe estar entre 0 y 9");
+    }
 
-    return { vencimientos, total };
-  },
-
-  async getById(id) {
-    return prisma.vencimientos.findUnique({
-      where: { idvencimientos: id },
-    });
-  },
-
-  async getByPeriodo(anio, mes) {
-    return prisma.vencimientos.findFirst({
+    // Buscar el registro de vencimientos para ese año y mes
+    const registro = await prisma.vencimientos.findFirst({
       where: {
         anio_v: anio,
         mes_v: mes,
       },
     });
-  },
 
-  async create(data) {
-    // Convertir todas las fechas a objetos Date
-    const dateFields = [
-      "d0",
-      "d1",
-      "d2",
-      "d3",
-      "d4",
-      "d5",
-      "d6",
-      "d7",
-      "d8",
-      "d9",
-    ];
-    dateFields.forEach((field) => {
-      if (data[field]) {
-        data[field] = new Date(data[field]);
-      }
-    });
-
-    // Asegurar que mes_v tenga siempre 2 dígitos
-    if (data.mes_v && data.mes_v.length === 1) {
-      data.mes_v = `0${data.mes_v}`;
+    if (!registro) {
+      throw new Error(`No se encontraron vencimientos para ${mes}/${anio}`);
     }
 
-    return prisma.vencimientos.create({
-      data,
-    });
-  },
+    // Obtener la fecha correspondiente al último dígito
+    const campoFecha = `d${u_digito}`;
+    const fechaVencimiento = registro[campoFecha];
 
-  async update(id, data) {
-    // Convertir todas las fechas a objetos Date
-    const dateFields = [
-      "d0",
-      "d1",
-      "d2",
-      "d3",
-      "d4",
-      "d5",
-      "d6",
-      "d7",
-      "d8",
-      "d9",
-    ];
-    dateFields.forEach((field) => {
-      if (data[field]) {
-        data[field] = new Date(data[field]);
-      }
-    });
-
-    // Asegurar que mes_v tenga siempre 2 dígitos
-    if (data.mes_v && data.mes_v.length === 1) {
-      data.mes_v = `0${data.mes_v}`;
+    if (!fechaVencimiento) {
+      throw new Error(`No hay fecha definida para el dígito ${u_digito}`);
     }
 
-    return prisma.vencimientos.update({
-      where: { idvencimientos: id },
-      data,
-    });
-  },
-
-  async delete(id) {
-    return prisma.vencimientos.delete({
-      where: { idvencimientos: id },
-    });
-  },
-
-  async validateDates(data) {
-    // Validar formato de año
-    if (data.anio_v && !/^\d{4}$/.test(data.anio_v)) {
-      return "El año debe tener 4 dígitos";
-    }
-
-    // Validar formato de mes
-    if (data.mes_v && !/^(0?[1-9]|1[0-2])$/.test(data.mes_v)) {
-      return "El mes debe estar entre 1 y 12";
-    }
-
-    // Validar que las fechas estén en orden cronológico
-    const dateFields = [
-      "d0",
-      "d1",
-      "d2",
-      "d3",
-      "d4",
-      "d5",
-      "d6",
-      "d7",
-      "d8",
-      "d9",
-    ];
-    let previousDate = null;
-
-    for (const field of dateFields) {
-      if (data[field]) {
-        const currentDate = new Date(data[field]);
-        if (previousDate && currentDate < previousDate) {
-          return `La fecha ${field} debe ser posterior a la fecha anterior`;
-        }
-        previousDate = currentDate;
-      }
-    }
-
-    return null;
-  },
+    return {
+      anio,
+      mes,
+      u_digito,
+      fecha_vencimiento: fechaVencimiento,
+    };
+  } catch (error) {
+    console.error("Error en getVencimientosByFilters:", error.message);
+    throw error;
+  }
 };
 
-module.exports = vencimientosService;
+// Get all vencimientos with pagination
+const getAllVencimientos = async (limit = 10, offset = 0) => {
+  try {
+    const [vencimientos, total] = await Promise.all([
+      prisma.vencimientos.findMany({
+        take: limit,
+        skip: offset,
+        orderBy: [{ anio_v: "desc" }, { mes_v: "desc" }],
+      }),
+      prisma.vencimientos.count(),
+    ]);
+
+    return {
+      vencimientos,
+      total,
+    };
+  } catch (error) {
+    console.error("Error en getAllVencimientos:", error);
+    throw error;
+  }
+};
+
+// Get vencimiento by ID
+const getVencimientoById = async (id) => {
+  try {
+    const vencimiento = await prisma.vencimientos.findUnique({
+      where: {
+        idvencimientos: parseInt(id),
+      },
+    });
+
+    return vencimiento;
+  } catch (error) {
+    console.error("Error en getVencimientoById:", error);
+    throw error;
+  }
+};
+
+// Create vencimiento
+const createVencimiento = async (vencimientoData) => {
+  try {
+    const vencimiento = await prisma.vencimientos.create({
+      data: {
+        d0: new Date(vencimientoData.d0),
+        d1: new Date(vencimientoData.d1),
+        d2: new Date(vencimientoData.d2),
+        d3: new Date(vencimientoData.d3),
+        d4: new Date(vencimientoData.d4),
+        d5: new Date(vencimientoData.d5),
+        d6: new Date(vencimientoData.d6),
+        d7: new Date(vencimientoData.d7),
+        d8: new Date(vencimientoData.d8),
+        d9: new Date(vencimientoData.d9),
+        anio_v: vencimientoData.anio_v,
+        mes_v: vencimientoData.mes_v,
+      },
+    });
+
+    return vencimiento;
+  } catch (error) {
+    console.error("Error en createVencimiento:", error);
+    throw error;
+  }
+};
+
+// Update vencimiento
+const updateVencimiento = async (id, vencimientoData) => {
+  try {
+    const vencimiento = await prisma.vencimientos.update({
+      where: {
+        idvencimientos: parseInt(id),
+      },
+      data: {
+        d0: vencimientoData.d0 ? new Date(vencimientoData.d0) : undefined,
+        d1: vencimientoData.d1 ? new Date(vencimientoData.d1) : undefined,
+        d2: vencimientoData.d2 ? new Date(vencimientoData.d2) : undefined,
+        d3: vencimientoData.d3 ? new Date(vencimientoData.d3) : undefined,
+        d4: vencimientoData.d4 ? new Date(vencimientoData.d4) : undefined,
+        d5: vencimientoData.d5 ? new Date(vencimientoData.d5) : undefined,
+        d6: vencimientoData.d6 ? new Date(vencimientoData.d6) : undefined,
+        d7: vencimientoData.d7 ? new Date(vencimientoData.d7) : undefined,
+        d8: vencimientoData.d8 ? new Date(vencimientoData.d8) : undefined,
+        d9: vencimientoData.d9 ? new Date(vencimientoData.d9) : undefined,
+        anio_v: vencimientoData.anio_v,
+        mes_v: vencimientoData.mes_v,
+      },
+    });
+
+    return vencimiento;
+  } catch (error) {
+    console.error("Error en updateVencimiento:", error);
+    throw error;
+  }
+};
+
+// Delete vencimiento
+const deleteVencimiento = async (id) => {
+  try {
+    const vencimiento = await prisma.vencimientos.delete({
+      where: {
+        idvencimientos: parseInt(id),
+      },
+    });
+
+    return vencimiento;
+  } catch (error) {
+    console.error("Error en deleteVencimiento:", error);
+    throw error;
+  }
+};
+
+module.exports = {
+  getVencimientosByFilters,
+  getAllVencimientos,
+  getVencimientoById,
+  createVencimiento,
+  updateVencimiento,
+  deleteVencimiento,
+};

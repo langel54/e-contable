@@ -11,6 +11,8 @@ import {
   Typography,
   CircularProgress,
   Stack,
+  Alert,
+  Chip,
 } from "@mui/material";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
@@ -23,6 +25,7 @@ import {
   deleteTributo,
   getTiposTributo,
 } from "@/app/services/tributosService";
+import { getVencimientos } from "@/app/services/vencimientosService";
 import { getClientesProvs } from "@/app/services/clienteProvService";
 import { useAuth } from "@/app/provider";
 import Swal from "sweetalert2";
@@ -41,18 +44,19 @@ const validationSchema = Yup.object({
 });
 
 const months = [
-  { value: "01", label: "Enero" },
-  { value: "02", label: "Febrero" },
-  { value: "03", label: "Marzo" },
-  { value: "04", label: "Abril" },
-  { value: "05", label: "Mayo" },
-  { value: "06", label: "Junio" },
-  { value: "07", label: "Julio" },
-  { value: "08", label: "Agosto" },
-  { value: "09", label: "Septiembre" },
+  { value: "1", label: "Enero" },
+  { value: "2", label: "Febrero" },
+  { value: "3", label: "Marzo" },
+  { value: "4", label: "Abril" },
+  { value: "5", label: "Mayo" },
+  { value: "6", label: "Junio" },
+  { value: "7", label: "Julio" },
+  { value: "8", label: "Agosto" },
+  { value: "9", label: "Septiembre" },
   { value: "10", label: "Octubre" },
   { value: "11", label: "Noviembre" },
   { value: "12", label: "Diciembre" },
+  { value: "13", label: "Anual" },
 ];
 
 const currentYear = dayjs().year();
@@ -68,10 +72,12 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
       idtipo_trib: "",
       anio: currentYear,
       mes: dayjs().format("MM"),
-      importe_reg: "",
+      importe_reg: 0,
       importe_pc: 0,
+      importe_pend: 0,
       estado: "0",
       obs: "",
+      fecha_reg: dayjs().format("YYYY-MM-DD mm:ss"),
       //registra: user?.personal?.nombres || user?.username || "",
     }
   );
@@ -81,6 +87,10 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
   );
   const [tiposTributo, setTiposTributo] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [vencimientoValidado, setVencimientoValidado] = useState(false);
+  const [fechaVencimiento, setFechaVencimiento] = useState(
+    dayjs().format("YYYY-MM-DD")
+  );
 
   useEffect(() => {
     if (tributoEdit) {
@@ -98,8 +108,8 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
         anio: tributoEdit.anio || currentYear,
         mes: (typeof tributoEdit.mes === "number"
           ? String(tributoEdit.mes)
-          : tributoEdit.mes || dayjs().format("MM")
-        ).padStart(2, "0"),
+          : tributoEdit.mes || dayjs().format("M")
+        ).replace(/^0+/, ""),
         importe_reg: tributoEdit.importe_reg ?? "",
         estado: tributoEdit.estado ?? "0",
         obs: tributoEdit.obs ?? "",
@@ -120,10 +130,12 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
         idclienteprov: "",
         idtipo_trib: "",
         anio: currentYear,
-        mes: dayjs().format("MM"),
-        importe_reg: "",
+        mes: dayjs().format("M"),
+        importe_reg: 0,
+        importe_pend: 0,
         estado: "0",
         obs: "",
+        fecha_reg: dayjs().format("YYYY-MM-DD"),
         // registra: user?.personal?.nombres || user?.username || "",
       }));
       setSelectedClient(null);
@@ -148,6 +160,16 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
       ...prev,
       idclienteprov: selectedClient?.idclienteprov || "",
     }));
+
+    // Si hay cliente seleccionado y ya hay año/mes, validar vencimientos
+    if (selectedClient?.u_digito && initialValues.anio && initialValues.mes) {
+      setVencimientoValidado(false);
+      validarVencimiento(
+        initialValues.anio,
+        initialValues.mes,
+        selectedClient.u_digito
+      );
+    }
   }, [selectedClient]);
 
   const transformResponse = (response) => ({
@@ -159,8 +181,65 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
     return getClientesProvs(page, pageSize, search, 1);
   };
 
+  const validarVencimiento = async (anio, mes, u_digito) => {
+    try {
+      // Si no hay cliente seleccionado, no se puede validar
+      if (!u_digito) {
+        Swal.fire({
+          title: "¡Atención!",
+          text: "Debe seleccionar un cliente para validar los vencimientos.",
+          icon: "warning",
+          confirmButtonText: "Entendido",
+        });
+        return false;
+      }
+
+      const response = await getVencimientos(anio, mes, u_digito);
+      const vencimientos = response.vencimientos || response;
+
+      if (!vencimientos || vencimientos.length === 0) {
+        Swal.fire({
+          title: "¡Atención!",
+          text: `No existe un registro de vencimientos para el período ${anio}-${mes.padStart(
+            2,
+            "0"
+          )} y régimen ${u_digito}. No se puede registrar el tributo sin fechas de vencimiento configuradas.`,
+          icon: "warning",
+          confirmButtonText: "Entendido",
+        });
+        return false;
+      } else {
+        setFechaVencimiento(
+          dayjs(vencimientos.fecha_vencimiento).format("YYYY-MM-DD")
+        );
+      }
+
+      setVencimientoValidado(true);
+      return true;
+    } catch (error) {
+      console.error("Error validando vencimientos:", error);
+      Swal.fire({
+        title: "Error",
+        text: "No se pudo validar las fechas de vencimiento. Intente nuevamente.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+      return false;
+    }
+  };
+
   const handleSubmit = async (values, setFieldError, setSubmitting) => {
-    console.log("🚀 ~ handleSubmit ~ values:", values);
+    // Validar vencimientos antes de proceder
+    const vencimientoValido = await validarVencimiento(
+      values.anio,
+      values.mes,
+      selectedClient?.u_digito
+    );
+    if (!vencimientoValido) {
+      setSubmitting(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const payload = {
@@ -186,7 +265,11 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
           showConfirmButton: false,
         });
       } else {
-        await createTributo(payload);
+        await createTributo({
+          ...payload,
+          importe_pend: 0,
+          fecha_reg: dayjs().format("YYYY-MM-DD hh:mm"),
+        });
         Swal.fire({
           title: "¡Registrado!",
           text: "El tributo ha sido registrado correctamente",
@@ -305,11 +388,12 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
                   label="Fecha Vencimiento"
                   name="fecha_v"
                   type="date"
-                  value={dayjs(values.fecha_v).format("YYYY-MM-DD")}
+                  value={fechaVencimiento}
                   onChange={handleChange}
                   InputLabelProps={{ shrink: true }}
                   error={Boolean(errors.fecha_v)}
                   helperText={errors.fecha_v}
+                  InputProps={{ readOnly: true }}
                 />
               </Grid>
 
@@ -342,7 +426,22 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
                   <Select
                     name="anio"
                     value={values.anio}
-                    onChange={handleChange}
+                    onChange={async (e) => {
+                      handleChange(e);
+                      // Validar vencimientos cuando cambie el año
+                      if (
+                        e.target.value &&
+                        values.mes &&
+                        selectedClient?.u_digito
+                      ) {
+                        setVencimientoValidado(false);
+                        await validarVencimiento(
+                          e.target.value,
+                          values.mes,
+                          selectedClient.u_digito
+                        );
+                      }
+                    }}
                   >
                     {years.map((y) => (
                       <MenuItem key={y} value={y}>
@@ -355,7 +454,26 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
               <Grid item xs={12} md={3}>
                 <FormControl fullWidth size="medium">
                   <InputLabel>Mes</InputLabel>
-                  <Select name="mes" value={values.mes} onChange={handleChange}>
+                  <Select
+                    name="mes"
+                    value={values.mes}
+                    onChange={async (e) => {
+                      handleChange(e);
+                      // Validar vencimientos cuando cambie el mes
+                      if (
+                        e.target.value &&
+                        values.anio &&
+                        selectedClient?.u_digito
+                      ) {
+                        setVencimientoValidado(false);
+                        await validarVencimiento(
+                          values.anio,
+                          e.target.value,
+                          selectedClient.u_digito
+                        );
+                      }
+                    }}
+                  >
                     {months.map((m) => (
                       <MenuItem key={m.value} value={m.value}>
                         {m.label}
@@ -364,6 +482,37 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
                   </Select>
                 </FormControl>
               </Grid>
+
+              {/* Indicador de validación de vencimientos */}
+              {values.anio && values.mes && selectedClient?.u_digito && (
+                <Grid item xs={12}>
+                  {vencimientoValidado ? (
+                    <Alert severity="success" sx={{ mb: 2 }}>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        {/* <Chip
+                            label="✓"
+                            color="success"
+                            size="small"
+                            sx={{ minWidth: 24, height: 24 }}
+                          /> */}
+                        <Typography variant="body2">
+                          Fecha de vencimiento para: {values.anio}-
+                          {values.mes.padStart(2, "0")} (Dígito:{" "}
+                          {selectedClient.u_digito})
+                        </Typography>
+                      </Stack>
+                    </Alert>
+                  ) : (
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                      <Typography variant="body2">
+                        No se encontró fecha de vencimiento para: {values.anio}-
+                        {values.mes.padStart(2, "0")} (Dígito:{" "}
+                        {selectedClient.u_digito})
+                      </Typography>
+                    </Alert>
+                  )}
+                </Grid>
+              )}
 
               <Grid item xs={12} md={6}>
                 <NumericFormat

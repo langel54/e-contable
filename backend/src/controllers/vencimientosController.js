@@ -1,103 +1,176 @@
 const vencimientosService = require("../services/vencimientosService");
 
-const vencimientosController = {
-  async getAll(req, res) {
-    try {
-      const { page = 1, limit = 10 } = req.query;
-      const skip = (page - 1) * limit;
-
-      const { vencimientos, total } = await vencimientosService.getAll(
-        skip,
-        limit
-      );
-
-      res.json({
-        vencimientos,
-        pagination: {
-          total,
-          page: Number(page),
-          pages: Math.ceil(total / limit),
-        },
+// Get vencimientos by filters
+const getVencimientos = async (req, res) => {
+  try {
+    const { anio, mes, u_digito } = req.query;
+    
+    if (!anio || !mes || !u_digito) {
+      return res.status(400).json({
+        success: false,
+        message: "Faltan parámetros requeridos: anio, mes, u_digito",
       });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
     }
-  },
 
-  async getById(req, res) {
-    try {
-      const vencimiento = await vencimientosService.getById(
-        parseInt(req.params.id)
-      );
-      if (!vencimiento) {
-        return res.status(404).json({ message: "Vencimiento no encontrado" });
-      }
-      res.json(vencimiento);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  },
+    const vencimientos = await vencimientosService.getVencimientosByFilters(
+      anio,
+      mes,
+      u_digito
+    );
 
-  async getByPeriodo(req, res) {
-    try {
-      const { anio, mes } = req.params;
-      const vencimiento = await vencimientosService.getByPeriodo(anio, mes);
-      if (!vencimiento) {
-        return res.status(404).json({
-          message: "Vencimiento no encontrado para el periodo especificado",
-        });
-      }
-      res.json(vencimiento);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  },
-
-  async create(req, res) {
-    try {
-      const validationError = await vencimientosService.validateDates(req.body);
-      if (validationError) {
-        return res.status(400).json({ message: validationError });
-      }
-
-      const vencimiento = await vencimientosService.create(req.body);
-      res.status(201).json(vencimiento);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  },
-
-  async update(req, res) {
-    try {
-      const validationError = await vencimientosService.validateDates(req.body);
-      if (validationError) {
-        return res.status(400).json({ message: validationError });
-      }
-
-      const vencimiento = await vencimientosService.update(
-        parseInt(req.params.id),
-        req.body
-      );
-      if (!vencimiento) {
-        return res.status(404).json({ message: "Vencimiento no encontrado" });
-      }
-      res.json(vencimiento);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  },
-
-  async delete(req, res) {
-    try {
-      const result = await vencimientosService.delete(parseInt(req.params.id));
-      if (!result) {
-        return res.status(404).json({ message: "Vencimiento no encontrado" });
-      }
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  },
+    res.json({
+      success: true,
+      vencimientos,
+      count: vencimientos.length,
+    });
+  } catch (error) {
+    console.error("Error en getVencimientos:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+      error: error.message,
+    });
+  }
 };
 
-module.exports = vencimientosController;
+// Get all vencimientos
+const getAllVencimientos = async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const offset = (page - 1) * limit;
+
+    const result = await vencimientosService.getAllVencimientos(limit, offset);
+
+    res.json({
+      success: true,
+      vencimientos: result.vencimientos,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: result.total,
+        pages: Math.ceil(result.total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("Error en getAllVencimientos:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+      error: error.message,
+    });
+  }
+};
+
+// Get vencimiento by ID
+const getVencimientoById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const vencimiento = await vencimientosService.getVencimientoById(id);
+
+    if (!vencimiento) {
+      return res.status(404).json({
+        success: false,
+        message: "Vencimiento no encontrado",
+      });
+    }
+
+    res.json({
+      success: true,
+      vencimiento,
+    });
+  } catch (error) {
+    console.error("Error en getVencimientoById:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+      error: error.message,
+    });
+  }
+};
+
+// Create vencimiento
+const createVencimiento = async (req, res) => {
+  try {
+    const vencimientoData = req.body;
+    const vencimiento = await vencimientosService.createVencimiento(vencimientoData);
+
+    res.status(201).json({
+      success: true,
+      message: "Vencimiento creado exitosamente",
+      vencimiento,
+    });
+  } catch (error) {
+    console.error("Error en createVencimiento:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+      error: error.message,
+    });
+  }
+};
+
+// Update vencimiento
+const updateVencimiento = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const vencimientoData = req.body;
+    
+    const vencimiento = await vencimientosService.updateVencimiento(id, vencimientoData);
+
+    if (!vencimiento) {
+      return res.status(404).json({
+        success: false,
+        message: "Vencimiento no encontrado",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Vencimiento actualizado exitosamente",
+      vencimiento,
+    });
+  } catch (error) {
+    console.error("Error en updateVencimiento:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+      error: error.message,
+    });
+  }
+};
+
+// Delete vencimiento
+const deleteVencimiento = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await vencimientosService.deleteVencimiento(id);
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: "Vencimiento no encontrado",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Vencimiento eliminado exitosamente",
+    });
+  } catch (error) {
+    console.error("Error en deleteVencimiento:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+      error: error.message,
+    });
+  }
+};
+
+module.exports = {
+  getVencimientos,
+  getAllVencimientos,
+  getVencimientoById,
+  createVencimiento,
+  updateVencimiento,
+  deleteVencimiento,
+};
