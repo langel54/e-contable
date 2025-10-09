@@ -7,6 +7,7 @@ import {
   CheckCircle,
   Cancel,
   Pending,
+  Preview,
 } from "@mui/icons-material";
 import {
   Badge,
@@ -41,34 +42,25 @@ const tributoColumns = (
   return [
     {
       field: "actions",
-      headerName: "",
-      width: 100,
+      headerName: "Ver",
+      width: 60,
       sortable: false,
+      align: "left",
       renderCell: (params) => {
         const data = params.row;
         return (
           <Stack direction="row" spacing={1}>
-            <Tooltip title="Editar" arrow placement="left">
+            <Tooltip title="Editar / ELiminar" arrow placement="left">
               <IconButton
                 onClick={() => {
                   setEditedTributo(data);
                   setOpenAddModal(true);
                 }}
                 size="small"
-                color="primary"
+                color="info"
+                type="button"
               >
-                <Edit fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Eliminar" arrow placement="left">
-              <IconButton
-                onClick={() => {
-                  console.log("Eliminar:", data);
-                }}
-                size="small"
-                color="error"
-              >
-                <Cancel fontSize="small" />
+                <Preview fontSize="small" />
               </IconButton>
             </Tooltip>
           </Stack>
@@ -138,20 +130,18 @@ const tributoColumns = (
       renderCell: (params) => {
         const tipoTrib = params.row.tipo_trib;
         return (
-          <Typography
-            variant="body2"
-            color="primary"
-            sx={{
-              cursor: "pointer",
-              textDecoration: "underline",
-              fontWeight: "bold",
-            }}
-            onClick={() =>
-              console.log("Código tributo:", tipoTrib?.idtipo_trib)
-            }
-          >
-            {tipoTrib?.idtipo_trib || "-"}
-          </Typography>
+          <Tooltip title={tipoTrib.descripcion_t} placement="top-start" arrow>
+            <Typography
+              variant="caption"
+              color="primary"
+              fontWeight={600}
+              // onClick={() =>
+              //   console.log("Código tributo:", tipoTrib?.idtipo_trib)
+              // }
+            >
+              {tipoTrib?.idtipo_trib || "-"}
+            </Typography>
+          </Tooltip>
         );
       },
     },
@@ -623,7 +613,9 @@ const TributosFilter = () => {
       <DrawerComponent
         open={openAddModal}
         onClose={() => setOpenAddModal(false)}
-        title={editedTributo ? "Editar Tributo" : "Registrar Tributo"}
+        title={
+          editedTributo ? "Editar / Eliminar Tributo" : "Registrar Tributo"
+        }
         width={480}
         content={
           <TributoForm

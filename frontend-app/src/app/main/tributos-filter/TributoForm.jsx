@@ -251,7 +251,10 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
         mes: values.mes,
         importe_reg: values.importe_reg,
         importe_pc: values.importe_pc ?? 0,
-        estado: values.estado,
+        estado:
+          values.importe_reg <= values.importe_pc || values.importe_reg == 0
+            ? "1"
+            : "0",
         obs: values.obs,
       };
 
