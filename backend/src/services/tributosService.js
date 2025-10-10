@@ -73,10 +73,48 @@ const tributosService = {
     });
   },
 
-  async delete(id) {
-    return prisma.tributos.delete({
+  async checkPagosAsociados(id) {
+    const pagosCount = await prisma.pagos.count({
       where: { idtributos: id },
     });
+    return pagosCount > 0;
+  },
+
+  async delete(id, force = false) {
+    // Verificar si el tributo existe
+    const tributo = await this.getById(id);
+    if (!tributo) {
+      throw new Error("Tributo no encontrado");
+    }
+
+    if (!force) {
+      // Verificar si tiene pagos asociados
+      const tienePagos = await this.checkPagosAsociados(id);
+      if (tienePagos) {
+        throw new Error(
+          "No se puede eliminar el tributo porque tiene pagos asociados. Use la opción de eliminación forzada si desea continuar."
+        );
+      }
+
+      // Si el tributo tiene un importe pagado, no permitir la eliminación
+      if (tributo.importe_pc > 0) {
+        throw new Error(
+          "No se puede eliminar el tributo porque ya tiene pagos registrados. Use la opción de eliminación forzada si desea continuar."
+        );
+      }
+    } else {
+      // Si es forzado, eliminar primero los pagos asociados
+      await prisma.pagos.deleteMany({
+        where: { idtributos: id },
+      });
+    }
+
+    // Si todo está bien o se fuerza la eliminación, proceder
+    await prisma.tributos.delete({
+      where: { idtributos: id },
+    });
+
+    return { success: true, message: "Tributo y pagos asociados eliminados correctamente" };
   },
 
   async getFilter(skip, limit, idclienteprov, idtipo_trib, anio, mes, estado) {

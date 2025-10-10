@@ -70,11 +70,12 @@ const tributosController = {
 
   async delete(req, res) {
     try {
-      const result = await tributosService.delete(parseInt(req.params.id));
+      const force = req.query.force === 'true';
+      const result = await tributosService.delete(parseInt(req.params.id), force);
       if (!result) {
         return res.status(404).json({ message: "Tributo no encontrado" });
       }
-      res.status(204).send();
+      res.status(200).json({ success: true, message: "Tributo eliminado correctamente" });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

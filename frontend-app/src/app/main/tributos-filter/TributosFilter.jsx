@@ -313,14 +313,17 @@ const tributoColumns = (
 
         return (
           <Stack direction="row" spacing={1} alignItems="center">
-            <Button
-              variant="contained"
-              color={estaPagado ? "success" : "error"}
-              size="small"
-              sx={{ minWidth: "auto", px: 1 }}
-            >
-              {estaPagado ? "Sí" : "No"}
-            </Button>
+            <Tooltip arrow placement="left" title="Añadir pago">
+              <Button
+                variant="contained"
+                color={estaPagado ? "success" : "error"}
+                size="small"
+                sx={{ minWidth: "auto", px: 1 }}
+                onClick={() => console.log("----->", estaPagado)}
+              >
+                {estaPagado ? "Sí" : "No"}
+              </Button>
+            </Tooltip>
             <IconButton size="small" color="primary">
               <AttachMoney fontSize="small" />
             </IconButton>

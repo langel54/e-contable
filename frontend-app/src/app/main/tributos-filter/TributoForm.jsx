@@ -264,7 +264,7 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
           title: "¡Actualizado!",
           text: "El tributo ha sido actualizado correctamente",
           icon: "success",
-          timer: 1500,
+          timer: 2000,
           showConfirmButton: false,
         });
       } else {
@@ -277,7 +277,7 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
           title: "¡Registrado!",
           text: "El tributo ha sido registrado correctamente",
           icon: "success",
-          timer: 1500,
+          timer: 2000,
           showConfirmButton: false,
         });
       }
@@ -293,17 +293,38 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (force = false) => {
     if (!tributoEdit?.idtributos) return;
 
-    const result = await Swal.fire({
+    let result = await Swal.fire({
       title: "¿Estás seguro?",
-      text: "No podrás revertir esta acción.",
-      icon: "warning",
+      html: `<div style="padding: 10px 32px; text-align: center;">
+        <p>Vas a eliminar el tributo:</p>
+        <ul style="text-align: left; margin: 10px 0" type="square">
+          <li>Cliente: ${tributoEdit.cliente_prov?.razonsocial}</li>
+          <li>Tipo: ${tributoEdit.tipo_trib?.descripcion_t}</li>
+          <li>Período: ${tributoEdit.mes}/${tributoEdit.anio}</li>
+          <li>Importe: S/ ${tributoEdit.importe_reg}</li>
+          ${
+            tributoEdit.importe_pc > 0
+              ? `<li style="color: #d33">Importe pagado: S/ ${tributoEdit.importe_pc}</li>`
+              : ""
+          }
+        </ul>
+        <p style="margin-top: 10px;">${
+          force
+            ? '<strong style="color: #d33">¡ATENCIÓN! Se eliminará el tributo incluso si tiene pagos asociados.</strong>'
+            : "Esta acción no se puede revertir."
+        }</p>
+     
+        </div>`,
+      icon: force ? "warning" : "question",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Sí, eliminar",
+      confirmButtonColor: force ? "#d33" : "#3085d6",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: force
+        ? "Sí, eliminar de todas formas"
+        : "Sí, eliminar",
       cancelButtonText: "Cancelar",
     });
 
@@ -311,19 +332,54 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
 
     setLoading(true);
     try {
-      await deleteTributo(tributoEdit.idtributos);
-      Swal.fire({
+      const response = await deleteTributo(tributoEdit.idtributos, force);
+      if (onSaved) onSaved();
+      handleCloseModal();
+      await Swal.fire({
         title: "¡Eliminado!",
         text: "El tributo ha sido eliminado correctamente",
         icon: "success",
-        timer: 1500,
+        timer: 2000,
         showConfirmButton: false,
       });
-      if (onSaved) onSaved();
-      handleCloseModal();
     } catch (error) {
-      const message = error?.message || "Error al eliminar tributo";
-      Swal.fire({ title: "Error", text: message, icon: "error" });
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Error al eliminar tributo";
+
+      // Si hay pagos asociados o importe pagado, ofrecer la eliminación forzada
+      if (
+        !force &&
+        (message.includes("pagos asociados") ||
+          message.includes("pagos registrados"))
+      ) {
+        result = await Swal.fire({
+          title: "No se puede eliminar normalmente",
+          html: `
+            <p>${message}</p>
+            <p style="margin-top: 10px; color: #d33;">¿Deseas forzar la eliminación?</p>
+            <p style="font-size: 0.9em; margin-top: 5px;">Esta acción eliminará el tributo y sus pagos asociados.</p>
+          `,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Sí, forzar eliminación",
+          cancelButtonText: "Cancelar",
+        });
+
+        if (result.isConfirmed) {
+          return handleDelete(true);
+        }
+      } else {
+        await Swal.fire({
+          title: "Error",
+          text: message,
+          icon: "error",
+          confirmButtonText: "Entendido",
+        });
+      }
     } finally {
       setLoading(false);
     }
