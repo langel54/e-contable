@@ -4,7 +4,6 @@ const vencimientosService = require("../services/vencimientosService");
 const getVencimientos = async (req, res) => {
   try {
     const { anio, mes, u_digito } = req.query;
-    
     if (!anio || !mes || !u_digito) {
       return res.status(400).json({
         success: false,
@@ -21,10 +20,15 @@ const getVencimientos = async (req, res) => {
     res.json({
       success: true,
       vencimientos,
-      count: vencimientos.length,
     });
   } catch (error) {
     console.error("Error en getVencimientos:", error);
+    if (error.type === "validation") {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+    if (error.type === "not_found") {
+      return res.status(404).json({ success: false, message: error.message });
+    }
     res.status(500).json({
       success: false,
       message: "Error interno del servidor",

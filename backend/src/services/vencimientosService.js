@@ -3,42 +3,43 @@ const prisma = new PrismaClient();
 
 // Get vencimientos by filters (anio, mes, u_digito)
 const getVencimientosByFilters = async (anio, mes, u_digito) => {
-  try {
-    // Validar el último dígito
-    if (isNaN(u_digito) || u_digito < 0 || u_digito > 9) {
-      throw new Error("El último dígito debe estar entre 0 y 9");
-    }
-
-    // Buscar el registro de vencimientos para ese año y mes
-    const registro = await prisma.vencimientos.findFirst({
-      where: {
-        anio_v: anio,
-        mes_v: mes,
-      },
-    });
-
-    if (!registro) {
-      throw new Error(`No se encontraron vencimientos para ${mes}/${anio}`);
-    }
-
-    // Obtener la fecha correspondiente al último dígito
-    const campoFecha = `d${u_digito}`;
-    const fechaVencimiento = registro[campoFecha];
-
-    if (!fechaVencimiento) {
-      throw new Error(`No hay fecha definida para el dígito ${u_digito}`);
-    }
-
-    return {
-      anio,
-      mes,
-      u_digito,
-      fecha_vencimiento: fechaVencimiento,
-    };
-  } catch (error) {
-    console.error("Error en getVencimientosByFilters:", error.message);
+  // Validar el último dígito
+  if (isNaN(u_digito) || u_digito < 0 || u_digito > 9) {
+    const error = new Error("El último dígito debe estar entre 0 y 9");
+    error.type = "validation";
     throw error;
   }
+
+  // Buscar el registro de vencimientos para ese año y mes
+  const registro = await prisma.vencimientos.findFirst({
+    where: {
+      anio_v: anio,
+      mes_v: mes,
+    },
+  });
+
+  if (!registro) {
+    const error = new Error(`No se encontraron vencimientos para ${mes}/${anio}`);
+    error.type = "not_found";
+    throw error;
+  }
+
+  // Obtener la fecha correspondiente al último dígito
+  const campoFecha = `d${u_digito}`;
+  const fechaVencimiento = registro[campoFecha];
+
+  if (!fechaVencimiento) {
+    const error = new Error(`No hay fecha definida para el dígito ${u_digito}`);
+    error.type = "not_found";
+    throw error;
+  }
+
+  return {
+    anio,
+    mes,
+    u_digito,
+    fecha_vencimiento: fechaVencimiento,
+  };
 };
 
 // Get all vencimientos with pagination

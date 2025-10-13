@@ -218,11 +218,21 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
       return true;
     } catch (error) {
       console.error("Error validando vencimientos:", error);
+       console.error("Error validando vencimientos:", error);
+      let errorMessage = "No se pudo validar las fechas de vencimiento. Intente nuevamente.";
+
+      if (error.message) {
+          errorMessage = error.message;
+      }
+
       Swal.fire({
         title: "Error",
         text: "No se pudo validar las fechas de vencimiento. Intente nuevamente.",
+        text: errorMessage,
         icon: "error",
         confirmButtonText: "Aceptar",
+        timer: 5000,
+        timerProgressBar: true,
       });
       return false;
     }
@@ -282,6 +292,7 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
         });
       }
       if (onSaved) onSaved();
+      
       handleCloseModal();
     } catch (error) {
       const message = error?.message || "Error al guardar tributo";

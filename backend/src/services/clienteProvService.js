@@ -94,33 +94,48 @@ const clienteProvService = {
   },
 
   async getById(id) {
-    return prisma.clienteProv.findUnique({
-      where: { idclienteprov: id }, //0-000
+    const cliente = await prisma.clienteProv.findUnique({
+      where: { idclienteprov: id },
       include: {
         regimen: true,
         rubro: true,
         facturador: true,
       },
     });
+    if (!cliente) {
+      const error = new Error("Cliente/Proveedor no encontrado");
+      error.type = "not_found";
+      throw error;
+    }
+    return cliente;
   },
 
   async create(data) {
+    // Validación de campos obligatorios
+    if (!data.ruc) {
+      const error = new Error("El campo 'ruc' es obligatorio.");
+      error.type = "validation";
+      throw error;
+    }
+    if (!data.u_digito) {
+      const error = new Error("El campo 'u_digito' es obligatorio.");
+      error.type = "validation";
+      throw error;
+    }
+
     // Verificar si ya existe un cliente con el mismo RUC
     const existingClient = await prisma.clienteProv.findFirst({
       where: {
         ruc: data.ruc,
       },
     });
-
-    // Si existe un cliente con el mismo RUC, lanzar error con los datos
     if (existingClient) {
       const estadoData = await prisma.estado.findFirst({
         where: { idestado: existingClient.estado },
       });
-      throw new Error(`Ya existe un cliente con el RUC ${data.ruc}. 
-        ID ClienteProv: ${existingClient.idclienteprov}, 
-        Razón Social: ${existingClient.razonsocial}, 
-        Estado: ${estadoData.descripcion}`);
+      const error = new Error(`Ya existe un cliente con el RUC ${data.ruc}. ID: ${existingClient.idclienteprov}, Razón Social: ${existingClient.razonsocial}, Estado: ${estadoData?.descripcion || "Desconocido"}`);
+      error.type = "duplicate";
+      throw error;
     }
 
     // Obtener el último número de 'nro' en la base de datos
@@ -129,23 +144,19 @@ const clienteProvService = {
     });
     const nextNro = lastNro ? lastNro.nro + 1 : 1;
 
-    if (!data.u_digito) {
-      throw new Error("El campo 'u_digito' es obligatorio.");
-    }
-
     // Filtrar registros por `u_digito` y obtener el mayor número asociado
     const lastRecord = await prisma.clienteProv.findFirst({
       where: {
         idclienteprov: {
-          startsWith: `${data.u_digito}-`, // Buscar IDs que comiencen con el `u_digito`
+          startsWith: `${data.u_digito}-`,
         },
       },
-      orderBy: { idclienteprov: "desc" }, // Ordenar por ID en orden descendente
+      orderBy: { idclienteprov: "desc" },
     });
 
     // Extraer el número actual del último ID
     const lastNumber = lastRecord
-      ? parseInt(lastRecord.idclienteprov.split("-")[1], 10) // Obtener la parte numérica después del "-"
+      ? parseInt(lastRecord.idclienteprov.split("-")[1], 10)
       : 0;
 
     // Generar el nuevo ID
@@ -155,7 +166,7 @@ const clienteProvService = {
       ...data,
       nro: nextNro,
       idclienteprov: newId,
-      declarado: data.declarado ?? "0", // Si declarado no está definido, asignar 0
+      declarado: data.declarado ?? "0",
       dni: data.dni?.toString(),
     };
 
@@ -165,6 +176,13 @@ const clienteProvService = {
   },
 
   async update(id, data) {
+    // Validar existencia
+    const cliente = await prisma.clienteProv.findUnique({ where: { idclienteprov: id } });
+    if (!cliente) {
+      const error = new Error("Cliente/Proveedor no encontrado");
+      error.type = "not_found";
+      throw error;
+    }
     return prisma.clienteProv.update({
       where: { idclienteprov: id },
       data,
@@ -177,6 +195,13 @@ const clienteProvService = {
   },
 
   async delete(id) {
+    // Validar existencia
+    const cliente = await prisma.clienteProv.findUnique({ where: { idclienteprov: id } });
+    if (!cliente) {
+      const error = new Error("Cliente/Proveedor no encontrado");
+      error.type = "not_found";
+      throw error;
+    }
     return prisma.clienteProv.delete({
       where: { idclienteprov: id },
     });

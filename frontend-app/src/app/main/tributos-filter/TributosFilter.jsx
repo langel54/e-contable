@@ -8,6 +8,8 @@ import {
   Cancel,
   Pending,
   Preview,
+  CheckCircleOutline,
+  CancelOutlined,
 } from "@mui/icons-material";
 import {
   Badge,
@@ -33,11 +35,14 @@ import { FileExcelFilled } from "@ant-design/icons";
 import ModalComponent from "@/app/components/ModalComponent";
 import DrawerComponent from "@/app/components/DrawerComponent";
 import TributoForm from "./TributoForm";
+import PagosModal from "./pagos/PagosModal";
 
 const tributoColumns = (
   setEditedTributo,
   setOpenAddModal,
-  setOpenStatusModal
+  setOpenStatusModal,
+  openPagosModalFn,
+  updateTableTributos
 ) => {
   return [
     {
@@ -247,7 +252,8 @@ const tributoColumns = (
         const diffTime = hoy - fechaVenc;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         const mesesAtrasados = Math.max(0, diffDays / 30);
-        const interes = (params.row.importe_reg || 0) * (mesesAtrasados * 0.01);
+        const interes =
+          (params.row.importe_reg || 0) * (mesesAtrasados * 0.004);
 
         return (
           <Typography
@@ -280,7 +286,8 @@ const tributoColumns = (
         const diffTime = hoy - fechaVenc;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         const mesesAtrasados = Math.max(0, diffDays / 30);
-        const interes = (params.row.importe_reg || 0) * (mesesAtrasados * 0.01);
+        const interes =
+          (params.row.importe_reg || 0) * (mesesAtrasados * 0.004);
         const deudaActual = pendiente + interes;
 
         return (
@@ -304,29 +311,38 @@ const tributoColumns = (
     {
       field: "pagado_status",
       headerName: "¿Pagado?",
-      width: 100,
+      width: 80,
       align: "right",
       renderCell: (params) => {
         const pendiente =
           (params.row.importe_reg || 0) - (params.row.importe_pc || 0);
         const estaPagado = pendiente <= 0;
-
         return (
           <Stack direction="row" spacing={1} alignItems="center">
             <Tooltip arrow placement="left" title="Añadir pago">
               <Button
-                variant="contained"
+                variant="outlined"
                 color={estaPagado ? "success" : "error"}
                 size="small"
                 sx={{ minWidth: "auto", px: 1 }}
-                onClick={() => console.log("----->", estaPagado)}
+                onClick={() =>
+                  openPagosModalFn(params.row, updateTableTributos)
+                }
               >
-                {estaPagado ? "Sí" : "No"}
+                {estaPagado ? (
+                  <CheckCircle fontSize="small" />
+                ) : (
+                  <Cancel fontSize="small" />
+                )}
               </Button>
             </Tooltip>
-            <IconButton size="small" color="primary">
+            {/* <IconButton
+              size="small"
+              color="primary"
+              onClick={() => openPagosModalFn(params.row)}
+            >
               <AttachMoney fontSize="small" />
-            </IconButton>
+            </IconButton> */}
           </Stack>
         );
       },
@@ -336,7 +352,6 @@ const tributoColumns = (
 
 const TributosFilter = () => {
   const [tributos, setTributos] = useState([]);
-  console.log("🚀 ~ TributosFilter ~ tributos:", tributos);
   const [pagination, setPagination] = useState({
     page: 0,
     pageSize: 10,
@@ -351,6 +366,8 @@ const TributosFilter = () => {
   const [openAddModal, setOpenAddModal] = useState(false);
   const [editedTributo, setEditedTributo] = useState(null);
   const [openStatusModal, setOpenStatusModal] = useState(false);
+  const [openPagosModal, setOpenPagosModal] = useState(false);
+  const [tributoPagos, setTributoPagos] = useState(null);
 
   const fetchDataTributos = useCallback(
     async (
@@ -417,6 +434,17 @@ const TributosFilter = () => {
     selectedEstado,
   ]);
 
+  const updateTableTributos = () => {
+    fetchDataTributos(
+      pagination.page + 1,
+      pagination.pageSize,
+      selectedCliente,
+      selectedTipoTrib,
+      selectedAnio,
+      selectedMes,
+      selectedEstado
+    );
+  };
   // Memoiza las columnas para evitar recrearlas en cada render
   const columns = React.useMemo(
     () =>
@@ -426,7 +454,12 @@ const TributosFilter = () => {
           setOpenAddModal(true);
         },
         setOpenAddModal,
-        setOpenStatusModal
+        setOpenStatusModal,
+        // Añadimos función para abrir pagos
+        (data) => {
+          setTributoPagos(data);
+          setOpenPagosModal(true);
+        }
       ),
     [setOpenAddModal, setOpenStatusModal]
   );
@@ -455,7 +488,7 @@ const TributosFilter = () => {
 
           // Calcular interés
           const mesesAtrasados = Math.max(0, diffDays / 30);
-          const interes = (tributo.importe_reg || 0) * (mesesAtrasados * 0.01);
+          const interes = (tributo.importe_reg || 0) * (mesesAtrasados * 0.004);
 
           // Calcular deuda actual
           const pendiente =
@@ -517,7 +550,6 @@ const TributosFilter = () => {
         deuda_actual: "Deuda Actual",
         observaciones: "Obs.",
       };
-      console.log("🚀 ~ handleExportExcel ~ exportData:", exportData);
 
       excelExport({
         data: exportData, // Usamos los datos devueltos por fetchAllDataCliente
@@ -637,6 +669,24 @@ const TributosFilter = () => {
             }}
           />
         }
+      />
+      <ModalComponent
+        open={openPagosModal}
+        handleClose={() => {
+          setOpenPagosModal(false);
+          updateTableTributos();
+        }}
+        title="Pagos del Tributo"
+        content={
+          tributoPagos ? (
+            <PagosModal
+              open={openPagosModal}
+              onClose={() => setOpenPagosModal(false)}
+              tributo={tributoPagos}
+            />
+          ) : null
+        }
+        width={"700px"}
       />
     </Box>
   );

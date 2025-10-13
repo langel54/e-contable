@@ -21,13 +21,19 @@ const tributosService = {
   },
 
   async getById(id) {
-    return prisma.tributos.findUnique({
+    const tributo = await prisma.tributos.findUnique({
       where: { idtributos: id },
       include: {
         cliente_prov: true,
         tipo_trib: true,
       },
     });
+    if (!tributo) {
+      const error = new Error("Tributo no encontrado");
+      error.type = "not_found";
+      throw error;
+    }
+    return tributo;
   },
 
   async getByCliente(idclienteprov) {
@@ -43,6 +49,27 @@ const tributosService = {
   },
 
   async create(data) {
+    // Validación de campos obligatorios
+    if (!data.idclienteprov) {
+      const error = new Error("El campo 'idclienteprov' es obligatorio.");
+      error.type = "validation";
+      throw error;
+    }
+    if (!data.idtipo_trib) {
+      const error = new Error("El campo 'idtipo_trib' es obligatorio.");
+      error.type = "validation";
+      throw error;
+    }
+    if (!data.anio) {
+      const error = new Error("El campo 'anio' es obligatorio.");
+      error.type = "validation";
+      throw error;
+    }
+    if (!data.mes) {
+      const error = new Error("El campo 'mes' es obligatorio.");
+      error.type = "validation";
+      throw error;
+    }
     // Asegurarse de que la fecha de registro sea un objeto Date válido
     if (data.fecha_reg) {
       data.fecha_reg = new Date(data.fecha_reg);
@@ -58,6 +85,13 @@ const tributosService = {
   },
 
   async update(id, data) {
+    // Validar existencia
+    const tributo = await prisma.tributos.findUnique({ where: { idtributos: id } });
+    if (!tributo) {
+      const error = new Error("Tributo no encontrado");
+      error.type = "not_found";
+      throw error;
+    }
     // Asegurarse de que la fecha de registro sea un objeto Date válido
     if (data.fecha_reg) {
       data.fecha_reg = new Date(data.fecha_reg);
@@ -82,25 +116,27 @@ const tributosService = {
 
   async delete(id, force = false) {
     // Verificar si el tributo existe
-    const tributo = await this.getById(id);
+    const tributo = await prisma.tributos.findUnique({ where: { idtributos: id } });
     if (!tributo) {
-      throw new Error("Tributo no encontrado");
+      const error = new Error("Tributo no encontrado");
+      error.type = "not_found";
+      throw error;
     }
 
     if (!force) {
       // Verificar si tiene pagos asociados
       const tienePagos = await this.checkPagosAsociados(id);
       if (tienePagos) {
-        throw new Error(
-          "No se puede eliminar el tributo porque tiene pagos asociados. Use la opción de eliminación forzada si desea continuar."
-        );
+        const error = new Error("No se puede eliminar el tributo porque tiene pagos asociados. Use la opción de eliminación forzada si desea continuar.");
+        error.type = "forbidden";
+        throw error;
       }
 
       // Si el tributo tiene un importe pagado, no permitir la eliminación
       if (tributo.importe_pc > 0) {
-        throw new Error(
-          "No se puede eliminar el tributo porque ya tiene pagos registrados. Use la opción de eliminación forzada si desea continuar."
-        );
+        const error = new Error("No se puede eliminar el tributo porque ya tiene pagos registrados. Use la opción de eliminación forzada si desea continuar.");
+        error.type = "forbidden";
+        throw error;
       }
     } else {
       // Si es forzado, eliminar primero los pagos asociados
