@@ -6,6 +6,7 @@ import {
   PostAdd,
   DriveFileRenameOutline,
   RestartAlt,
+  DeleteOutline,
 } from "@mui/icons-material";
 import {
   Box,
@@ -30,29 +31,88 @@ import {
   Typography,
   CircularProgress,
 } from "@mui/material";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ExpensesForm from "./ExpensesForm";
 import ModalComponent from "@/app/components/ModalComponent";
 import PDFPreviewModal from "./components/PDFPreviewModal";
-import dayjs from "dayjs";
 import "../../components/date-picker/date-picker.css";
 import DatePicker from "react-datepicker";
 import { getConceptos } from "@/app/services/conceptoServices";
 import { getPeriodos } from "@/app/services/periodoServices";
-import utc from "dayjs/plugin/utc";
 import EstadoChip from "@/app/components/EstadoChip";
 import { getEstados } from "@/app/services/estadoDocServices";
 import { FileExcelFilled, FilePdfFilled } from "@ant-design/icons";
-import excelExport from "@/app/components/excelReport";
 import { getColumns } from "./components/TableColumns";
-
-dayjs.extend(utc);
+import { useExpensesData } from "./hooks/useExpensesData";
+// Helper to get formatted start/end dates
+const getDateFormats = (startDate, endDate) => {
+  let startDateFormat = "";
+  let endDateFormat = "";
+  if (startDate && endDate) {
+    let start = new Date(startDate);
+    let end = new Date(endDate);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+    startDateFormat = start.toISOString();
+    endDateFormat = end.toISOString();
+  }
+  return { startDateFormat, endDateFormat };
+};
+import {
+  fetchAllExpenses,
+  handleGenerateExcel,
+  handleYearChange,
+  renderYearContent,
+  handleResetFilter,
+} from "./utils/expensesUtils";
 
 const ExpensesPage = () => {
-  const [expensesData, setExpensesData] = useState();
-  const [pagination, setPagination] = useState({ page: 0, pageSize: 10 });
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
+  // Estado para el modal de anulación lógica
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  // Abrir modal de confirmación
+  const handleOpenDeleteModal = (id) => {
+    setDeleteId(id);
+    setOpenDeleteModal(true);
+    setDeleteError("");
+  };
+
+  // Cerrar modal de confirmación
+  const handleCloseDeleteModal = () => {
+    setOpenDeleteModal(false);
+    setDeleteId(null);
+    setDeleteError("");
+  };
+
+  // Confirmar anulación lógica
+  const handleConfirmDelete = async (id) => {
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      // Importa el servicio de eliminación lógica de gastos
+      const { deleteSalida } = await import("@/app/services/expensesServices");
+      await deleteSalida(id);
+      handleCloseDeleteModal();
+      tableRefresh();
+    } catch (error) {
+      setDeleteError(error.message || "Error al anular el egreso");
+    } finally {
+      setDeleting(false);
+    }
+  };
+  // State and hooks
+  const {
+    expensesData,
+    setExpensesData,
+    pagination,
+    setPagination,
+    total,
+    loading,
+    fetchDataExpenses,
+  } = useExpensesData();
   const [openFormModal, setOpenFormModal] = useState(false);
   const [editSalidaData, setEditSalidaData] = useState(null);
   const [periodosList, setPeriodosList] = useState([]);
@@ -87,55 +147,14 @@ const ExpensesPage = () => {
     fetchData();
   }, []);
 
-  const fetchDataExpenses = useCallback(
-    async (
-      page,
-      pageSize,
-      startDate,
-      endDate,
-      conceptFilter,
-      periodo,
-      selectedAnio,
-      selectedEstado
-    ) => {
-      setLoading(true);
-      try {
-        const data = await getExpenses(
-          page,
-          pageSize,
-          "",
-          selectedEstado,
-          startDate,
-          endDate,
-          conceptFilter,
-          periodo,
-          selectedAnio
-        );
-        setExpensesData(data.salidas);
-        setTotal(data.pagination?.total || 0);
-      } catch (error) {
-        console.error("Error fetching egresos:", error);
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
-
   useEffect(() => {
     const fechasValidas = (startDate && endDate) || (!startDate && !endDate);
     const periodoValido =
       (periodo && selectedAnio) || (!periodo && !selectedAnio);
-    let startDateFormat = "";
-    let endDateFormat = "";
-    if (startDate && endDate) {
-      let start = new Date(startDate);
-      let end = new Date(endDate);
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-      startDateFormat = dayjs(start).utc().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
-      endDateFormat = dayjs(end).utc().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
-    }
+    const { startDateFormat, endDateFormat } = getDateFormats(
+      startDate,
+      endDate
+    );
     if (fechasValidas && periodoValido) {
       fetchDataExpenses(
         pagination.page + 1,
@@ -170,24 +189,30 @@ const ExpensesPage = () => {
     selectedEstado,
   ]);
 
-  const handleYearChange = (date) => {
-    if (date) setSelectedAnio(date.getFullYear());
-  };
-  const renderYearContent = (year) => (
-    <span title={`Año: ${year}`}>{year}</span>
-  );
-  const handleResetFilter = () => {
-    setDateRange([null, null]);
-    setConceptFilter("");
-    setPeriodo("");
-    setSelectedAnio("");
-    setSelectedEstado("");
+  // Handlers
+
+  const tableRefresh = () => {
+    const { startDateFormat, endDateFormat } = getDateFormats(
+      startDate,
+      endDate
+    );
+    fetchDataExpenses(
+      pagination.page + 1,
+      pagination.pageSize,
+      startDateFormat,
+      endDateFormat,
+      conceptFilter,
+      periodo,
+      selectedAnio,
+      selectedEstado
+    );
   };
   const handleClickPop = (event) => setAnchorElPop(event.currentTarget);
   const handleActionOpen = () => setAnchorElPop(null);
   const handleCloseFormModal = () => {
     setOpenFormModal(!openFormModal);
     setEditSalidaData(null);
+    tableRefresh();
   };
   const handleOpenPDFModal = (row) => {
     setOpenPDFModal(true);
@@ -211,7 +236,7 @@ const ExpensesPage = () => {
         </Typography>
         <Button
           size="medium"
-          color="success"
+          color="error"
           variant="contained"
           onClick={() => setOpenFormModal(true)}
           startIcon={<PostAdd fontSize="inherit" />}
@@ -346,14 +371,76 @@ const ExpensesPage = () => {
         </Stack>
         <Stack direction={"row"} spacing={1}>
           <Tooltip arrow title="Quitar FIltros" placement="left">
-            <IconButton onClick={() => handleResetFilter()}>
+            <IconButton
+              onClick={() =>
+                handleResetFilter({
+                  setDateRange,
+                  setConceptFilter,
+                  setPeriodo,
+                  setSelectedAnio,
+                  setSelectedEstado,
+                })
+              }
+            >
               <RestartAlt />
             </IconButton>
           </Tooltip>
           <IconButton onClick={handleClickPop}>
             <MoreVert />
           </IconButton>
-          {/* Popover para acciones adicionales, como exportar o imprimir PDF */}
+          <Popover
+            open={Boolean(anchorElPop)}
+            anchorEl={anchorElPop}
+            onClose={handleActionOpen}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          >
+            <List>
+              <ListItem
+                sx={{ cursor: "pointer" }}
+                onClick={() =>
+                  handleGenerateExcel({
+                    startDate,
+                    endDate,
+                    conceptFilter,
+                    periodo,
+                    selectedAnio,
+                    selectedEstado,
+                    setExportingExcel,
+                    handleActionOpen,
+                  })
+                }
+                disabled={exportingExcel}
+              >
+                <ListItemIcon
+                  sx={(theme) => ({ color: theme.palette.success.main })}
+                >
+                  {exportingExcel ? (
+                    <CircularProgress size={20} color="success" />
+                  ) : (
+                    <FileExcelFilled />
+                  )}
+                </ListItemIcon>
+                <ListItemText
+                  primary={exportingExcel ? "Exportando..." : "Exportar Excel"}
+                />
+              </ListItem>
+              <Divider />
+              <ListItem
+                sx={{ cursor: "pointer" }}
+                onClick={() => {
+                  // Acción PDF, igual que IncomesPage
+                  handleActionOpen();
+                }}
+              >
+                <ListItemIcon
+                  sx={(theme) => ({ color: theme.palette.error.main })}
+                >
+                  <FilePdfFilled />
+                </ListItemIcon>
+                <ListItemText primary="Imprimir PDF" />
+              </ListItem>
+            </List>
+          </Popover>
         </Stack>
       </Stack>
       <CustomTable
@@ -361,6 +448,7 @@ const ExpensesPage = () => {
           setEditSalidaData,
           setOpenFormModal,
           handleOpenPDFModal,
+          openDeleteModal: handleOpenDeleteModal,
         })}
         data={expensesData || []}
         paginationModel={pagination}
@@ -369,6 +457,52 @@ const ExpensesPage = () => {
         loading={loading}
         getRowId={(row) => row.idsalida}
       />
+      <ModalComponent
+        open={openDeleteModal}
+        handleClose={handleCloseDeleteModal}
+        title="Confirmar anulación"
+        icon={<DeleteOutline color="error" />}
+        width="400px"
+        content={
+          <>
+            <Typography>
+              ¿Está seguro que desea anular el Egreso N° <b>{deleteId}</b>? Esta
+              acción no puede deshacerse.
+            </Typography>
+            {deleteError && (
+              <Typography color="error" sx={{ mt: 2 }}>
+                {deleteError}
+              </Typography>
+            )}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: 2,
+                mt: 3,
+              }}
+            >
+              <Button
+                onClick={handleCloseDeleteModal}
+                color="error"
+                variant="outlined"
+                disabled={deleting}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => handleConfirmDelete(deleteId)}
+                color="error"
+                variant="contained"
+                disabled={deleting}
+              >
+                {deleting ? "Anulando..." : "Anular"}
+              </Button>
+            </Box>
+          </>
+        }
+      />
+
       <ModalComponent
         icon={
           editSalidaData ? (

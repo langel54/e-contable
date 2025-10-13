@@ -5,7 +5,7 @@ import {
   updateClienteProv,
   updateDeclaradoTodos,
 } from "@/app/services/clienteProvService";
-import { accessSunat } from "@/app/services/sunServices";
+import { accessSunatDeclaracionesPagos, accessSunatTramites } from "@/app/services/sunServices";
 import { Edit, MoreVert } from "@mui/icons-material";
 import {
   Badge,
@@ -223,7 +223,69 @@ const clientColumns = (
                 transition: Zoom,
               }}
             >
-              <IconButton onClick={() => accessSunat(data)}>
+              <IconButton
+                onClick={async () => {
+                  try {
+                    const res = await accessSunatTramites(data);
+                    if (res.url) {
+                      window.open(
+                        res.url,
+                        "_blank",
+                        "noopener,noreferrer,width=1200,height=800,left=100,top=100"
+                      );
+                    } else {
+                      Swal.fire(
+                        "Error",
+                        res.error || "No se pudo generar la URL.",
+                        "error"
+                      );
+                    }
+                  } catch (err) {
+                    Swal.fire(
+                      "Error",
+                      "No se pudo conectar con el servicio SUNAT.",
+                      "error"
+                    );
+                  }
+                }}
+              >
+                <SunatIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip
+              title="Trámites y consultas"
+              arrow
+              placement="left"
+              slots={{
+                transition: Zoom,
+              }}
+            >
+              <IconButton
+                onClick={async () => {
+                  try {
+                    const res = await accessSunatDeclaracionesPagos(data);
+                    if (res.url) {
+                      window.open(
+                        res.url,
+                        "_blank",
+                        "noopener,noreferrer,width=1200,height=800,left=100,top=100"
+                      );
+                    } else {
+                      Swal.fire(
+                        "Error",
+                        res.error || "No se pudo generar la URL.",
+                        "error"
+                      );
+                    }
+                  } catch (err) {
+                    Swal.fire(
+                      "Error",
+                      "No se pudo conectar con el servicio SUNAT.",
+                      "error"
+                    );
+                  }
+                }}
+              >
                 <SunatIcon />
               </IconButton>
             </Tooltip>
@@ -315,10 +377,11 @@ const ClientsFilter = () => {
 
   // Memoiza las columnas para evitar recrearlas en cada render
   const columns = React.useMemo(
-    () => clientColumns(
-      () => setOpenAddModal(true),
-      () => setOpenStatusModal(true)
-    ),
+    () =>
+      clientColumns(
+        () => setOpenAddModal(true),
+        () => setOpenStatusModal(true)
+      ),
     []
   );
 

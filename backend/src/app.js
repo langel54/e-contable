@@ -37,7 +37,7 @@ const pdfSalidaRoutes = require("./routes/pdfSalidaRoutes");
 const sunafilRoutes = require("./routes/sunafilRoutes");
 const checkOrigin = require("./middlewares/checkOrigin");
 const corsOptions = require("./config/corsConfig");
-const { accessSunat } = require("./controllers/sunatController");
+const sunatRoutes = require("./routes/sunatRoutes");
 
 // const clienteRoutes = require("./routes/clienteRoutes");
 
@@ -53,21 +53,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use("/api/auth", authRoutes);
 // Ruta para acceso a SUNAT
-app.post("/api/access-sunat", async (req, res) => {
-  const { ruc, usuario, password } = req.body;
-  if (!ruc || !usuario || !password) {
-    return res.status(400).json({
-      error: "Todos los campos (RUC, usuario, contraseña) son obligatorios.",
-    });
-  }
-  try {
-    const result = await accessSunat({ ruc, usuario, password });
-    res.status(200).json({ message: "Acceso completado", result });
-  } catch (error) {
-    console.error("Error en el acceso a SUNAT:", error);
-    res.status(500).json({ error: "Hubo un problema al acceder a SUNAT." });
-  }
-});
+app.use("/api/sunat", sunatRoutes);
 
 // Aplicar middleware de autenticación a todas las rutas
 // app.use(authMiddleware);

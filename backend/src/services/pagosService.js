@@ -23,14 +23,42 @@ const pagosService = {
   },
 
   async getByTributo(idtributos) {
-    return prisma.pagos.findMany({
+    // obtenemos los pagos
+    const pagos = await prisma.pagos.findMany({
       where: { idtributos },
-      orderBy: {
-        fecha_p: "desc",
+      orderBy: { fecha_p: "desc" },
+      select: {
+        idpagos: true,
+        idtributos: true,
+        fecha_p: true,
+        importe_p: true,
+        idforma_pago_trib: true,
+        detalles: true,
       },
     });
-  },
 
+    if (!pagos.length) return [];
+
+    // obtenemos todos los IDs únicos de forma de pago usados
+    const idsFormasPago = [...new Set(pagos.map((p) => p.idforma_pago_trib))];
+
+    // consultamos sus descripciones
+    const formasPago = await prisma.formaPagoTrib.findMany({
+      where: { idforma_pago_trib: { in: idsFormasPago } },
+      select: { idforma_pago_trib: true, descripcion: true },
+    });
+
+    // las convertimos en un diccionario para acceso rápido
+    const mapaFormasPago = Object.fromEntries(
+      formasPago.map((fp) => [fp.idforma_pago_trib, fp.descripcion])
+    );
+
+    // combinamos la información
+    return pagos.map((p) => ({
+      ...p,
+      descripcion_forma_pago: mapaFormasPago[p.idforma_pago_trib] || null,
+    }));
+  },
   async create(data) {
     // Asegurarse de que la fecha de pago sea un objeto Date válido
     if (data.fecha_p) {
@@ -80,7 +108,7 @@ const pagosService = {
     return pago;
   },
 
-  // Método auxiliar para actualizar el importe pagado en el tributo
+  // Método auxiliar para actualizar el importe pagado y pendiente en el tributo
   async actualizarImportePagadoTributo(idtributos) {
     // Calcular el total de pagos para el tributo
     const totalPagado = await prisma.pagos.aggregate({
@@ -90,11 +118,26 @@ const pagosService = {
       },
     });
 
-    // Actualizar el importe pagado en el tributo
+    // Obtener el tributo para calcular el pendiente y el estado
+    const tributo = await prisma.tributos.findUnique({
+      where: { idtributos },
+      select: { importe_reg: true },
+    });
+
+    const pagado = parseFloat(totalPagado._sum.importe_p) || 0;
+    const importeReg = parseFloat(tributo?.importe_reg) || 0;
+    const pendiente = importeReg > 0 ? Math.max(importeReg - pagado, 0) : 0;
+
+    // Estado: '1' si pagado >= importe_reg, '0' en caso contrario
+    const estado = pagado >= importeReg && importeReg > 0 ? "1" : "0";
+
+    // Actualizar el importe pagado, pendiente y estado en el tributo
     await prisma.tributos.update({
       where: { idtributos },
       data: {
-        importe_pag: totalPagado._sum.importe_p || 0,
+        importe_pc: pagado,
+        importe_pend: pendiente,
+        estado: estado,
       },
     });
   },

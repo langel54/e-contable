@@ -11,6 +11,7 @@ export const getColumns = ({
   setEditSalidaData,
   setOpenFormModal,
   handleOpenPDFModal,
+  openDeleteModal,
 }) => {
   return [
     { field: "idsalida", headerName: "ID", width: 80 },
@@ -94,7 +95,16 @@ export const getColumns = ({
             </IconButton>
           </Tooltip>
           <Tooltip title="Anular" arrow placement="top">
-            <IconButton color="error" size="small" style={{ marginRight: 8 }}>
+            <IconButton
+              color="error"
+              size="small"
+              style={{ marginRight: 8 }}
+              onClick={() => {
+                if (typeof openDeleteModal === "function") {
+                  openDeleteModal(params.row.idsalida);
+                }
+              }}
+            >
               <DeleteSweep />
             </IconButton>
           </Tooltip>

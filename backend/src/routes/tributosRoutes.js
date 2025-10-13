@@ -3,6 +3,7 @@ const tributosController = require("../controllers/tributosController");
 const router = express.Router();
 
 router.get("/", tributosController.getAll);
+router.get("/filter", tributosController.getFilter);
 router.get("/:id", tributosController.getById);
 router.post("/", tributosController.create);
 router.put("/:id", tributosController.update);

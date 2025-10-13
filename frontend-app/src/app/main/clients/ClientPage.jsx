@@ -1,6 +1,6 @@
 import CustomTable from "@/app/components/CustonTable";
 import { getClientesProvs } from "@/app/services/clienteProvService";
-import { accessSunat } from "@/app/services/sunServices";
+import { accessSunatTramites } from "@/app/services/sunServices";
 import AnimateButton from "@/app/ui-components/@extended/AnimateButton";
 import {
   AddCircleOutlineSharp,
@@ -171,13 +171,7 @@ const clientColumns = (
             >
               <Edit fontSize="small" />
             </IconButton>
-            {/* <IconButton
-              size="small"
-              onClick={() => handleDelete(params.row.idclienteprov)}
-              color="error"
-            >
-              <Delete fontSize="small" />
-            </IconButton> */}
+
             <Tooltip
               title="Tramites y consultas"
               arrow
@@ -186,7 +180,32 @@ const clientColumns = (
                 transition: Zoom,
               }}
             >
-              <IconButton onClick={() => accessSunat(data)}>
+              <IconButton
+                onClick={async () => {
+                  try {
+                    const res = await accessSunatTramites(data);
+                    if (res.url) {
+                      window.open(
+                        res.url,
+                        "_blank",
+                        "noopener,noreferrer,width=1200,height=800,left=100,top=100"
+                      );
+                    } else {
+                      Swal.fire(
+                        "Error",
+                        res.error || "No se pudo generar la URL.",
+                        "error"
+                      );
+                    }
+                  } catch (err) {
+                    Swal.fire(
+                      "Error",
+                      "No se pudo conectar con el servicio SUNAT.",
+                      "error"
+                    );
+                  }
+                }}
+              >
                 <SunatIcon />
               </IconButton>
             </Tooltip>
@@ -230,7 +249,6 @@ const ClientPage = () => {
   const [openDetailsModal, setOpenDetailsModal] = useState(false);
 
   const [editedClient, setEditedClient] = useState(null);
-  console.log("🚀 ~ ClientPage ~ editedClient:", editedClient);
 
   // const fetchDataCliente = async (
   //   currentPage,

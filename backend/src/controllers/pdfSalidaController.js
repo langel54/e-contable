@@ -6,23 +6,24 @@ const pdfController = {
   async generate(req, res) {
     try {
       const { idsalida } = req.params;
-      const pdfPath = path.join(
-        __dirname,
-        "..",
-        "temp-pdf",
-        `pdf-${idsalida}.pdf`
-      );
+      // Crear archivo PDF en la carpeta temp-pdf manualmente
+      const tempPdfDir = path.join(__dirname, '..', 'temp-pdf');
+      if (!fs.existsSync(tempPdfDir)) {
+        fs.mkdirSync(tempPdfDir, { recursive: true });
+      }
+      const pdfPath = path.join(tempPdfDir, `pdf-${idsalida}-${Date.now()}.pdf`);
       await pdfService.generatePDFFile(idsalida, pdfPath);
       res.sendFile(pdfPath, (err) => {
         if (err) {
           console.error("Error al enviar el PDF:", err);
           return res.status(500).json({ message: "Error al enviar el PDF" });
         }
+        // Elimina el archivo PDF manualmente después de enviarlo
         fs.unlink(pdfPath, (unlinkErr) => {
           if (unlinkErr) {
-            console.error("Error al eliminar el PDF:", unlinkErr);
+            console.error("No se pudo eliminar el PDF temporal:", unlinkErr);
           } else {
-            console.log(`PDF eliminado: ${pdfPath}`);
+            console.log(`PDF temporal eliminado: ${pdfPath}`);
           }
         });
       });

@@ -46,11 +46,11 @@ const ingresoController = {
     const { idingreso } = req.params;
     try {
       const ingreso = await ingresoService.getById(Number(idingreso));
-      if (!ingreso) {
-        return res.status(404).json({ message: "Ingreso no encontrado" });
-      }
       res.json(ingreso);
     } catch (error) {
+      if (error.type === "not_found") {
+        return res.status(404).json({ message: error.message });
+      }
       res.status(500).json({ message: error.message });
     }
   },
@@ -61,6 +61,9 @@ const ingresoController = {
       const nuevoIngreso = await ingresoService.create(req.body);
       res.status(201).json(nuevoIngreso);
     } catch (error) {
+      if (error.type === "validation") {
+        return res.status(400).json({ message: error.message });
+      }
       res.status(500).json({ message: error.message });
     }
   },
@@ -68,17 +71,19 @@ const ingresoController = {
   // Actualizar un registro existente
   async update(req, res) {
     const { idingreso } = req.params;
-    console.log("🚀 Apii:", idingreso);
     try {
       const ingresoActualizado = await ingresoService.update(
         Number(idingreso),
         req.body
       );
-      if (!ingresoActualizado) {
-        return res.status(404).json({ message: "Ingreso no encontrado" });
-      }
       res.json(ingresoActualizado);
     } catch (error) {
+      if (error.type === "not_found") {
+        return res.status(404).json({ message: error.message });
+      }
+      if (error.type === "validation") {
+        return res.status(400).json({ message: error.message });
+      }
       res.status(500).json({ message: error.message });
     }
   },
@@ -88,11 +93,11 @@ const ingresoController = {
     const { idingreso } = req.params;
     try {
       const deleted = await ingresoService.delete(Number(idingreso));
-      if (!deleted) {
-        return res.status(404).json({ message: "Ingreso no encontrado" });
-      }
-      res.status(204).json();
+      res.json({ success: true, ingreso: deleted });
     } catch (error) {
+      if (error.type === "not_found") {
+        return res.status(404).json({ message: error.message });
+      }
       res.status(500).json({ message: error.message });
     }
   },

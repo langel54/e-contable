@@ -2,13 +2,11 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
 import ModalComponent from "@/app/components/ModalComponent";
 import { ReceiptLong } from "@mui/icons-material";
-import { pdfIncomeService, pdfSalidaService } from "@/app/services/pdfServices";
+import { pdfSalidaService } from "@/app/services/pdfServices";
 
 const PDFPreviewModal = ({ open, handleClose, data }) => {
-  console.log("🚀 ~ PDFPreviewModal ~ data:", data);
   const [loading, setLoading] = useState(true);
   const [pdfUrl, setPdfUrl] = useState(null);
-  console.log("🚀 ~ PDFPreviewModal ~ pdfUrl:", pdfUrl);
 
   useEffect(() => {
     const generatePDF = async () => {

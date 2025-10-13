@@ -17,12 +17,11 @@ import DrawerListItem from "../menu/DrawerListItem";
 import menuItemsByRole from "../menu/menuConfig";
 import { useState } from "react";
 import { useAuth } from "@/app/provider";
+import { Stack } from "@mui/material";
 
 export default function MiniDrawer({ children }) {
   const [open, setOpen] = useState(true);
   const { userType, user } = useAuth();
-  console.log("🚀 ~ MiniDrawer ~ userType:", userType);
-  console.log("🚀 ~ MiniDrawer ~ user:", user?.tipo_usuario?.id_tipo);
 
   const pathname = usePathname();
   const router = useRouter();
@@ -40,6 +39,7 @@ export default function MiniDrawer({ children }) {
     : [];
 
   return (
+    /////////////////////// plantilla ////////////////////
     <Box sx={{ display: "flex" }}>
       <AppBar position="fixed" open={open}>
         <Toolbar>
@@ -75,9 +75,12 @@ export default function MiniDrawer({ children }) {
       </AppBar>
       <Drawer variant="permanent" open={open}>
         <DrawerHeader>
-          <IconButton onClick={handleDrawerToggle}>
-            <ChevronLeftIcon />
-          </IconButton>
+          <Stack direction={"row"} justifyContent="space-between" width={"100%"} alignItems={"center"}>
+            <Typography variant="h5">Empresa SAC</Typography>
+            <IconButton onClick={handleDrawerToggle}>
+              <ChevronLeftIcon />
+            </IconButton>
+          </Stack>
         </DrawerHeader>
         <Divider />
         <List>

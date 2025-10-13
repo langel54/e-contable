@@ -84,7 +84,7 @@ const ingresoService = {
 
   // Obtener un registro por su ID
   async getById(idingreso) {
-    return await prisma.ingreso.findUnique({
+    const ingreso = await prisma.ingreso.findUnique({
       where: { idingreso },
       select: {
         idingreso: true,
@@ -113,10 +113,37 @@ const ingresoService = {
         caja_mes: true,
       },
     });
+    if (!ingreso) {
+      const error = new Error("Ingreso no encontrado");
+      error.type = "not_found";
+      throw error;
+    }
+    return ingreso;
   },
 
   // Crear un nuevo registro
   async create(data) {
+    // Validación de campos obligatorios
+    if (!data.idclienteprov) {
+      const error = new Error("El campo 'idclienteprov' es obligatorio.");
+      error.type = "validation";
+      throw error;
+    }
+    if (!data.idconcepto) {
+      const error = new Error("El campo 'idconcepto' es obligatorio.");
+      error.type = "validation";
+      throw error;
+    }
+    if (!data.anio) {
+      const error = new Error("El campo 'anio' es obligatorio.");
+      error.type = "validation";
+      throw error;
+    }
+    if (!data.importe) {
+      const error = new Error("El campo 'importe' es obligatorio.");
+      error.type = "validation";
+      throw error;
+    }
     return await prisma.ingreso.create({
       data,
       select: {
@@ -142,7 +169,11 @@ const ingresoService = {
   // Actualizar un registro existente
   async update(idingreso, data) {
     const ingreso = await prisma.ingreso.findUnique({ where: { idingreso } });
-    if (!ingreso) return null;
+    if (!ingreso) {
+      const error = new Error("Ingreso no encontrado");
+      error.type = "not_found";
+      throw error;
+    }
     return await prisma.ingreso.update({
       where: { idingreso },
       data: {
@@ -190,11 +221,14 @@ const ingresoService = {
   // },
   async delete(idingreso) {
     const ingreso = await prisma.ingreso.findUnique({ where: { idingreso } });
-    if (!ingreso) return null;
-
+    if (!ingreso) {
+      const error = new Error("Ingreso no encontrado");
+      error.type = "not_found";
+      throw error;
+    }
     return await prisma.ingreso.update({
       where: { idingreso },
-      data: { estado: 0 },
+      data: { estado: { connect: { idestado: 2 } } },
     });
   },
 };

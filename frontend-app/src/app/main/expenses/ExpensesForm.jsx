@@ -42,7 +42,6 @@ const validationSchema = Yup.object({
   codcaja_m: Yup.string().required("El código de caja es obligatorio"),
 });
 
-
 const ExpensesForm = ({ salidaEdit = null, handleCloseModal }) => {
   const { cajaMes, user } = useAuth();
   const [initialValues, setInitialValues] = useState(
@@ -65,7 +64,9 @@ const ExpensesForm = ({ salidaEdit = null, handleCloseModal }) => {
   );
 
   const [selectedClient, setSelectedClient] = useState(
-    salidaEdit ? { ...salidaEdit.cliente_prov, montoref: salidaEdit.importe } : null
+    salidaEdit
+      ? { ...salidaEdit.cliente_prov, montoref: salidaEdit.importe }
+      : null
   );
   const [conceptos, setConceptos] = useState([]);
   const [tipoPago, setTipoPago] = useState([]);
@@ -131,10 +132,14 @@ const ExpensesForm = ({ salidaEdit = null, handleCloseModal }) => {
       handleCloseModal();
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || error.message || "Error desconocido en el servidor";
+        error.response?.data?.message ||
+        error.message ||
+        "Error desconocido en el servidor";
       setFieldError(
         "general",
-        `Error al ${salidaEdit ? "actualizar" : "agregar"} Egreso: ${errorMessage}`
+        `Error al ${
+          salidaEdit ? "actualizar" : "agregar"
+        } Egreso: ${errorMessage}`
       );
     } finally {
       setSubmitting(false);
@@ -221,8 +226,15 @@ const ExpensesForm = ({ salidaEdit = null, handleCloseModal }) => {
                     renderOption={(props, option) => (
                       <li {...props} key={option.idclienteprov}>
                         <div style={{ padding: "8px 0" }}>
-                          <div style={{ fontWeight: 500 }}>{option.razonsocial}</div>
-                          <div style={{ fontSize: "0.8em", color: "rgba(0, 0, 0, 0.6)" }}>
+                          <div style={{ fontWeight: 500 }}>
+                            {option.razonsocial}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: "0.8em",
+                              color: "rgba(0, 0, 0, 0.6)",
+                            }}
+                          >
                             RUC: {option.ruc}
                           </div>
                         </div>
@@ -231,7 +243,9 @@ const ExpensesForm = ({ salidaEdit = null, handleCloseModal }) => {
                   />
                 </FormControl>
                 {!values.idclienteprov && errors.idclienteprov && (
-                  <Typography variant="caption" color="error">{errors.idclienteprov}</Typography>
+                  <Typography variant="caption" color="error">
+                    {errors.idclienteprov}
+                  </Typography>
                 )}
               </Grid>
               <Grid item xs={12} md={6}>
@@ -245,14 +259,19 @@ const ExpensesForm = ({ salidaEdit = null, handleCloseModal }) => {
                     error={Boolean(errors.idconcepto)}
                   >
                     {conceptos.map((concepto) => (
-                      <MenuItem key={concepto.idconcepto} value={concepto.idconcepto}>
+                      <MenuItem
+                        key={concepto.idconcepto}
+                        value={concepto.idconcepto}
+                      >
                         {concepto.nombre_concepto}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
                 {!values.idconcepto && errors.idconcepto && (
-                  <Typography variant="caption" color="error">{errors.idconcepto}</Typography>
+                  <Typography variant="caption" color="error">
+                    {errors.idconcepto}
+                  </Typography>
                 )}
               </Grid>
               <Grid item xs={12} md={6}>
@@ -265,10 +284,20 @@ const ExpensesForm = ({ salidaEdit = null, handleCloseModal }) => {
                   onValueChange={(values) => {
                     setFieldValue("importe", values.floatValue);
                   }}
-                  thousandSeparator="," decimalSeparator="." decimalScale={2} fixedDecimalScale customInput={TextField}
+                  thousandSeparator=","
+                  decimalSeparator="."
+                  decimalScale={2}
+                  fixedDecimalScale
+                  customInput={TextField}
                   error={Boolean(errors.importe)}
                   helperText={errors.importe ? errors.importe : ""}
-                  sx={{"& .MuiInputBase-input": { color: (theme) => theme.palette.info.dark, fontWeight: 600, textAlign: "end" }}}
+                  sx={{
+                    "& .MuiInputBase-input": {
+                      color: (theme) => theme.palette.info.dark,
+                      fontWeight: 600,
+                      textAlign: "end",
+                    },
+                  }}
                 />
               </Grid>
               <Grid item xs={12} md={4}>
@@ -288,8 +317,27 @@ const ExpensesForm = ({ salidaEdit = null, handleCloseModal }) => {
                   </Select>
                 </FormControl>
                 {!values.idperiodo && errors.idperiodo && (
-                  <Typography variant="caption" color="error">{errors.idperiodo}</Typography>
+                  <Typography variant="caption" color="error">
+                    {errors.idperiodo}
+                  </Typography>
                 )}
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth size="medium">
+                  <InputLabel>Año</InputLabel>
+                  <Select
+                    name="anio"
+                    value={values.anio}
+                    onChange={handleChange}
+                    displayEmpty
+                  >
+                    {anios.map((anio) => (
+                      <MenuItem key={anio} value={anio}>
+                        {anio}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
               <Grid item xs={12} md={4}>
                 <FormControl fullWidth size="medium">
@@ -325,23 +373,7 @@ const ExpensesForm = ({ salidaEdit = null, handleCloseModal }) => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={4}>
-                <FormControl fullWidth size="medium">
-                  <InputLabel>Año</InputLabel>
-                  <Select
-                    name="anio"
-                    value={values.anio}
-                    onChange={handleChange}
-                    displayEmpty
-                  >
-                    {anios.map((anio) => (
-                      <MenuItem key={anio} value={anio}>
-                        {anio}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
+
               <Grid item xs={12} md={4}>
                 <TextField
                   disabled

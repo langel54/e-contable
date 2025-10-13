@@ -62,13 +62,11 @@ const clienteProvController = {
   async getById(req, res) {
     try {
       const clienteProv = await clienteProvService.getById(req.params.id);
-      if (!clienteProv) {
-        return res
-          .status(404)
-          .json({ message: "Cliente/Proveedor no encontrado" });
-      }
       res.json(clienteProv);
     } catch (error) {
+      if (error.type === "not_found") {
+        return res.status(404).json({ message: error.message });
+      }
       res.status(500).json({ message: error.message });
     }
   },
@@ -78,7 +76,13 @@ const clienteProvController = {
       const clienteProv = await clienteProvService.create(req.body);
       res.status(201).json(clienteProv);
     } catch (error) {
-      res.status(400).json({ message: error.message });
+      if (error.type === "validation") {
+        return res.status(400).json({ message: error.message });
+      }
+      if (error.type === "duplicate") {
+        return res.status(409).json({ message: error.message });
+      }
+      res.status(500).json({ message: error.message });
     }
   },
 
@@ -88,27 +92,26 @@ const clienteProvController = {
         req.params.id,
         req.body
       );
-      if (!clienteProv) {
-        return res
-          .status(404)
-          .json({ message: "Cliente/Proveedor no encontrado" });
-      }
       res.json(clienteProv);
     } catch (error) {
-      res.status(400).json({ message: error.message });
+      if (error.type === "not_found") {
+        return res.status(404).json({ message: error.message });
+      }
+      if (error.type === "validation") {
+        return res.status(400).json({ message: error.message });
+      }
+      res.status(500).json({ message: error.message });
     }
   },
 
   async delete(req, res) {
     try {
-      const result = await clienteProvService.delete(req.params.id);
-      if (!result) {
-        return res
-          .status(404)
-          .json({ message: "Cliente/Proveedor no encontrado" });
-      }
+      await clienteProvService.delete(req.params.id);
       res.status(204).send();
     } catch (error) {
+      if (error.type === "not_found") {
+        return res.status(404).json({ message: error.message });
+      }
       res.status(500).json({ message: error.message });
     }
   },

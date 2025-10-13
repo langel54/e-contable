@@ -180,7 +180,7 @@ const salidaService = {
     if (!salida) return null;
     return await prisma.salida.update({
       where: { idsalida },
-      data: { estado: 0 },
+      data: { estado: { connect: { idestado: 2 } } },
     });
   },
 };

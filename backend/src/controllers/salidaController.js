@@ -44,7 +44,7 @@ const salidaController = {
     try {
       const salida = await salidaService.getById(Number(idsalida));
       if (!salida) {
-        return res.status(404).json({ message: "Salida no encontrada" });
+        return res.status(404).json({ message: "Registro no encontrado" });
       }
       res.json(salida);
     } catch (error) {
@@ -71,7 +71,7 @@ const salidaController = {
         req.body
       );
       if (!salidaActualizada) {
-        return res.status(404).json({ message: "Salida no encontrada" });
+        return res.status(404).json({ message: "Registro no encontrado" });
       }
       res.json(salidaActualizada);
     } catch (error) {
@@ -85,9 +85,9 @@ const salidaController = {
     try {
       const deleted = await salidaService.delete(Number(idsalida));
       if (!deleted) {
-        return res.status(404).json({ message: "Salida no encontrada" });
+        return res.status(404).json({ message: "Registro no encontrado" });
       }
-      res.status(204).json();
+      res.json({ success: true, salida: deleted });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
