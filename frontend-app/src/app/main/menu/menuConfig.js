@@ -8,7 +8,7 @@ import ReceiptIcon from "@mui/icons-material/Receipt";
 import { AccountBalance, AccountBalanceWallet } from "@mui/icons-material";
 
 const menuItemsByRole = {
-  1: [
+   1: [
     {
       text: "Inicio",
       path: "/main",
@@ -79,16 +79,24 @@ const menuItemsByRole = {
         { text: "Egresos", path: "/main/expenses" },
       ],
     },
+    {
+      text: "Notas",
+      path: "/notas",
+      icon: <ReceiptIcon />,
+      allowedRoles: [1, 2, 3],
+    },
   ],
   2: [
     { text: "Inicio", path: "/main", icon: <HomeIcon /> },
     { text: "Personal", path: "/main/staff", icon: <GroupIcon /> },
     { text: "Clientes", path: "/main/clients", icon: <PersonIcon /> },
     { text: "Reportes", path: "/main/reports", icon: <ReceiptIcon /> },
+  { text: "Notas", path: "/notas", icon: <ReceiptIcon /> },
   ],
   3: [
     { text: "Inicio", path: "/main", icon: <HomeIcon /> },
     { text: "Clientes", path: "/main/clients", icon: <PersonIcon /> },
+  { text: "Notas", path: "/notas", icon: <ReceiptIcon /> },
   ],
 };
 
