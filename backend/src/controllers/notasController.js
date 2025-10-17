@@ -1,13 +1,26 @@
 const notasService = require("../services/notasService");
 
 const notasController = {
-  // Obtener todos los registros con paginación
+    // Obtener todos los registros con paginación y filtros
   async getAll(req, res) {
     try {
-      const { page = 1, limit = 10 } = req.query;
+      const { 
+        page = 1, 
+        limit = 10, 
+        cliente, 
+        fechaInicio, 
+        fechaFin,
+        search 
+      } = req.query;
       const skip = (page - 1) * limit;
+      
+      const filters = {};
+      if (cliente) filters.cliente = cliente;
+      if (fechaInicio) filters.fechaInicio = fechaInicio;
+      if (fechaFin) filters.fechaFin = fechaFin;
+      if (search) filters.search = search;
 
-      const { notas, total } = await notasService.getAll(skip, Number(limit));
+      const { notas, total } = await notasService.getAll(skip, Number(limit), filters);
 
       res.json({
         notas,

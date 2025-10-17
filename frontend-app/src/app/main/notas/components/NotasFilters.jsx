@@ -3,17 +3,15 @@ import {
   Box,
   Stack,
   FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  OutlinedInput,
   InputAdornment,
   IconButton,
   TextField,
   Tooltip,
-  Divider,
+  Button,
+  Chip,
 } from "@mui/material";
-import { Clear, RestartAlt } from "@mui/icons-material";
+import { Clear, RestartAlt, FilterAlt } from "@mui/icons-material";
+import NotasClienteAutocomplete from "./NotasClienteAutocomplete";
 import DatePicker from "react-datepicker";
 
 const NotasFilters = ({
@@ -24,76 +22,95 @@ const NotasFilters = ({
   endDate,
   setDateRange,
   handleResetFilter,
-}) => (
-  <Stack direction="row" spacing={2} sx={{ mb: 1, mt: 1, display: "flex", justifyContent: "space-between", alignItems: "center" }} width={"100%"}>
-    <Stack direction={"row"} justifyContent={"start"} spacing={2}>
-      <FormControl sx={{ width: 250 }}>
-        <InputLabel>Empresa/Cliente</InputLabel>
-        <Select
-          sx={{ pr: 3 }}
+}) => {
+  const hasActiveFilters = clienteFilter || startDate || endDate;
+
+  return (
+    <Box sx={{ mb: 3, mt: 2 }}>
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 2,
+        }}
+      >
+        {/* <NotasClienteAutocomplete
           value={clienteFilter}
-          onChange={(e) => setClienteFilter(e.target.value)}
-          displayEmpty
-          label="Selecciona empresa/cliente"
-          input={
-            <OutlinedInput
-              endAdornment={
-                <InputAdornment position="end">
-                  {clienteFilter && (
-                    <IconButton size="small" edge="end" onClick={() => setClienteFilter("")}
-                      sx={{ borderRadius: "50%" }}>
-                      <Clear sx={{ height: 14 }} />
-                    </IconButton>
-                  )}
-                </InputAdornment>
-              }
-            />
-          }
-        >
-          <MenuItem value="">Todos</MenuItem>
-          {clientes.map((c) => (
-            <MenuItem key={c.idclienteprov} value={c.idclienteprov}>
-              {c.razonsocial}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl>
-        <DatePicker
-          locale={"es"}
-          dateFormat="dd/MM/yyyy "
-          selectsRange={true}
-          startDate={startDate}
-          endDate={endDate}
-          onChange={setDateRange}
-          customInput={
-            <TextField
-              label="Fecha de nota"
-              autoComplete={false}
-              slotProps={{
-                input: {
+          onChange={setClienteFilter}
+          sx={{ minWidth: 280 }}
+        /> */}
+
+        <FormControl size="medium">
+          <DatePicker
+            locale={"es"}
+            dateFormat="dd/MM/yyyy"
+            selectsRange={true}
+            startDate={startDate}
+            endDate={endDate}
+            onChange={setDateRange}
+            placeholderText="Seleccionar rango de fechas"
+            isClearable={startDate || endDate}
+            customInput={
+              <TextField
+                label="Rango de Fechas"
+                size="medium"
+                sx={{ minWidth: 250 }}
+                InputProps={{
                   endAdornment: (startDate || endDate) && (
                     <InputAdornment position="end">
-                      <IconButton sx={{ borderRadius: "50%" }} onClick={() => setDateRange([null, null])} size="small">
-                        <Clear sx={{ height: 14 }} />
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDateRange([null, null]);
+                        }}
+                      >
+                        <Clear fontSize="small" />
                       </IconButton>
                     </InputAdornment>
                   ),
-                },
-              }}
+                }}
+              />
+            }
+          />
+        </FormControl>
+
+        {hasActiveFilters && (
+          <Tooltip title="Limpiar todos los filtros" arrow>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={handleResetFilter}
+              startIcon={<RestartAlt />}
+              size="medium"
+            >
+              Limpiar Filtros
+            </Button>
+          </Tooltip>
+        )}
+
+        {hasActiveFilters && (
+          <Box sx={{ ml: "auto" }}>
+            <Chip
+              icon={<FilterAlt />}
+              label={`${[
+                clienteFilter ? "1 cliente" : "",
+                startDate || endDate ? "1 rango de fechas" : "",
+              ]
+                .filter(Boolean)
+                .join(", ")} aplicado(s)`}
+              color="primary"
+              variant="outlined"
+              size="medium"
             />
-          }
-        />
-      </FormControl>
-    </Stack>
-    <Stack direction={"row"} spacing={1}>
-      <Tooltip arrow title="Quitar Filtros" placement="left">
-        <IconButton onClick={handleResetFilter}>
-          <RestartAlt />
-        </IconButton>
-      </Tooltip>
-    </Stack>
-  </Stack>
-);
+          </Box>
+        )}
+      </Stack>
+    </Box>
+  );
+};
 
 export default NotasFilters;
