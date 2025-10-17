@@ -81,7 +81,7 @@ const menuItemsByRole = {
     },
     {
       text: "Notas",
-      path: "/notas",
+      path: "/main/notas",
       icon: <ReceiptIcon />,
       allowedRoles: [1, 2, 3],
     },
@@ -91,12 +91,12 @@ const menuItemsByRole = {
     { text: "Personal", path: "/main/staff", icon: <GroupIcon /> },
     { text: "Clientes", path: "/main/clients", icon: <PersonIcon /> },
     { text: "Reportes", path: "/main/reports", icon: <ReceiptIcon /> },
-  { text: "Notas", path: "/notas", icon: <ReceiptIcon /> },
+  { text: "Notas", path: "/main/notas", icon: <ReceiptIcon /> },
   ],
   3: [
     { text: "Inicio", path: "/main", icon: <HomeIcon /> },
     { text: "Clientes", path: "/main/clients", icon: <PersonIcon /> },
-  { text: "Notas", path: "/notas", icon: <ReceiptIcon /> },
+  { text: "Notas", path: "/main/notas", icon: <ReceiptIcon /> },
   ],
 };
 
