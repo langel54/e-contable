@@ -1,4 +1,4 @@
-
+import { fetchWithAuth } from "./apiClient";
 export const fetchUsers = async (currentPage, currentPageSize, search = "") => {
   let url = `/users?page=${currentPage}&limit=${currentPageSize}`;
   if (search && search.length >= 2) {

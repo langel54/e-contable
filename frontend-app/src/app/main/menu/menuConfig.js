@@ -8,7 +8,7 @@ import ReceiptIcon from "@mui/icons-material/Receipt";
 import { AccountBalance, AccountBalanceWallet } from "@mui/icons-material";
 
 const menuItemsByRole = {
-   1: [
+  1: [
     {
       text: "Inicio",
       path: "/main",
@@ -26,17 +26,17 @@ const menuItemsByRole = {
       path: "/main/users",
       icon: <PeopleIcon />,
       allowedRoles: [1],
-      children: [
-        { text: "Lista", path: "/main/users/list" },
-        { text: "Crear", path: "/main/users/create" },
-      ],
+      // children: [
+      //   { text: "Lista", path: "/main/users/list" },
+      //   { text: "Crear", path: "/main/users/create" },
+      // ],
     },
-    {
-      text: "Personal",
-      path: "/main/staff",
-      icon: <GroupIcon />,
-      allowedRoles: [1, 2],
-    },
+    // {
+    //   text: "Personal",
+    //   path: "/main/users",
+    //   icon: <GroupIcon />,
+    //   allowedRoles: [1, 2],
+    // },
     {
       text: "Clientes",
       path: "/main/clients",
@@ -53,22 +53,22 @@ const menuItemsByRole = {
       icon: <AccountBalanceWallet />,
       allowedRoles: [1, 2, 3],
     },
-    {
-      text: "Reportes",
-      path: "/main/reports",
-      icon: <ReceiptIcon />,
-      allowedRoles: [1, 2],
-    },
-    {
-      text: "Configuración",
-      path: "/main/settings",
-      icon: <SettingsIcon />,
-      allowedRoles: [1],
-      children: [
-        { text: "General", path: "/main/settings/general" },
-        { text: "Seguridad", path: "/main/settings/security" },
-      ],
-    },
+    // {
+    //   text: "Reportes",
+    //   path: "/main",
+    //   icon: <ReceiptIcon />,
+    //   allowedRoles: [1, 2],
+    // },
+    // {
+    //   text: "Configuración",
+    //   path: "/main/settings",
+    //   icon: <SettingsIcon />,
+    //   allowedRoles: [1],
+    //   children: [
+    //     { text: "General", path: "/main/settings/general" },
+    //     { text: "Seguridad", path: "/main/settings/security" },
+    //   ],
+    // },
     {
       text: "Caja",
       path: "/main/incomes",
@@ -88,15 +88,25 @@ const menuItemsByRole = {
   ],
   2: [
     { text: "Inicio", path: "/main", icon: <HomeIcon /> },
-    { text: "Personal", path: "/main/staff", icon: <GroupIcon /> },
-    { text: "Clientes", path: "/main/clients", icon: <PersonIcon /> },
-    { text: "Reportes", path: "/main/reports", icon: <ReceiptIcon /> },
-  { text: "Notas", path: "/main/notas", icon: <ReceiptIcon /> },
+    // { text: "Personal", path: "/main/staff", icon: <GroupIcon /> },
+    // { text: "Clientes", path: "/main/clients", icon: <PersonIcon /> },
+    // { text: "Reportes", path: "/main/reports", icon: <ReceiptIcon /> },
+    { text: "Notas", path: "/main/notas", icon: <ReceiptIcon /> },
   ],
   3: [
     { text: "Inicio", path: "/main", icon: <HomeIcon /> },
     { text: "Clientes", path: "/main/clients", icon: <PersonIcon /> },
-  { text: "Notas", path: "/main/notas", icon: <ReceiptIcon /> },
+    { text: "Notas", path: "/main/notas", icon: <ReceiptIcon /> },
+  ],
+  4: [
+    { text: "Inicio", path: "/main", icon: <HomeIcon /> },
+    { text: "Clientes", path: "/main/clients", icon: <PersonIcon /> },
+    { text: "Notas", path: "/main/notas", icon: <ReceiptIcon /> },
+  ],
+  5: [
+    { text: "Inicio", path: "/main", icon: <HomeIcon /> },
+    { text: "Clientes", path: "/main/clients", icon: <PersonIcon /> },
+    { text: "Notas", path: "/main/notas", icon: <ReceiptIcon /> },
   ],
 };
 

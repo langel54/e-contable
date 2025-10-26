@@ -90,10 +90,27 @@ export default function NotasList() {
     fetchNotas();
   }, [pagination.page, pagination.pageSize, clienteFilter, startDate, endDate]);
 
+  const updateTable = async () => {
+    const filters = {
+      fechaInicio: startDate,
+      fechaFin: endDate,
+      cliente: clienteFilter,
+    };
+    const data = await getNotas(
+      pagination.page + 1,
+      pagination.pageSize,
+      filters
+    );
+
+    setNotasData(data.notas || []);
+    setTotal(data.pagination?.total || 0);
+  };
+
   // Acciones
   const handleCloseFormModal = () => {
     setOpenFormModal(false);
     setEditNotaData(null);
+    updateTable();
   };
 
   const handleSaved = () => {

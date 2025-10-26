@@ -3,13 +3,17 @@ import { getClientesProvs } from "@/app/services/clienteProvService";
 import { accessSunatTramites } from "@/app/services/sunServices";
 import AnimateButton from "@/app/ui-components/@extended/AnimateButton";
 import {
+  AccountBalance,
   AddCircleOutlineSharp,
   Clear,
   Delete,
   Edit,
+  MoreVert,
   Search,
+  Visibility,
 } from "@mui/icons-material";
 import {
+  Avatar,
   Badge,
   Box,
   Button,
@@ -18,6 +22,10 @@ import {
   IconButton,
   InputAdornment,
   InputBase,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
   Paper,
   Stack,
   TextField,
@@ -42,187 +50,255 @@ const clientColumns = (
   setOpenAddModal,
   setOpenStatusModal,
   setOpenDetailsModal
-) => {
-  return [
-    {
-      field: "idclienteprov",
-      headerName: "Código",
-    },
-    {
-      field: "nregimen",
-      headerName: "Régimen",
-      renderCell: (params) => {
-        return (
+) => [
+  {
+    field: "regimen",
+    headerName: "Reg.",
+    flex: 0.5,
+    sortable: false,
+    // align: "center",
+    renderCell: (params) => {
+      const { idclienteprov, nregimen, razonsocial } = params.row;
+      return (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, p: 0.5 }}>
           <Chip
-            label={params.row.nregimen || "-"}
+            label={nregimen || "Sin régimen"}
             color="secondary"
             size="small"
-            sx={{ fontSize: 10 }}
             variant="outlined"
+            sx={{ mt: 0.3, fontSize: 10, height: 18, alignSelf: "start" }}
           />
-        );
-      },
+        </Box>
+      );
     },
-    {
-      field: "razonsocial",
-      headerName: "Razón Social",
-      flex: 1,
-    },
-    {
-      field: "ruc",
-      headerName: "RUC",
-      valueGetter: (params) => params || "-",
-    },
-    {
-      field: "dni",
-      headerName: "DNI",
-      valueGetter: (params) => {
-        return params || "-";
-      },
-    },
-    {
-      field: "c_usuario",
-      headerName: "Usuario",
-    },
-    {
-      field: "c_passw",
-      headerName: "Password",
-    },
-    {
-      field: "clave_afpnet",
-      headerName: "AFPNet",
-    },
-    {
-      field: "clave_rnp",
-      headerName: "RNP",
-    },
-
-    {
-      field: "estado",
-      headerName: "Estado",
-      renderCell: (params) => {
-        let label, color;
-
-        switch (params.row.estado) {
-          case "1":
-            label = "Activo";
-            color = "success";
-            break;
-          case "2":
-            label = "Suspendido";
-            color = "warning";
-            break;
-          case "3":
-            label = "Baja temp";
-            color = "info";
-            break;
-          case "4":
-            label = "Baja def";
-            color = "error";
-            break;
-          default:
-            label = "Sin estado";
-            color = "default";
-            break;
-        }
-
-        return (
-          <Tooltip
-            title="Cambiar estado"
-            arrow
-            slots={{
-              transition: Zoom,
+  },
+  {
+    field: "info",
+    headerName: "Cliente",
+    flex: 2,
+    sortable: false,
+    renderCell: (params) => {
+      const { idclienteprov, nregimen, razonsocial } = params.row;
+      return (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, p: 0.5 }}>
+          {/* <Avatar
+            sx={{
+              bgcolor: "primary.light",
+              color: "primary.contrastText",
+              width: 36,
+              height: 36,
+              fontSize: 13,
+              fontWeight: "bold",
             }}
-            placement="top"
           >
-            <IconButton
-              sx={{ fontSize: 10, p: 1, height: 20 }}
-              onClick={() => {
-                setEditedClient(params.row);
-                setOpenStatusModal();
-              }}
+            {razonsocial ? razonsocial.charAt(0).toUpperCase() : "?"}
+          </Avatar> */}
+
+          <Box sx={{ display: "flex", flexDirection: "column" }}>
+            <Typography
+              variant="subtitle2"
+              sx={{ fontWeight: 500, color: "text.primary", lineHeight: 1.2 }}
             >
-              <Badge badgeContent={label} color={color}></Badge>
-            </IconButton>
-          </Tooltip>
-        );
-      },
+              {razonsocial || "Sin razón social"}
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{ color: "text.secondary", lineHeight: 1.2 }}
+            >
+              Código: {idclienteprov}
+            </Typography>
+          </Box>
+        </Box>
+      );
     },
-    {
-      field: "actions",
-      headerName: "Acciones",
-      sortable: false,
-      width: 150,
-      renderCell: (params) => {
-        const data = {
-          usuario: params.row.c_usuario,
-          password: params.row.c_passw,
-          ruc: params.row.ruc,
-        };
-        return (
-          <div className="flex gap-8">
-            <IconButton
-              size="small"
+  },
+  {
+    field: "ruc",
+    headerName: "RUC",
+    // width: 120,
+    valueGetter: (params) => params || "-",
+  },
+  {
+    field: "dni",
+    headerName: "DNI",
+    // width: 120,
+    valueGetter: (params) => params || "-",
+  },
+  {
+    field: "c_usuario",
+    headerName: "Usuario",
+  },
+  {
+    field: "c_passw",
+    headerName: "Password",
+  },
+  {
+    field: "clave_afpnet",
+    headerName: "AFPNet",
+  },
+  {
+    field: "clave_rnp",
+    headerName: "RNP",
+  },
+  {
+    field: "estado",
+    headerName: "Estado",
+    // width: 120,
+    renderCell: (params) => {
+      let label, color;
+      switch (params.row.estado) {
+        case "1":
+          label = "Activo";
+          color = "success";
+          break;
+        case "2":
+          label = "Suspendido";
+          color = "warning";
+          break;
+        case "3":
+          label = "Baja temp";
+          color = "info";
+          break;
+        case "4":
+          label = "Baja def";
+          color = "error";
+          break;
+        default:
+          label = "Sin estado";
+          color = "default";
+          break;
+      }
+
+      return (
+        <Tooltip title="Cambiar estado" arrow TransitionComponent={Zoom}>
+          <Button
+            // sx={{ fontSize: 10, p: 0.5 }}
+            onClick={() => {
+              setEditedClient(params.row);
+              setOpenStatusModal();
+            }}
+            color={color}
+            variant="contained"
+            size="small"
+          >
+            {label}
+            {/* <Badge badgeContent={label} color={color} /> */}
+          </Button>
+        </Tooltip>
+      );
+    },
+  },
+  {
+    field: "actions",
+    headerName: "Acciones",
+    sortable: false,
+    width: 80,
+    renderCell: (params) => {
+      const [anchorEl, setAnchorEl] = useState(null);
+      const open = Boolean(anchorEl);
+
+      const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+      };
+
+      const handleClose = () => {
+        setAnchorEl(null);
+      };
+
+      const data = {
+        usuario: params.row.c_usuario,
+        password: params.row.c_passw,
+        ruc: params.row.ruc,
+      };
+
+      const handleSunat = async () => {
+        handleClose();
+        try {
+          const res = await accessSunatTramites(data);
+          if (res.url) {
+            window.open(
+              res.url,
+              "_blank",
+              "noopener,noreferrer,width=1200,height=800,left=100,top=100"
+            );
+          } else {
+            Swal.fire(
+              "Error",
+              res.error || "No se pudo generar la URL.",
+              "error"
+            );
+          }
+        } catch {
+          Swal.fire(
+            "Error",
+            "No se pudo conectar con el servicio SUNAT.",
+            "error"
+          );
+        }
+      };
+
+      return (
+        <>
+          <IconButton onClick={handleClick}>
+            <MoreVert />
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            PaperProps={{
+              elevation: 3,
+              sx: { minWidth: 180, borderRadius: 2, py: 0.5 },
+            }}
+          >
+            <MenuItem
               onClick={() => {
+                handleClose();
                 setEditedClient(params.row);
                 setOpenAddModal();
               }}
-              color="primary"
             >
-              <Edit fontSize="small" />
-            </IconButton>
+              <ListItemIcon>
+                <Edit fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="Editar cliente" />
+            </MenuItem>
 
-            <Tooltip
-              title="Tramites y consultas"
-              arrow
-              placement="top"
-              slots={{
-                transition: Zoom,
-              }}
-            >
-              <IconButton
-                onClick={async () => {
-                  try {
-                    const res = await accessSunatTramites(data);
-                    if (res.url) {
-                      window.open(
-                        res.url,
-                        "_blank",
-                        "noopener,noreferrer,width=1200,height=800,left=100,top=100"
-                      );
-                    } else {
-                      Swal.fire(
-                        "Error",
-                        res.error || "No se pudo generar la URL.",
-                        "error"
-                      );
-                    }
-                  } catch (err) {
-                    Swal.fire(
-                      "Error",
-                      "No se pudo conectar con el servicio SUNAT.",
-                      "error"
-                    );
-                  }
-                }}
-              >
-                <SunatIcon />
-              </IconButton>
-            </Tooltip>
-            <IconButton
+            <MenuItem onClick={handleSunat}>
+              <ListItemIcon>
+                <AccountBalance fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="Trámites SUNAT" />
+            </MenuItem>
+
+            <Divider />
+
+            <MenuItem
               onClick={() => {
-                setOpenDetailsModal();
+                handleClose();
                 setEditedClient(params.row);
+                setOpenDetailsModal();
               }}
             >
-              <Badge badgeContent={"Ver"} color="secondary"></Badge>
-            </IconButton>
-          </div>
-        );
-      },
+              <ListItemIcon>
+                <Visibility fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="Ver detalles" />
+            </MenuItem>
+          </Menu>
+        </>
+      );
     },
-  ];
-};
+  },
+];
 const ClientPage = () => {
   const { estadoClientesProvider } = useAuth();
   const {
@@ -418,7 +494,7 @@ const ClientPage = () => {
         open={openDetailsModal}
         handleClose={handleCloseDetailsModal}
         content={<ClientDetails data={editedClient} />}
-        width="600px"
+        width="800px"
       />
     </Box>
   );

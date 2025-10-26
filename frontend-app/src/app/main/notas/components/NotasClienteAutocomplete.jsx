@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
 import InfiniteSelect from "@/app/components/AutocompleteComponent";
-import { getClientesProvs } from "@/app/services/clienteProvService";
+import { getClientesProvs, getClienteProvById } from "@/app/services/clienteProvService";
 
 const NotasClienteAutocomplete = ({ value, onChange, sx }) => {
   const [selectedClient, setSelectedClient] = useState(null);
 
   useEffect(() => {
-    if (!value) {
+    if (value && typeof value === 'string' && (!selectedClient || selectedClient.idclienteprov !== value)) {
+      // Si solo tenemos el ID (string), buscamos el objeto completo del cliente.
+      getClienteProvById(value).then(cliente => {
+        setSelectedClient(cliente);
+      });
+    } else if (!value) {
       setSelectedClient(null);
-      return;
     }
-    // Fetch client by id if needed (optional, for controlled mode)
-    // You can implement this if you want to fetch the client by id
-  }, [value]);
+  }, [value, selectedClient]);
 
   const transformResponse = (response) => ({
     items: response.clientesProvs || [],

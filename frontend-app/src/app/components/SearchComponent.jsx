@@ -26,7 +26,7 @@ const SearchComponent = ({
         alignItems: "center",
         width: 250,
         borderRadius: 1,
-        boxShadow: 2,
+        // boxShadow: 2,
       }}
     >
       <InputBase

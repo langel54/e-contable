@@ -16,6 +16,8 @@ import {
   FormControlLabel,
   Checkbox,
   Divider,
+  Chip,
+  Tooltip,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useDebounce } from "use-debounce";
@@ -179,7 +181,7 @@ const StyledModal = ({
             />
           }
           label="Cambiar contraseña"
-          sx={{ mt: 1 }}
+          // sx={{ mt: 1 }}
         />
 
         {changePassword && (
@@ -311,60 +313,104 @@ export default function UsersPage() {
 
   const columns = useMemo(
     () => [
-      { field: "id_usuario", headerName: "ID" },
-      { field: "usuario", headerName: "Usuario", flex: 1 },
+      {
+        field: "id_usuario",
+        headerName: "#",
+        width: 80,
+        headerAlign: "center",
+        align: "center",
+      },
+      {
+        field: "usuario",
+        headerName: "Usuario",
+        flex: 1,
+        minWidth: 150,
+        renderCell: (params) => (
+          <span style={{ fontWeight: 500 }}>{params.value}</span>
+        ),
+      },
       {
         field: "nombres",
         headerName: "Nombre Personal",
         flex: 2,
+        minWidth: 200,
         renderCell: (params) => {
-          return `${params.row.personal.nombres} ${params.row.personal.apellidos}`;
+          const nombre = `${params.row.personal.nombres} ${params.row.personal.apellidos}`;
+          return <span>{nombre}</span>;
         },
       },
       {
         field: "tipo_usuario",
         headerName: "Tipo de Usuario",
         flex: 1,
+        minWidth: 150,
         renderCell: (params) => {
           const tipo = userTypes.find((t) => t.id_tipo === params.row.id_tipo);
-          return tipo ? tipo.descripcion : "Desconocido";
+          const descripcion = tipo ? tipo.descripcion : "Desconocido";
+
+          // 🎨 Usa colores propios de MUI
+          const colorMap = {
+            Practicante: "secondary",
+            "Asistente Contable": "primary",
+            Gerencia: "info",
+            "Asistente Administrativo": "warning",
+            Apoyo: "success",
+            "Administrador del sistema": "error",
+          };
+
+          return (
+            <Chip
+              label={descripcion}
+              color={colorMap[descripcion] || "default"}
+              variant="filled"
+              size="small"
+              sx={{
+                fontWeight: 500,
+                borderRadius: "8px",
+                textTransform: "capitalize",
+              }}
+            />
+          );
         },
       },
       {
         field: "actions",
         headerName: "Acciones",
-        flex: 1,
-        align: "right",
-        renderCell: (params) => {
-          return (
-            <Stack direction={"row"}>
+        flex: 0.8,
+        minWidth: 120,
+        align: "center",
+        headerAlign: "center",
+        sortable: false,
+        renderCell: (params) => (
+          <Stack direction="row" spacing={1} justifyContent="center">
+            <Tooltip title="Editar usuario">
               <IconButton
-                aria-label="delete"
-                size="medium"
+                size="small"
                 color="primary"
-                onClick={() => {
-                  // setSelectedUser(params.row);
-                  handleOpenModal(params.row);
-
-                  // updateUser(params.row.id_usuario, { usuario: "NuevoNombre" }); // Ejemplo
+                sx={{
+                  transition: "transform 0.2s ease-in-out",
+                  "&:hover": { transform: "scale(1.15)" },
                 }}
+                onClick={() => handleOpenModal(params.row)}
               >
-                <EditIcon fontSize="inherit" />
+                <EditIcon fontSize="small" />
               </IconButton>
+            </Tooltip>
+            <Tooltip title="Eliminar usuario">
               <IconButton
-                aria-label="delete"
-                size="medium"
-                color="primary"
-                onClick={() => {
-                  setSelectedUser(params.row.id_usuario);
-                  // setModalOpen(true);
+                size="small"
+                color="error"
+                sx={{
+                  transition: "transform 0.2s ease-in-out",
+                  "&:hover": { transform: "scale(1.15)" },
                 }}
+                onClick={() => setSelectedUser(params.row.id_usuario)}
               >
-                <Delete fontSize="inherit" />
+                <Delete fontSize="small" />
               </IconButton>
-            </Stack>
-          );
-        },
+            </Tooltip>
+          </Stack>
+        ),
       },
     ],
     [userTypes]
