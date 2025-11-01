@@ -36,6 +36,7 @@ const pdfIncomeRoutes = require("./routes/pdfIncomeRoutes");
 const pdfSalidaRoutes = require("./routes/pdfSalidaRoutes");
 const sunafilRoutes = require("./routes/sunafilRoutes");
 const checkOrigin = require("./middlewares/checkOrigin");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 const corsOptions = require("./config/corsConfig");
 const sunatRoutes = require("./routes/sunatRoutes");
 
@@ -88,6 +89,7 @@ app.use("/api/misdeclaraciones", misDeclaracionesRoutes);
 app.use("/api/pdf-income", pdfIncomeRoutes);
 app.use("/api/pdf-salida", pdfSalidaRoutes);
 app.use("/api/sunafil", sunafilRoutes);
+app.use("/api", dashboardRoutes);
 
 // Error Handler
 app.use(errorHandler);
