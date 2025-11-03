@@ -33,12 +33,12 @@ export default function AnalyticEcommerce({
   return (
     <MainCard contentSX={{ p: 2.25 }}>
       <Stack spacing={0.5}>
-        <Typography variant="h6" color="text.secondary">
+        <Typography variant="h6" color="text.secondary" fontWeight={600}>
           {title}
         </Typography>
         <Grid container alignItems="center">
           <Grid item>
-            <Typography variant="h4" color="inherit">
+            <Typography variant="h2" color="inherit">
               {count}
             </Typography>
           </Grid>
@@ -64,14 +64,12 @@ export default function AnalyticEcommerce({
       </Stack>
       <Box sx={{ pt: 2.25 }}>
         <Typography variant="caption" color="text.secondary">
-          You made an extra{" "}
           <Typography
             variant="caption"
-            sx={{ color: `${color || "primary"}.main` }}
+            // sx={{ color: `${color || "primary"}.main` }}
           >
             {extra}
           </Typography>{" "}
-          this year
         </Typography>
       </Box>
     </MainCard>

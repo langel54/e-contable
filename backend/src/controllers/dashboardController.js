@@ -10,77 +10,71 @@ const getClientesKPIs = async (req, res) => {
       currentDate.getMonth(),
       1
     );
+
+    // ❗ Antes estaba 12 * 30 días = 360 días
+    // ✅ real: últimos 30 días
     const last30Days = new Date(
-      currentDate.getTime() - 12 * 30 * 24 * 60 * 60 * 1000
+      currentDate.getTime() - 30 * 24 * 60 * 60 * 1000
     );
 
-    // --- 1️⃣ Totales básicos ---
-    const [totalClientesActivos, clientesNuevosMes, clientesInactivos] =
-      await Promise.all([
-        prisma.clienteProv.count({ where: { estado: "1" } }),
-        prisma.clienteProv.count({
-          where: {
-            estado: "1",
-            fecha_ingreso: { gte: firstDayOfMonth.toISOString().split("T")[0] },
+    const now = new Date();
+    const firstDayYMD = `${now.getFullYear()}-01-01`;
+
+    // // ✅ clientes nuevos con fecha string convertida
+    // const result = await prisma.$queryRaw`
+    //   SELECT COUNT(*) as count
+    //   FROM clienteProv
+    //   WHERE estado = '1'
+    //     AND fecha_ingreso <> ''
+    //     AND fecha_ingreso <> '0000-00-00'
+    //     AND STR_TO_DATE(fecha_ingreso, '%Y-%m-%d') >=${firstDayYMD}
+    // `;
+    // console.log("🚀 ~ getClientesKPIs ~ result:", result);
+
+    const [
+      totalClientes,
+      totalClientesActivos,
+      totalClientesSuspendidos,
+      totalClientesBajaTemp,
+      totalClientesBajaDef,
+      clientesNuevosAnio,
+      clientesPlanillaElect,
+      clientesConActividad,
+    ] = await Promise.all([
+      prisma.clienteProv.count(),
+
+      prisma.clienteProv.count({ where: { estado: "1" } }),
+      prisma.clienteProv.count({ where: { estado: "2" } }),
+      prisma.clienteProv.count({ where: { estado: "3" } }),
+      prisma.clienteProv.count({ where: { estado: "4" } }),
+      prisma.clienteProv.count({
+        where: {
+          estado: "1",
+          fecha_ingreso: {
+            gte: firstDayYMD, // "greater than or equal" al primer día del año
           },
-        }),
-        prisma.clienteProv.count({ where: { estado: "0" } }),
-      ]);
+        },
+      }),
+      prisma.clienteProv.count({
+        where: {
+          estado: "1",
+          planilla_elect: "SI",
+        },
+      }),
 
-    // --- 2️⃣ Ticket promedio ---
-    const ingresosTotal = await prisma.ingreso.aggregate({
-      _sum: { importe: true },
-      where: { idestado: 1 },
-    });
+      prisma.ingreso.findMany({
+        where: {
+          fecha: { gte: last30Days },
+          idestado: 1,
+        },
+        select: { idclienteprov: true },
+        distinct: ["idclienteprov"],
+      }),
+    ]);
 
-    const ticketPromedio =
-      totalClientesActivos > 0
-        ? (ingresosTotal._sum.importe || 0) / totalClientesActivos
-        : 0;
+    // const clientesNuevosMes = Number(result[0]?.count ?? 0);
 
-    // --- 3️⃣ Top 3 clientes por ingresos ---
-    const top3Clientes = await prisma.ingreso.groupBy({
-      by: ["idclienteprov"],
-      _sum: { importe: true },
-      orderBy: { _sum: { importe: "desc" } },
-      take: 3,
-      where: { idestado: 1 },
-    });
-
-    const clientesData = await prisma.clienteProv.findMany({
-      where: {
-        idclienteprov: { in: top3Clientes.map((c) => c.idclienteprov) },
-      },
-    });
-
-    const top3ClientesDetalle = top3Clientes.map((cliente) => ({
-      idclienteprov: cliente.idclienteprov,
-      totalImporte: cliente._sum.importe || 0,
-      clienteInfo: clientesData.find(
-        (c) => c.idclienteprov === cliente.idclienteprov
-      ),
-    }));
-
-    // --- 4️⃣ Clientes frecuentes (más de 3 ingresos este mes) ---
-    const clientesFrecuentes = await prisma.ingreso.groupBy({
-      by: ["idclienteprov"],
-      where: {
-        fecha: { gte: new Date("2025-10-01T00:00:00.000Z") },
-        idestado: 1,
-      },
-      _count: { idclienteprov: true },
-      having: {
-        idclienteprov: { _count: { gt: 3 } },
-      },
-    });
-
-    // --- 5️⃣ Clientes sin actividad en los últimos 30 días ---
-    const clientesConActividad = await prisma.ingreso.findMany({
-      where: { fecha: { gte: last30Days } },
-      select: { idclienteprov: true },
-      distinct: ["idclienteprov"],
-    });
-
+    // ✅ clientes sin actividad
     const clientesSinActividad = await prisma.clienteProv.count({
       where: {
         estado: "1",
@@ -90,16 +84,39 @@ const getClientesKPIs = async (req, res) => {
       },
     });
 
-    // --- 📊 Resultado final ---
+    // ✅ Porcentaje limpio
+    const pct = (parte, total) =>
+      total > 0 ? ((parte / total) * 100).toFixed(2) : "0.00";
+
     res.status(200).json({
-      totalClientesActivos,
-      clientesNuevosMes,
-      clientesInactivos,
-      ticketPromedio,
-      top3Clientes: top3ClientesDetalle,
-      adicionales: {
-        clientesFrecuentes: clientesFrecuentes.length,
-        clientesSinActividad,
+      totalClientes,
+      clientesActivos: {
+        total: totalClientesActivos,
+        porcentaje: pct(totalClientesActivos, totalClientes),
+      },
+      clientesSuspendidos: {
+        total: totalClientesSuspendidos,
+        porcentaje: pct(totalClientesSuspendidos, totalClientes),
+      },
+      clientesBajaTemp: {
+        total: totalClientesBajaTemp,
+        porcentaje: pct(totalClientesBajaTemp, totalClientes),
+      },
+      clientesBajaDef: {
+        total: totalClientesBajaDef,
+        porcentaje: pct(totalClientesBajaDef, totalClientes),
+      },
+      clientesNuevosAnio: {
+        total: clientesNuevosAnio,
+        porcentaje: pct(clientesNuevosAnio, totalClientesActivos),
+      },
+      clientesPlanillaElect: {
+        total: clientesPlanillaElect,
+        porcentaje: pct(clientesPlanillaElect, totalClientesActivos),
+      },
+      clientesSinActividad: {
+        total: clientesSinActividad,
+        porcentaje: pct(clientesSinActividad, totalClientesActivos),
       },
     });
   } catch (error) {
@@ -107,111 +124,60 @@ const getClientesKPIs = async (req, res) => {
     handleHttpError(res, "ERROR_GET_CLIENTES_KPIS", 500);
   }
 };
+
 const getClientesGraficos = async (req, res) => {
+  console.log("🚀 ~ getClientesGraficos ~ req.query:", req.query);
   try {
-    // 📊 1. Top 10 clientes por ingresos acumulados
-    const top10Clientes = await prisma.ingreso.groupBy({
-      by: ["idclienteprov"],
-      _sum: { importe: true },
-      where: { idestado: 1 },
-      orderBy: { _sum: { importe: "desc" } },
-      take: 10,
-    });
+    const hoy = new Date();
+    const year = hoy.getFullYear();
 
-    // Obtener nombres de los clientes del Top 10
-    const clientesTopInfo = await prisma.clienteProv.findMany({
-      where: {
-        idclienteprov: { in: top10Clientes.map((c) => c.idclienteprov) },
+    const inicioDeAno = `${year}-01-01`;
+    const finDeAno = `${year}-12-31`;
+
+    // === 1) Totales por régimen (solo activos) ===
+    const clientesPorRegimen = await prisma.clienteProv.groupBy({
+      by: ["nregimen"],
+      where: { estado: "1" },
+      _count: { idclienteprov: true },
+      orderBy: {
+        _count: { idclienteprov: "desc" },
       },
-      select: { idclienteprov: true, razonsocial: true },
     });
 
-    const top10ConNombres = top10Clientes.map((c) => ({
-      idclienteprov: c.idclienteprov,
-      razonsocial:
-        clientesTopInfo.find((i) => i.idclienteprov === c.idclienteprov)
-          ?.razonsocial || "Desconocido",
-      total: c._sum.importe || 0,
-    }));
-
-    // 🗓️ 2. Ingresos mensuales por cliente (últimos 12 meses)
-    const fechaInicio = new Date();
-    fechaInicio.setMonth(fechaInicio.getMonth() - 11);
-    fechaInicio.setDate(1); // Desde inicio del mes
-
-    const ingresosMensuales = await prisma.ingreso.findMany({
+    // === 2) Clientes ingresados por mes (solo activos del año actual) ===
+    const clientesPorMesRaw = await prisma.clienteProv.findMany({
+      select: { fecha_ingreso: true },
       where: {
-        idestado: 1,
-        fecha: { gte: fechaInicio },
-      },
-      select: {
-        idclienteprov: true,
-        importe: true,
-        fecha: true,
-      },
-      orderBy: { fecha: "asc" },
-    });
-
-    // Agregamos nombres también para los ingresos mensuales
-    const idsClientesMensuales = [
-      ...new Set(ingresosMensuales.map((c) => c.idclienteprov)),
-    ];
-
-    const clientesMensualesInfo = await prisma.clienteProv.findMany({
-      where: { idclienteprov: { in: idsClientesMensuales } },
-      select: { idclienteprov: true, razonsocial: true },
-    });
-
-    const ingresosMensualesConNombres = ingresosMensuales.map((i) => ({
-      ...i,
-      razonsocial:
-        clientesMensualesInfo.find((c) => c.idclienteprov === i.idclienteprov)
-          ?.razonsocial || "Desconocido",
-    }));
-
-    // 🥧 3. Distribución porcentual de ingresos por cliente
-    const distribucionIngresos = await prisma.ingreso.groupBy({
-      by: ["idclienteprov"],
-      _sum: { importe: true },
-      where: { idestado: 1 },
-    });
-
-    const totalIngresos = distribucionIngresos.reduce(
-      (acc, curr) => acc + (curr._sum.importe || 0),
-      0
-    );
-
-    const clientesDistribucionInfo = await prisma.clienteProv.findMany({
-      where: {
-        idclienteprov: {
-          in: distribucionIngresos.map((c) => c.idclienteprov),
+        estado: "1",
+        fecha_ingreso: {
+          gte: inicioDeAno,
+          lte: finDeAno,
         },
       },
-      select: { idclienteprov: true, razonsocial: true },
+      orderBy: { fecha_ingreso: "asc" },
     });
 
-    const distribucionPorcentual = distribucionIngresos.map((cliente) => ({
-      idclienteprov: cliente.idclienteprov,
-      razonsocial:
-        clientesDistribucionInfo.find(
-          (i) => i.idclienteprov === cliente.idclienteprov
-        )?.razonsocial || "Desconocido",
-      total: cliente._sum.importe || 0,
-      porcentaje:
-        totalIngresos > 0
-          ? ((cliente._sum.importe || 0) / totalIngresos) * 100
-          : 0,
-    }));
+    // Agrupar con JS y completar meses vacíos con 0
+    const meses = Array.from({ length: 12 }, (_, i) => {
+      const mes = String(i + 1).padStart(2, "0");
+      return { mes: `${year}-${mes}`, total: 0 };
+    });
 
-    // ✅ 4. Enviar todo en un solo JSON
-    res.json({
-      top10Clientes: top10ConNombres,
-      ingresosMensuales: ingresosMensualesConNombres,
-      distribucionIngresos: distribucionPorcentual,
+    clientesPorMesRaw.forEach((item) => {
+      if (!item.fecha_ingreso) return;
+      const fecha = new Date(item.fecha_ingreso);
+      const mesIndex = fecha.getMonth(); // 0 - 11
+      meses[mesIndex].total++;
+    });
+
+    res.status(200).json({
+      // ok: true,
+      clientesPorRegimen,
+      clientesPorMes: meses,
     });
   } catch (error) {
-    console.error("Error en getClientesGraficos:", error);
-    handleHttpError(res, "ERROR_GET_CLIENTES_GRAFICOS", 500);
+    console.error("Error en getClientesKPIs:", error);
+    handleHttpError(res, "ERROR_GET_CLIENTES_KPIS", 500);
   }
 };
 
@@ -582,9 +548,6 @@ const getCajaKPIs = async (req, res) => {
 | `cajaAcumuladaAnual`           | Resultado total acumulado del año            | 📈 Línea de tendencia o 📊 Barras      |
 
  */
-
-
-
 
 const getCajaGraficos = async (req, res) => {
   try {
