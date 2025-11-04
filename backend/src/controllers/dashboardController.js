@@ -777,7 +777,7 @@ const getCajaGraficos = async (req, res) => {
       }),
     };
     const ingresosFormateados = ingresos.map((item) => ({
-      label: item.fecha.toISOString(), // también puedes usar .split("T")[0] si quieres solo la fecha
+      label: item.fecha, // también puedes usar .split("T")[0] si quieres solo la fecha
       value: item._sum.importe ?? 0,
     }));
     // 📤 5️⃣ Respuesta final

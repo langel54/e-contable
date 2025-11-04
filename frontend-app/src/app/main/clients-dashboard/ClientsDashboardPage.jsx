@@ -103,7 +103,7 @@ const ClientsDashboardPage = () => {
           <Grid item xs={12} sm={6} md={4} lg={4}>
             <AnalyticEcommerce
               title="Total"
-              count={totalClients}
+              count={totalClients || 0}
               percentage={"100"}
               extra="Clientes registrados en el sistema"
               color="info"
@@ -112,8 +112,8 @@ const ClientsDashboardPage = () => {
           <Grid item xs={12} sm={6} md={4} lg={4}>
             <AnalyticEcommerce
               title="Nuevos Clientes"
-              count={newClients.total}
-              percentage={newClients.porcentaje}
+              count={newClients.total || 0}
+              percentage={newClients.porcentaje || 0}
               extra="Clientes registrados este año"
               color="primary"
             />
@@ -121,8 +121,8 @@ const ClientsDashboardPage = () => {
           <Grid item xs={12} sm={6} md={4} lg={4}>
             <AnalyticEcommerce
               title="Con Planilla Electrónica"
-              count={planillaClients.total}
-              percentage={planillaClients.porcentaje}
+              count={planillaClients.total || 0}
+              percentage={planillaClients.porcentaje || 0}
               extra="Declaran planilla electrónica"
               color="primary"
             />
@@ -130,8 +130,8 @@ const ClientsDashboardPage = () => {
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <AnalyticEcommerce
               title="Clientes Activos"
-              count={activeClients.total}
-              percentage={activeClients.porcentaje}
+              count={activeClients.total || 0}
+              percentage={activeClients.porcentaje || 0}
               extra="Clientes con actividad reciente"
               color="success"
             />
@@ -139,8 +139,8 @@ const ClientsDashboardPage = () => {
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <AnalyticEcommerce
               title="Clientes Suspendidos"
-              count={suspendClients.total}
-              percentage={suspendClients.porcentaje}
+              count={suspendClients.total || 0}
+              percentage={suspendClients.porcentaje || 0}
               extra="Actividades suspendidas "
               color="warning"
             />
@@ -148,8 +148,8 @@ const ClientsDashboardPage = () => {
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <AnalyticEcommerce
               title="Clientes Baja Temporal"
-              count={tempDownClients.total}
-              percentage={tempDownClients.porcentaje}
+              count={tempDownClients.total || 0}
+              percentage={tempDownClients.porcentaje || 0}
               extra="Baja temporal registrados"
               color="INFO"
             />
@@ -157,8 +157,8 @@ const ClientsDashboardPage = () => {
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <AnalyticEcommerce
               title="Clientes Baja Definitiva"
-              count={defDownClients.total}
-              percentage={defDownClients.porcentaje}
+              count={defDownClients.total || 0}
+              percentage={defDownClients.porcentaje || 0}
               extra="Baja Definitiva registrados"
               color="error"
             />
@@ -173,8 +173,8 @@ const ClientsDashboardPage = () => {
           {/* row 2 */}
           <Grid item xs={12} md={7} lg={8}>
             <UniqueVisitorCard
-              categories={graficosDataRegimen.categories}
-              seriesData={graficosDataRegimen.seriesData}
+              categories={graficosDataRegimen.categories || []}
+              seriesData={graficosDataRegimen.seriesData || []}
             />
           </Grid>
           <Grid item xs={12} md={5} lg={4}>
@@ -191,16 +191,16 @@ const ClientsDashboardPage = () => {
                     Distribución
                   </Typography>
                   <Typography variant="h4" fontWeight={100}>
-                    Total: {totalClients}{" "}
+                    Total: {totalClients || 0}{" "}
                   </Typography>
                 </Stack>
               </Box>
               <CircleChart
                 series={[
-                  activeClients.total,
-                  suspendClients.total,
-                  tempDownClients.total,
-                  defDownClients.total,
+                  activeClients.total || 0,
+                  suspendClients.total || 0,
+                  tempDownClients.total || 0,
+                  defDownClients.total || 0,
                 ]}
                 labels={[
                   "Activos",
@@ -230,8 +230,8 @@ const ClientsDashboardPage = () => {
                 </Stack>
               </Box> */}
               <IncomeAreaChart
-                seriesData={graficosDataMes.seriesData}
-                categories={graficosDataMes.categories}
+                seriesData={graficosDataMes.seriesData || []}
+                categories={graficosDataMes.categories || []}
                 colors={[info.main, info.dark]}
               />
             </MainCard>
