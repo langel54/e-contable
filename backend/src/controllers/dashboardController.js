@@ -380,156 +380,165 @@ const getTributosKPIs = async (req, res) => {
 // Sección Caja
 const getCajaKPIs = async (req, res) => {
   try {
-    const { modo = "fecha", anio, idperiodo } = req.query;
+    const { anio, mes, modo = "fecha" } = req.query;
+    console.log("🚀 ~ getCajaKPIs ~ mes:", mes);
 
-    // 📅 Validación básica
-    if (!anio) {
-      return res.status(400).json({ error: "Debe enviar el parámetro 'anio'" });
-    }
+    if (!anio)
+      return res.status(400).json({ message: "El campo 'anio' es requerido" });
 
-    const y = parseInt(anio);
-    const m = idperiodo ? parseInt(idperiodo) - 1 : null;
-    const currentDate = new Date();
+    const selectedYear = parseInt(anio);
+    const selectedMonth = mes ? parseInt(mes) : null;
 
-    // 🧩 Filtros base
-    let whereActual = { idestado: 1 };
-    let whereAnterior = { idestado: 1 };
-    let whereAnual = { idestado: 1 };
+    // 🧩 Filtros dinámicos
+    const wherePeriodo = {
+      anio: selectedYear,
+      ...(selectedMonth && { idperiodo: selectedMonth }),
+    };
 
-    if (modo === "periodo") {
-      // 🔸 Filtro por año y periodo (idperiodo = mes 1-12)
-      whereActual.anio = y;
-      whereAnual.anio = y;
+    const whereFecha = {
+      fecha: {
+        gte: new Date(selectedYear, selectedMonth ? selectedMonth - 1 : 0, 1),
+        lte: new Date(
+          selectedYear,
+          selectedMonth ? selectedMonth : 12,
+          0,
+          23,
+          59,
+          59
+        ),
+      },
+    };
 
-      if (idperiodo) {
-        whereActual.idperiodo = parseInt(idperiodo);
-        whereAnterior = {
-          idestado: 1,
-          anio: y,
-          idperiodo: parseInt(idperiodo) - 1 > 0 ? parseInt(idperiodo) - 1 : 12,
-        };
-      } else {
-        whereAnterior = { idestado: 1, anio: y - 1 };
-      }
-    } else {
-      // 🔹 Filtro por fecha (modo = "fecha")
-      if (idperiodo) {
-        // Si se especifica mes
-        const fechaInicio = new Date(y, m, 1);
-        const fechaFin = new Date(y, m + 1, 0, 23, 59, 59, 999);
-        const fechaInicioPrev = new Date(y, m - 1, 1);
-        const fechaFinPrev = new Date(y, m, 0, 23, 59, 59, 999);
+    const where = modo === "fecha" ? whereFecha : wherePeriodo;
 
-        whereActual.fecha = { gte: fechaInicio, lte: fechaFin };
-        whereAnterior.fecha = { gte: fechaInicioPrev, lte: fechaFinPrev };
-        whereAnual.fecha = { gte: new Date(y, 0, 1), lte: new Date(y, 11, 31) };
-      } else {
-        // Año completo
-        const fechaInicio = new Date(y, 0, 1);
-        const fechaFin = new Date(y, 11, 31, 23, 59, 59, 999);
-        const fechaInicioPrev = new Date(y - 1, 0, 1);
-        const fechaFinPrev = new Date(y - 1, 11, 31, 23, 59, 59, 999);
+    // ==============================
+    // 1️⃣ Totales del mes seleccionado
+    // ==============================
+    const [ingMes, salMes] = await Promise.all([
+      prisma.ingreso.aggregate({ _sum: { importe: true }, where }),
+      prisma.salida.aggregate({ _sum: { importe: true }, where }),
+    ]);
 
-        whereActual.fecha = { gte: fechaInicio, lte: fechaFin };
-        whereAnterior.fecha = { gte: fechaInicioPrev, lte: fechaFinPrev };
-        whereAnual.fecha = { gte: fechaInicio, lte: fechaFin };
-      }
-    }
+    const totalIngresosMes = ingMes._sum.importe || 0;
+    const totalSalidasMes = salMes._sum.importe || 0;
+    const saldoMes = totalIngresosMes - totalSalidasMes;
 
-    // 🧮 Consultas paralelas
-    const [
-      ingresosActual,
-      salidasActual,
-      ingresosAnterior,
-      salidasAnterior,
-      ingresosAnual,
-      salidasAnual,
-      ingresosTotales,
-      salidasTotales,
-    ] = await Promise.all([
-      prisma.ingreso.aggregate({ _sum: { importe: true }, where: whereActual }),
-      prisma.salida.aggregate({ _sum: { importe: true }, where: whereActual }),
+    // ==============================
+    // 2️⃣ Totales del año seleccionado
+    // ==============================
+    const [ingAnio, salAnio] = await Promise.all([
       prisma.ingreso.aggregate({
         _sum: { importe: true },
-        where: whereAnterior,
+        where:
+          modo === "fecha"
+            ? {
+                fecha: {
+                  gte: new Date(selectedYear, 0, 1),
+                  lte: new Date(selectedYear, 11, 31),
+                },
+              }
+            : { anio: selectedYear },
       }),
       prisma.salida.aggregate({
         _sum: { importe: true },
-        where: whereAnterior,
-      }),
-      prisma.ingreso.aggregate({ _sum: { importe: true }, where: whereAnual }),
-      prisma.salida.aggregate({ _sum: { importe: true }, where: whereAnual }),
-      prisma.ingreso.aggregate({
-        _sum: { importe: true },
-        where: { idestado: 1 },
-      }),
-      prisma.salida.aggregate({
-        _sum: { importe: true },
-        where: { idestado: 1 },
+        where:
+          modo === "fecha"
+            ? {
+                fecha: {
+                  gte: new Date(selectedYear, 0, 1),
+                  lte: new Date(selectedYear, 11, 31),
+                },
+              }
+            : { anio: selectedYear },
       }),
     ]);
 
-    // 💰 Cálculos base
-    const ingresoAct = ingresosActual._sum.importe || 0;
-    const salidaAct = salidasActual._sum.importe || 0;
-    const ingresoAnt = ingresosAnterior._sum.importe || 0;
-    const salidaAnt = salidasAnterior._sum.importe || 0;
+    const totalIngresosAnio = ingAnio._sum.importe || 0;
+    const totalSalidasAnio = salAnio._sum.importe || 0;
+    const saldoAnio = totalIngresosAnio - totalSalidasAnio;
 
-    const saldoActual = ingresoAct - salidaAct;
-    const saldoAnterior = ingresoAnt - salidaAnt;
-    const totalIngresos = ingresosTotales._sum.importe || 0;
-    const totalSalidas = salidasTotales._sum.importe || 0;
-    const cajaAcumuladaAnual =
-      (ingresosAnual._sum.importe || 0) - (salidasAnual._sum.importe || 0);
+    // ==============================
+    // 3️⃣ Periodo anterior (mes o año)
+    // ==============================
+    let whereAnterior = {};
 
-    // 📈 Crecimientos y ratios
-    const crecimientoIngresos =
-      ingresoAnt !== 0 ? ((ingresoAct - ingresoAnt) / ingresoAnt) * 100 : 0;
-    const crecimientoSalidas =
-      salidaAnt !== 0 ? ((salidaAct - salidaAnt) / salidaAnt) * 100 : 0;
-    const crecimientoNeto =
-      saldoAnterior !== 0
-        ? ((saldoActual - saldoAnterior) / Math.abs(saldoAnterior)) * 100
-        : 0;
+    if (modo === "fecha") {
+      if (selectedMonth) {
+        const prevMonth = selectedMonth === 1 ? 12 : selectedMonth - 1;
+        const prevYear = selectedMonth === 1 ? selectedYear - 1 : selectedYear;
 
-    // ⚙️ Promedio diario o eficiencia
-    const dias = idperiodo
-      ? new Date(y, parseInt(idperiodo), 0).getDate()
-      : 365;
-    const promedioDiario = saldoActual / dias;
+        whereAnterior = {
+          fecha: {
+            gte: new Date(prevYear, prevMonth - 1, 1),
+            lte: new Date(prevYear, prevMonth, 0, 23, 59, 59),
+          },
+        };
+      } else {
+        whereAnterior = {
+          fecha: {
+            gte: new Date(selectedYear - 1, 0, 1),
+            lte: new Date(selectedYear - 1, 11, 31),
+          },
+        };
+      }
+    } else {
+      // modo periodo
+      if (selectedMonth) {
+        const prevMonth = selectedMonth === 1 ? 12 : selectedMonth - 1;
+        const prevYear = selectedMonth === 1 ? selectedYear - 1 : selectedYear;
+        whereAnterior = { anio: prevYear, idperiodo: prevMonth };
+      } else {
+        whereAnterior = { anio: selectedYear - 1 };
+      }
+    }
 
-    // 📤 Respuesta formateada (coherente con gráficos)
+    const [ingPrev, salPrev] = await Promise.all([
+      prisma.ingreso.aggregate({
+        _sum: { importe: true },
+        where: whereAnterior,
+      }),
+      prisma.salida.aggregate({
+        _sum: { importe: true },
+        where: whereAnterior,
+      }),
+    ]);
+
+    const prevIngresos = ingPrev._sum.importe || 0;
+    const prevSalidas = salPrev._sum.importe || 0;
+    const prevSaldo = prevIngresos - prevSalidas;
+
+    // ==============================
+    // 4️⃣ Variaciones relativas (%)
+    // ==============================
+    const variacionIngresos = prevIngresos
+      ? ((totalIngresosMes - prevIngresos) / prevIngresos) * 100
+      : 0;
+    const variacionSalidas = prevSalidas
+      ? ((totalSalidasMes - prevSalidas) / prevSalidas) * 100
+      : 0;
+    const variacionSaldo = prevSaldo
+      ? ((saldoMes - prevSaldo) / prevSaldo) * 100
+      : 0;
+
+    // ==============================
+    // 5️⃣ Respuesta final
+    // ==============================
     res.json({
-      modo,
-      parametros: { anio: y, idperiodo },
-      totales: {
-        label: "Caja total actual",
-        value: (totalIngresos - totalSalidas).toFixed(2),
+      filtros: { anio: selectedYear, mes: selectedMonth, modo },
+      totalesMes: {
+        ingresos: totalIngresosMes,
+        salidas: totalSalidasMes,
+        saldo: saldoMes,
       },
-      periodoActual: {
-        ingresos: { label: "Ingresos", value: ingresoAct },
-        salidas: { label: "Salidas", value: salidaAct },
-        saldo: { label: "Saldo", value: saldoActual },
-        rentabilidad: {
-          label: "Rentabilidad (%)",
-          value:
-            ingresoAct > 0
-              ? ((saldoActual / ingresoAct) * 100).toFixed(2)
-              : "0.00",
-        },
-        promedioDiario: {
-          label: "Promedio Diario",
-          value: promedioDiario.toFixed(2),
-        },
+      totalesAnio: {
+        ingresos: totalIngresosAnio,
+        salidas: totalSalidasAnio,
+        saldo: saldoAnio,
       },
-      crecimiento: [
-        { label: "Ingresos", value: crecimientoIngresos.toFixed(2) },
-        { label: "Salidas", value: crecimientoSalidas.toFixed(2) },
-        { label: "Saldo Neto", value: crecimientoNeto.toFixed(2) },
-      ],
-      cajaAcumuladaAnual: {
-        label: "Caja Acumulada Anual",
-        value: cajaAcumuladaAnual.toFixed(2),
+      variacion: {
+        ingresos: Number(variacionIngresos.toFixed(2)),
+        salidas: Number(variacionSalidas.toFixed(2)),
+        saldo: Number(variacionSaldo.toFixed(2)),
       },
     });
   } catch (error) {
@@ -537,17 +546,7 @@ const getCajaKPIs = async (req, res) => {
     handleHttpError(res, "ERROR_GET_CAJA_KPIS", 500);
   }
 };
-/************************
- * | **Campo / Sección**            | **Qué representa**                           | **Gráfico sugerido**                   |
-| ------------------------------ | -------------------------------------------- | -------------------------------------- |
-| `totales`                      | Caja total (ingresos - salidas global)       | 💰 KPI numérico                        |
-| `periodoActual`                | Ingresos, salidas y saldo del periodo actual | 📊 Barras o 📈 Línea                   |
-| `periodoActual.rentabilidad`   | % utilidad neta sobre ingresos               | 📟 KPI circular o gauge                |
-| `periodoActual.promedioDiario` | Saldo promedio por día                       | 📟 KPI numérico                        |
-| `crecimiento`                  | Comparación con periodo anterior             | 📊 Barras o 🔼🔽 Indicadores de cambio |
-| `cajaAcumuladaAnual`           | Resultado total acumulado del año            | 📈 Línea de tendencia o 📊 Barras      |
 
- */
 
 const getCajaGraficos = async (req, res) => {
   try {

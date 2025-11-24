@@ -42,7 +42,7 @@ export default function AnalyticEcommerce({
               {count}
             </Typography>
           </Grid>
-          {percentage && (
+          {(percentage || percentage == "0") && (
             <Grid item>
               <Chip
                 variant="combined"

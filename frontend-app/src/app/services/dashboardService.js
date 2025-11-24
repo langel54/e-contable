@@ -25,12 +25,21 @@ export const getDashboardTributosTablas = async () => {
   return fetchWithAuth("/dashboard/tributos/tablas");
 };
 
-export const getDashboardCajaKPIs = async () => {
-  return fetchWithAuth("/dashboard/caja/kpis");
+export const getDashboardCajaKPIs = async ({ modo, anio, idperiodo }) => {
+  return fetchWithAuth(
+    "/dashboard/caja/kpis?modo=" + modo + "&anio=" + anio + "&mes=" + idperiodo
+  );
 };
 
-export const getDashboardCajaGraficos = async () => {
-  return fetchWithAuth("/dashboard/caja/graficos");
+export const getDashboardCajaGraficos = async ({ modo, anio, idperiodo }) => {
+  return fetchWithAuth(
+    "/dashboard/caja/graficos?modo=" +
+      modo +
+      "&anio=" +
+      anio +
+      "&mes=" +
+      idperiodo
+  );
 };
 
 export const getDashboardCajaTablas = async () => {

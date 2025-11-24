@@ -21,91 +21,86 @@ import dayjs from "dayjs";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import MonthPicker from "./MonthPicker";
+import {
+  getDashboardCajaGraficos,
+  getDashboardCajaKPIs,
+} from "@/app/services/dashboardService";
+import { round } from "lodash";
+import {
+  buildChartMes,
+  prepareChartDataWithMes,
+} from "../incomes/utils/processGraphData";
 
 // Mock de servicios mientras se crea el backend
-const getDashboardCajaKPIs = async () => {
-  console.log("Fetching Caja KPIs...");
-  // En un futuro, esto vendría de frontend-app/src/app/services/dashboardService.js
-  return new Promise((resolve) =>
-    setTimeout(
-      () =>
-        resolve({
-          totalIngresos: { total: 125000, porcentaje: 60 },
-          totalEgresos: { total: 85000, porcentaje: 40 },
-          saldoMes: { total: 40000, isLoss: false },
-          ingresosMes: { total: 15000, porcentaje: 75 },
-          egresosMes: { total: 5000, porcentaje: 25 },
-        }),
-      500
-    )
-  );
-};
-
-const getDashboardCajaGraficos = async () => {
-  console.log("Fetching Caja Graficos...");
-  // En un futuro, esto vendría de frontend-app/src/app/services/dashboardService.js
-  return new Promise((resolve) =>
-    setTimeout(
-      () =>
-        resolve({
-          movimientosPorMes: [
-            { mes: "Ene", ingresos: 12000, egresos: 7000 },
-            { mes: "Feb", ingresos: 18000, egresos: 9000 },
-            { mes: "Mar", ingresos: 15000, egresos: 11000 },
-            { mes: "Abr", ingresos: 22000, egresos: 13000 },
-            { mes: "May", ingresos: 19000, egresos: 15000 },
-            { mes: "Jun", ingresos: 25000, egresos: 10000 },
-          ],
-        }),
-      500
-    )
-  );
-};
 
 const CashDashboardPage = () => {
   const theme = useTheme();
+  const [mode, setMode] = useState("fecha");
+  const [selectedAnio, setSelectedAnio] = useState(dayjs().year());
+  const [selectedMonth, setSelectedMonth] = useState("10");
   const [kpis, setKpis] = useState({});
-  const [chartData, setChartData] = useState({
-    seriesData: [],
-    categories: [],
-  });
+
+  const [chartData, setChartData] = useState({});
+  console.log(
+    "🚀 ~ CashDashboardPage ~ chartData:",
+    chartData.ingresosMensuales
+  );
+
+  const fetchData = async () => {
+    try {
+      const kpiData = await getDashboardCajaKPIs({
+        modo: mode,
+        anio: selectedAnio,
+        idperiodo: selectedMonth,
+      });
+      //   {
+      //     "filtros": {
+      //         "anio": 2024,
+      //         "mes": 1,
+      //         "modo": "fecha"
+      //     },
+      //     "totalesMes": {
+      //         "ingresos": 27205,
+      //         "salidas": 31341.7,
+      //         "saldo": -4136.700000000001
+      //     },
+      //     "totalesAnio": {
+      //         "ingresos": 199472,
+      //         "salidas": 207738.17,
+      //         "saldo": -8266.170000000013
+      //     },
+      //     "variacion": {
+      //         "ingresos": -14.11,
+      //         "salidas": 21.06,
+      //         "saldo": -171.53
+      //     }
+      // }
+      setKpis(kpiData);
+
+      const graphData = await getDashboardCajaGraficos({
+        modo: mode,
+        anio: selectedAnio,
+        idperiodo: selectedMonth,
+      });
+      setChartData(graphData);
+    } catch (error) {
+      console.error("Error fetching cash dashboard data:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const kpiData = await getDashboardCajaKPIs();
-        setKpis(kpiData);
-
-        const graphData = await getDashboardCajaGraficos();
-        const categories = graphData.movimientosPorMes.map((d) => d.mes);
-        const seriesData = [
-          {
-            name: "Ingresos",
-            data: graphData.movimientosPorMes.map((d) => d.ingresos),
-          },
-          {
-            name: "Egresos",
-            data: graphData.movimientosPorMes.map((d) => d.egresos),
-          },
-        ];
-        setChartData({ seriesData, categories });
-      } catch (error) {
-        console.error("Error fetching cash dashboard data:", error);
-      }
-    };
-
-    fetchData();
+    fetchData(); // al montar
   }, []);
+
+  useEffect(() => {
+    fetchData(); // cada vez que cambian los filtros
+  }, [mode, selectedAnio, selectedMonth]);
 
   const formatCurrency = (value = 0) =>
     new Intl.NumberFormat("es-PE", {
       style: "currency",
       currency: "PEN",
     }).format(value);
-
-  const [mode, setMode] = useState("fecha");
-  const [selectedAnio, setSelectedAnio] = useState(dayjs().year());
-  const [selectedMonth, setSelectedMonth] = useState("");
 
   const handleYearChange = (date) => {
     const year = date.getFullYear();
@@ -118,6 +113,24 @@ const CashDashboardPage = () => {
     >
       {year}
     </span>
+  );
+
+  const { categories: categoriesMes, series: seriesMes } = buildChartMes(
+    chartData.ingresosMensuales,
+    chartData.salidasMensuales
+  );
+
+  const resultMesSaldo = selectedMonth
+    ? prepareChartDataWithMes(chartData.saldosMensuales, "Saldos")
+    : { categoriesMes: [], seriesDataMes: [] };
+
+  const {
+    categoriesMes: categoriesMesSaldo,
+    seriesDataMes: seriesDataMesSaldo,
+  } = resultMesSaldo;
+  console.log(
+    "🚀 ~ CashDashboardPage ~ categoriesMesSaldo:",
+    seriesDataMesSaldo
   );
 
   return (
@@ -173,43 +186,128 @@ const CashDashboardPage = () => {
             />
           </FormControl>
         </Stack>
+        {selectedMonth && kpis?.totalesMes && (
+          <>
+            <Grid item xs={12} sm={4} md={4} lg={4}>
+              <AnalyticEcommerce
+                title="Ingresos Totales del Mes"
+                count={formatCurrency(kpis.totalesMes.ingresos || 0)}
+                percentage={kpis.totalesMes.ingresos > 0 ? 100 : 0}
+                color="info"
+                extra="Total de ingresos del mes"
+              />
+            </Grid>
 
-        <Grid item xs={12} sm={6} md={4} lg={4}>
+            <Grid item xs={12} sm={4} md={4} lg={4}>
+              <AnalyticEcommerce
+                title="Egresos Totales del Mes"
+                count={formatCurrency(kpis.totalesMes.salidas || 0)}
+                percentage={
+                  kpis.totalesMes.ingresos != 0
+                    ? round(
+                        (kpis.totalesMes.salidas / kpis.totalesMes.ingresos) *
+                          100
+                      )
+                    : 0
+                }
+                color="error"
+                extra="Total de egresos del mes"
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={4} md={4} lg={4}>
+              <AnalyticEcommerce
+                title="Saldo del Mes"
+                count={formatCurrency(kpis.totalesMes.saldo || 0)}
+                percentage={
+                  kpis.totalesMes.ingresos != 0
+                    ? round(
+                        (kpis.totalesMes.saldo / kpis.totalesMes.ingresos) * 100
+                      )
+                    : 0
+                }
+                color={kpis.totalesMes.saldo <= 0 ? "error" : "success"}
+                isLoss={kpis.totalesMes.saldo <= 0}
+                extra="Total de saldo del mes"
+              />
+            </Grid>
+          </>
+        )}
+
+        <Grid item xs={12} sm={4} md={4} lg={4}>
           <AnalyticEcommerce
-            title="Ingresos Totales"
-            count={formatCurrency(kpis.totalIngresos?.total)}
-            color="success"
+            title="Ingreso Anual"
+            count={formatCurrency(kpis.totalesAnio?.ingresos || 0)}
+            percentage={100}
+            color="info"
+            extra={`Total de ingresos del año ${selectedAnio}`}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={4} lg={4}>
+
+        <Grid item xs={12} sm={4} md={4} lg={4}>
           <AnalyticEcommerce
-            title="Egresos Totales"
-            count={formatCurrency(kpis.totalEgresos?.total)}
+            title="Egreso Anual"
+            count={formatCurrency(kpis.totalesAnio?.salidas || 0)}
+            percentage={
+              kpis.totalesAnio?.ingresos !== 0
+                ? round(
+                    (kpis.totalesAnio?.salidas / kpis.totalesAnio?.ingresos) *
+                      100
+                  )
+                : 0
+            }
+            isLoss={kpis.totalesAnio?.salidas > kpis.totalesAnio?.ingresos}
             color="error"
+            extra={`Total de egresos del año ${selectedAnio}`}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={4} lg={4}>
+
+        <Grid item xs={12} sm={4} md={4} lg={4}>
           <AnalyticEcommerce
-            title="Saldo del Mes"
-            count={formatCurrency(kpis.saldoMes?.total)}
-            color={kpis.saldoMes?.isLoss ? "error" : "primary"}
-            isLoss={kpis.saldoMes?.isLoss}
+            title="Saldo Anual"
+            count={formatCurrency(kpis.totalesAnio?.saldo || 0)}
+            percentage={
+              kpis.totalesAnio?.ingresos !== 0
+                ? round(
+                    (kpis.totalesAnio?.saldo / kpis.totalesAnio?.ingresos) * 100
+                  )
+                : 0
+            }
+            color={kpis.totalesAnio?.saldo <= 0 ? "error" : "success"}
+            isLoss={kpis.totalesAnio?.saldo <= 0}
+            extra={`Total de saldo del año ${selectedAnio}`}
           />
         </Grid>
 
-        <Grid item xs={12} md={12}>
-          <MainCard>
-            <Typography variant="h5">Movimientos por Mes</Typography>
-            <AreaChart
-              seriesData={chartData.seriesData}
-              categories={chartData.categories}
-              height={350}
-              type="bar"
-            //   colors={["red","green"]}
-            />
-          </MainCard>
-        </Grid>
-
+        {selectedMonth && (
+          <Grid item xs={12} md={12}>
+            <MainCard>
+              <Typography variant="h5">Movimientos Diarios</Typography>
+              <AreaChart
+                seriesData={seriesMes || []}
+                categories={categoriesMes || []}
+                height={350}
+                type="line"
+                // colors={["red", "green"]}
+              />
+            </MainCard>
+          </Grid>
+        )}
+        {selectedMonth && (
+          <Grid item xs={12} md={12}>
+            <MainCard>
+              <Typography variant="h5">Saldos Diarios</Typography>
+              <AreaChart
+                seriesData={seriesDataMesSaldo || []}
+                categories={categoriesMesSaldo || []}
+                height={350}
+                type="line"
+                colors={["red"]}
+                horizontalLineAtZero={true}
+              />
+            </MainCard>
+          </Grid>
+        )}
         <Grid item xs={12} md={4}>
           <MainCard>
             <Typography variant="h5">Distribución del Mes</Typography>

@@ -8,45 +8,95 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
-const defaultChartOptions = {
-  chart: {
-    type: "area",
-    toolbar: { show: false },
-  },
-  dataLabels: { enabled: true },
-  stroke: { curve: "smooth", width: 2 },
-  grid: { strokeDashArray: 0 },
-};
-
 const AreaChart = ({
   seriesData = [],
   categories = [],
   colors,
   type = "area",
   height = 450,
+  horizontalLineAtZero = false, // ✅ nueva propiedad
 }) => {
   const theme = useTheme();
-  const { text, divider, primary, warning, info } = theme.palette;
+  const { text, divider, info, warning, error } = theme.palette;
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
 
+  const safeCategories = Array.isArray(categories) ? categories : [];
+
   const options = {
-    ...defaultChartOptions,
+    chart: {
+      type,
+      toolbar: { show: true },
+    },
+
+    // ⭐ DATA LABELS ACTIVADOS PARA TODOS LOS TIPOS
+    // dataLabels: {
+    //   enabled: true,
+    //   style: {
+    //     fontSize: "12px",
+    //     colors: [text.primary],
+    //   },
+    //   offsetY: type === "bar" ? -8 : -5,
+    // },
+
+    // ⭐ CONFIG ESPECÍFICA SEGÚN EL TIPO
+    ...(type === "line" && {
+      stroke: { curve: "smooth", width: 3 },
+      fill: { opacity: 1 },
+    }),
+
+    ...(type === "area" && {
+      stroke: { curve: "smooth", width: 2 },
+      fill: { type: "gradient", gradient: { opacityFrom: 0.5, opacityTo: 0 } },
+    }),
+
+    ...(type === "bar" && {
+      plotOptions: {
+        bar: {
+          borderRadius: 8,
+          dataLabels: { position: "top" },
+          columnWidth: "45%",
+        },
+      },
+    }),
+
     colors: colors || [info.light, warning.main],
+
     xaxis: {
-      categories,
+      categories: safeCategories,
       labels: {
-        style: { colors: Array(categories.length).fill(text.secondary) },
+        style: { colors: safeCategories.map(() => text.secondary) },
       },
       axisBorder: { show: true, color: divider },
-      tickAmount: categories.length - 1,
+      tickAmount: safeCategories.length > 1 ? safeCategories.length - 1 : 0,
     },
+
     yaxis: {
       labels: { style: { colors: [text.secondary] } },
     },
-    grid: { borderColor: divider },
+
+    grid: {
+      borderColor: divider,
+    },
+    // ✅ Agregar línea horizontal en 0 si la propiedad está activada
+    annotations: horizontalLineAtZero
+      ? {
+          yaxis: [
+            {
+              y: 0,
+              borderColor: error.main || "#FF0000", // roja
+              strokeDashArray: 0,
+              label: {
+                borderColor: error.main || "#FF0000",
+                style: { color: "#fff", background: error.main || "#FF0000" },
+                text: "0",
+              },
+            },
+          ],
+        }
+      : {},
   };
 
   return (
@@ -73,18 +123,3 @@ AreaChart.propTypes = {
 };
 
 export default AreaChart;
-// const series = [
-//   { name: "Ventas", data: [5, 10, 15, 20, 30, 40] },
-//   { name: "Devoluciones", data: [1, 2, 3, 2, 1, 0] },
-// ];
-
-// const categories = ["Ene", "Feb", "Mar", "Abr", "May", "Jun"];
-
-// return (
-//   <AreaChart
-//     seriesData={series}
-//     categories={categories}
-//     type="area"
-//     height={350}
-//   />
-// );
