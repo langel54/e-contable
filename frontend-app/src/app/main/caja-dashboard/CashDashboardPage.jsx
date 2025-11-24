@@ -120,9 +120,7 @@ const CashDashboardPage = () => {
     chartData.salidasMensuales
   );
 
-  const resultMesSaldo = selectedMonth
-    ? prepareChartDataWithMes(chartData.saldosMensuales, "Saldos")
-    : { categoriesMes: [], seriesDataMes: [] };
+  const resultMesSaldo = prepareChartDataWithMes(chartData.saldosMensuales, "Saldos");
 
   const {
     categoriesMes: categoriesMesSaldo,
@@ -279,24 +277,24 @@ const CashDashboardPage = () => {
           />
         </Grid>
 
-        {selectedMonth && (
+        {(seriesMes && seriesMes.length > 0 && categoriesMes && categoriesMes.length > 0) && (
           <Grid item xs={12} md={12}>
             <MainCard>
-              <Typography variant="h5">Movimientos Diarios</Typography>
+              <Typography variant="h5">Movimientos</Typography>
               <AreaChart
                 seriesData={seriesMes || []}
                 categories={categoriesMes || []}
                 height={350}
-                type="line"
+                type="bar"
                 // colors={["red", "green"]}
               />
             </MainCard>
           </Grid>
         )}
-        {selectedMonth && (
+        {(seriesDataMesSaldo && seriesDataMesSaldo.length > 0 && categoriesMesSaldo && categoriesMesSaldo.length > 0) && (
           <Grid item xs={12} md={12}>
             <MainCard>
-              <Typography variant="h5">Saldos Diarios</Typography>
+              <Typography variant="h5">Saldos</Typography>
               <AreaChart
                 seriesData={seriesDataMesSaldo || []}
                 categories={categoriesMesSaldo || []}

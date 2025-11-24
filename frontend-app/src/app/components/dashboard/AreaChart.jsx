@@ -55,7 +55,7 @@ const AreaChart = ({
     ...(type === "bar" && {
       plotOptions: {
         bar: {
-          borderRadius: 8,
+          borderRadius: 4,
           dataLabels: { position: "top" },
           columnWidth: "45%",
         },
