@@ -76,7 +76,7 @@ export default function MiniDrawer({ children }) {
       <Drawer variant="permanent" open={open}>
         <DrawerHeader>
           <Stack direction={"row"} justifyContent="space-between" width={"100%"} alignItems={"center"}>
-            <Typography variant="h5">Empresa SAC</Typography>
+            <Typography variant="h5">Solconsa SAC</Typography>
             <IconButton onClick={handleDrawerToggle}>
               <ChevronLeftIcon />
             </IconButton>
