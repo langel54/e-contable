@@ -18,6 +18,7 @@ import menuItemsByRole from "../menu/menuConfig";
 import { useState } from "react";
 import { useAuth } from "@/app/provider";
 import { Stack } from "@mui/material";
+import ThemeToggle from "../../components/ThemeToggle";
 
 export default function MiniDrawer({ children }) {
   const [open, setOpen] = useState(true);
@@ -66,7 +67,8 @@ export default function MiniDrawer({ children }) {
               <Typography variant="h6" noWrap component="div">
                 Mi Aplicación
               </Typography>
-              <Box display={"flex"} direction="row" justifyContent="end">
+              <Box display={"flex"} direction="row" justifyContent="end" alignItems="center">
+                <ThemeToggle />
                 <HeaderContent />
               </Box>
             </Box>
@@ -97,7 +99,14 @@ export default function MiniDrawer({ children }) {
       </Drawer>
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 3, height: "100vh", overflow: "auto" }}
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          height: "100vh",
+          overflow: "auto",
+          bgcolor: "background.default",
+          color: "text.primary",
+        }}
       >
         <DrawerHeader />
         {children}

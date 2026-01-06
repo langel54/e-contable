@@ -76,28 +76,30 @@ const StyledModal = ({
           transform: "translate(-50%, -50%)",
           width: 400,
           bgcolor: "background.paper",
-          boxShadow: 24,
+          backgroundImage: (theme) => theme.palette.mode === 'dark' ? 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))' : 'none',
+          boxShadow: (theme) => theme.customShadows.z1,
           p: 4,
-          borderRadius: 2,
+          borderRadius: 3,
           maxHeight: "90vh",
           overflow: "auto",
+          border: (theme) => theme.palette.mode === 'dark' ? '1px solid rgba(255, 255, 255, 0.08)' : 'none',
         }}
       >
-        <Typography id="edit-user-modal" variant="subtitle1" mb={3}>
+        <Typography id="edit-user-modal" variant="h5" color="text.primary" fontWeight={700} mb={3}>
           Editar Usuario
         </Typography>
 
-        {/* Campos de Usuario */}
-        <TextField
-          fullWidth
-          label="Usuario"
-          value={editedUser?.usuario || ""}
-          onChange={(e) =>
-            setEditedUser({ ...editedUser, usuario: e.target.value })
-          }
-          margin="normal"
-        />
-        <Divider />
+        <Stack spacing={2}>
+          {/* Campos de Usuario */}
+          <TextField
+            fullWidth
+            label="Usuario"
+            value={editedUser?.usuario || ""}
+            onChange={(e) =>
+              setEditedUser({ ...editedUser, usuario: e.target.value })
+            }
+          />
+          <Divider sx={{ '&::before, &::after': { borderColor: 'divider' } }} />
 
         {/* Campos de Personal */}
         <TextField
@@ -205,6 +207,7 @@ const StyledModal = ({
             }}
           />
         )}
+        </Stack>
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
           <Button

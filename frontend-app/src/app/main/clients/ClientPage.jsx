@@ -63,10 +63,16 @@ const clientColumns = (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, p: 0.5 }}>
           <Chip
             label={nregimen || "Sin régimen"}
-            color="secondary"
             size="small"
             variant="outlined"
-            sx={{ mt: 0.3, fontSize: 10, height: 18, alignSelf: "start" }}
+            sx={{ 
+              mt: 0.3, 
+              fontSize: 10, 
+              height: 18, 
+              alignSelf: "start",
+              borderColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.2)' : theme.palette.secondary.main,
+              color: 'text.secondary'
+            }}
           />
         </Box>
       );
@@ -439,13 +445,19 @@ const ClientPage = () => {
           <EstadoClienteSelect />
           <Button
             size="medium"
-            color="primary"
             variant="contained"
             onClick={() => {
               setOpenAddModal(true);
             }}
+            startIcon={<AddCircleOutlineSharp fontSize="inherit" />}
+            sx={{
+              backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#818cf8' : theme.palette.primary.main,
+              '&:hover': {
+                backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#6366f1' : theme.palette.primary.dark,
+              }
+            }}
           >
-            <AddCircleOutlineSharp fontSize="inherit" /> Agregar Usuario
+            Agregar Cliente
           </Button>
         </Stack>
       </Stack>

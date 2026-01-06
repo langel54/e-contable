@@ -432,14 +432,15 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
                           <div style={{ fontWeight: 500 }}>
                             {option.razonsocial}
                           </div>
-                          <div
-                            style={{
-                              fontSize: "0.8em",
-                              color: "rgba(0, 0, 0, 0.6)",
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: 'text.secondary',
+                              display: 'block'
                             }}
                           >
                             RUC: {option.ruc}
-                          </div>
+                          </Typography>
                         </div>
                       </li>
                     )}

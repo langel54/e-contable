@@ -3,12 +3,13 @@ const configuracionService = require("../services/configuracionService");
 const configuracionController = {
   async getAll(req, res) {
     try {
-      const { page = 1, limit = 10 } = req.query;
+      const { page = 1, limit = 10, search } = req.query;
       const skip = (page - 1) * limit;
 
       const { configuraciones, total } = await configuracionService.getAll(
         skip,
-        limit
+        limit,
+        search
       );
 
       res.json({

@@ -44,3 +44,8 @@ export const deleteIngreso = async (idingreso) => {
     method: "DELETE",
   });
 };
+
+// Reporte Anual
+export const getAnnualReport = async (year) => {
+  return fetchWithAuth(`/ingreso/report/annual?year=${year}`);
+};

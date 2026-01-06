@@ -101,6 +101,20 @@ const ingresoController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  // Reporte Anual
+  async getAnnualReport(req, res) {
+    try {
+      const { year } = req.query;
+      if (!year) {
+        return res.status(400).json({ message: "El parámetro 'year' es requerido." });
+      }
+      const report = await ingresoService.getAnnualReport(Number(year));
+      res.json(report);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 module.exports = ingresoController;

@@ -11,14 +11,16 @@ import Palette from "./palette";
 import Typography from "./typography";
 import CustomShadows from "./shadows";
 import componentsOverride from "./overrides";
+import { useAuth } from "../provider";
 
 // ==============================|| DEFAULT THEME - MAIN  ||============================== //
 
 export default function ThemeCustomization({ children }) {
-  const theme = Palette("light", "default");
+  const { mode } = useAuth();
+  const theme = Palette(mode, "default");
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const themeTypography = Typography(`'Public Sans', sans-serif`);
+  const themeTypography = Typography(`'Outfit', sans-serif`);
   const themeCustomShadows = useMemo(() => CustomShadows(theme), [theme]);
 
   const themeOptions = useMemo(

@@ -2,6 +2,8 @@ export const drawerWidth = 240;
 
 export const openedMixin = (theme) => ({
   width: drawerWidth,
+  borderRight: `1px solid ${theme.palette.divider}`,
+  backgroundColor: theme.palette.mode === 'dark' ? '#121212' : theme.palette.background.paper,
   transition: theme.transitions.create("width", {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.enteringScreen,
@@ -10,6 +12,8 @@ export const openedMixin = (theme) => ({
 });
 
 export const closedMixin = (theme) => ({
+  borderRight: `1px solid ${theme.palette.divider}`,
+  backgroundColor: theme.palette.mode === 'dark' ? '#121212' : theme.palette.background.paper,
   transition: theme.transitions.create("width", {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,

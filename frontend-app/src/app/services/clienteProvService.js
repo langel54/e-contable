@@ -17,10 +17,11 @@ export const getFilterClientesProvs = async (
   digito,
   regimen,
   status,
-  planilla
+  planilla,
+  search = ""
 ) => {
   return fetchWithAuth(
-    `/clienteproveedor/filter?page=${page}&limit=${limit}&digito=${digito}&regimen=${regimen}&status=${status}&planilla=${planilla}`
+    `/clienteproveedor/filter?page=${page}&limit=${limit}&digito=${digito}&regimen=${regimen}&status=${status}&planilla=${planilla}&search=${search}`
   );
 };
 
@@ -106,11 +107,11 @@ export const validateClienteProv = (data) => {
 export const getValidateRuc = async (ruc, action, idclienteprov) => {
   return fetchWithAuth(
     "/clienteproveedor/validate-ruc/" +
-      ruc +
-      "?action=" +
-      action +
-      "&idclienteprov=" +
-      idclienteprov
+    ruc +
+    "?action=" +
+    action +
+    "&idclienteprov=" +
+    idclienteprov
   );
 };
 export const updateDeclaradoTodos = async (nuevoEstado) => {

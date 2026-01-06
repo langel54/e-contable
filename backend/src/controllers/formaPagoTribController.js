@@ -3,11 +3,12 @@ const formaPagoTribService = require("../services/formaPagoTribService");
 const formaPagoTribController = {
   // Obtener todos los registros con paginación
   async getAll(req, res) {
-    const { skip, limit } = req.query;
+    const { skip, limit, search } = req.query;
     try {
       const { formaPagoTribs, total } = await formaPagoTribService.getAll(
         parseInt(skip) || 0,
-        parseInt(limit) || 10
+        parseInt(limit) || 10,
+        search
       );
       res.status(200).json({ formaPagoTribs, total });
     } catch (error) {
@@ -31,9 +32,10 @@ const formaPagoTribController = {
 
   // Crear un nuevo registro
   async create(req, res) {
-    const { descripcion } = req.body;
+    const { idforma_pago_trib, descripcion } = req.body;
     try {
       const nuevaFormaPagoTrib = await formaPagoTribService.create({
+        idforma_pago_trib,
         descripcion,
       });
       res.status(201).json(nuevaFormaPagoTrib);

@@ -34,7 +34,11 @@ const estadoClienteRoutes = require("./routes/estadoClienteRoutes");
 const misDeclaracionesRoutes = require("./routes/misDeclaracionesRoutes");
 const pdfIncomeRoutes = require("./routes/pdfIncomeRoutes");
 const pdfSalidaRoutes = require("./routes/pdfSalidaRoutes");
+const pdfEstadoCuentaRoutes = require("./routes/pdfEstadoCuentaRoutes");
+const pdfEgresosClienteRoutes = require("./routes/pdfEgresosClienteRoutes");
 const sunafilRoutes = require("./routes/sunafilRoutes");
+const estadoCuentaRoutes = require("./routes/estadoCuentaRoutes");
+const egresosClienteRoutes = require("./routes/egresosClienteRoutes");
 const checkOrigin = require("./middlewares/checkOrigin");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const corsOptions = require("./config/corsConfig");
@@ -88,7 +92,11 @@ app.use("/api/estado-cliente", estadoClienteRoutes);
 app.use("/api/misdeclaraciones", misDeclaracionesRoutes);
 app.use("/api/pdf-income", pdfIncomeRoutes);
 app.use("/api/pdf-salida", pdfSalidaRoutes);
+app.use("/api/pdf-estado-cuenta", pdfEstadoCuentaRoutes);
+app.use("/api/pdf-egresos-cliente", pdfEgresosClienteRoutes);
 app.use("/api/sunafil", sunafilRoutes);
+app.use("/api/estado-cuenta", estadoCuentaRoutes);
+app.use("/api/egresos-cliente", egresosClienteRoutes);
 app.use("/api", dashboardRoutes);
 
 // Error Handler

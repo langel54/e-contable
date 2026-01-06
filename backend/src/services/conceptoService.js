@@ -1,17 +1,26 @@
 const prisma = require("../config/database");
 
 const conceptoService = {
-  async getAll(skip, limit) {
+  async getAll(skip, limit, search) {
+    const where = search
+      ? {
+          nombre_concepto: {
+            contains: search,
+          },
+        }
+      : {};
+
     const conceptos = await prisma.concepto.findMany({
       skip,
       take: limit,
+      where,
       select: {
         idconcepto: true,
         nombre_concepto: true,
       },
     });
 
-    const total = await prisma.concepto.count();
+    const total = await prisma.concepto.count({ where });
     return { conceptos, total };
   },
 

@@ -32,6 +32,14 @@ export default function Palette(mode, presetColor) {
 
   const paletteColor = ThemeOption(colors, presetColor, mode);
 
+  // Custom primary for dark mode to be a softer blue/indigo
+  if (mode === "dark") {
+    paletteColor.primary.main = "#818cf8"; // Softer Indigo
+    paletteColor.primary.light = "#a5b4fc";
+    paletteColor.primary.dark = "#6366f1";
+    paletteColor.primary.lighter = "rgba(129, 140, 248, 0.1)";
+  }
+
   return createTheme({
     palette: {
       mode,
@@ -41,17 +49,17 @@ export default function Palette(mode, presetColor) {
       },
       ...paletteColor,
       text: {
-        primary: paletteColor.grey[700],
-        secondary: paletteColor.grey[500],
+        primary: mode === "dark" ? "#ececec" : paletteColor.grey[700], // Soft White
+        secondary: mode === "dark" ? "#b0b0b0" : paletteColor.grey[500], // Soft Grey
         disabled: paletteColor.grey[400],
       },
       action: {
         disabled: paletteColor.grey[300],
       },
-      divider: paletteColor.grey[200],
+      divider: mode === "dark" ? "rgba(255, 255, 255, 0.12)" : paletteColor.grey[200],
       background: {
-        paper: paletteColor.grey[0],
-        default: paletteColor.grey.A50,
+        paper: mode === "dark" ? "#1e1e1e" : paletteColor.grey[0], // Surface
+        default: mode === "dark" ? "#121212" : paletteColor.grey.A50, // Base
       },
     },
   });

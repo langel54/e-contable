@@ -29,3 +29,37 @@ export const pdfIncomeService = async (idingreso) => {
   }
   return response.blob();
 };
+
+export const pdfEstadoCuentaService = async (idclienteprov, year) => {
+  const token = Cookies.get("token");
+  const response = await fetch(
+    `${API_URL}/pdf-estado-cuenta?idclienteprov=${idclienteprov}&year=${year}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || "Error en la petición");
+  }
+  return response.blob();
+};
+
+export const pdfEgresosClienteService = async (idclienteprov, year) => {
+  const token = Cookies.get("token");
+  const response = await fetch(
+    `${API_URL}/pdf-egresos-cliente?idclienteprov=${idclienteprov}&year=${year}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || "Error en la petición");
+  }
+  return response.blob();
+};

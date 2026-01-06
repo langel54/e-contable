@@ -69,12 +69,20 @@ const DrawerListItem = ({ item, open }) => {
           onMouseEnter={!open && item.children ? openHover : undefined}
           onMouseLeave={!open && item.children ? scheduleCloseHover : undefined}
           sx={{
-            minHeight: 48,
+            minHeight: 44, // Slightly smaller for a tighter look
+            mx: 1, // Margin for the pill shape
+            borderRadius: 2, // Pill-ish radius
             justifyContent: open ? "initial" : "initial",
             px: 2.5,
-            backgroundColor: isActive ? "rgba(0,0,0,0.04)" : "transparent",
-            width: "100%",
-            "&:hover": { backgroundColor: "action.hover" },
+            mb: 0.5,
+            backgroundColor: isActive ? "primary.lighter" : "transparent",
+            color: isActive ? "primary.main" : "text.secondary",
+            width: "auto", // To allow for mx
+            transition: "all 0.2s ease-in-out",
+            "&:hover": {
+              backgroundColor: isActive ? "primary.lighter" : "action.hover",
+              color: isActive ? "primary.main" : "primary.main",
+            },
           }}
         >
           <ListItemIcon
@@ -127,16 +135,29 @@ const DrawerListItem = ({ item, open }) => {
                   component={Link}
                   href={subItem.path}
                   sx={{
-                    pl: 6,
+                    pl: 8, // More indentation for sub-items
+                    mx: 1,
+                    borderRadius: 2,
+                    mb: 0.5,
+                    minHeight: 40,
                     backgroundColor: isSubActive
-                      ? "rgba(0,0,0,0.08)"
+                      ? "primary.lighter"
                       : "transparent",
+                    color: isSubActive ? "primary.main" : "text.secondary",
+                    transition: "all 0.2s ease-in-out",
+                    "&:hover": {
+                      backgroundColor: isSubActive ? "primary.lighter" : "action.hover",
+                      color: isSubActive ? "primary.main" : "primary.main",
+                    },
                   }}
                 >
                   {open && (
                     <ListItemText
                       primary={subItem.text}
-                      sx={{ color: isSubActive ? "primary.main" : "inherit" }}
+                      primaryTypographyProps={{
+                        variant: "body2",
+                        fontWeight: isSubActive ? 600 : 400,
+                      }}
                     />
                   )}
                 </ListItemButton>

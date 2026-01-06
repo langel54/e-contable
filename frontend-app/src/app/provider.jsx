@@ -15,6 +15,8 @@ const AuthContext = createContext({
   setEstadoClientesProvider: () => {},
   cajaMes: null,
   setCajaMes: () => {},
+  mode: "light",
+  toggleMode: () => {},
 });
 
 export function AuthProvider({ children }) {
@@ -26,6 +28,20 @@ export function AuthProvider({ children }) {
   const [loadingAuth, setLoadingAuth] = useState(true);
   const [estadoClientesProvider, setEstadoClientesProvider] = useState("");
   const [cajaMes, setCajaMes] = useState(null); // Estado para cajaMes
+  const [mode, setMode] = useState("light");
+
+  useEffect(() => {
+    const savedMode = Cookies.get("themeMode");
+    if (savedMode) {
+      setMode(savedMode);
+    }
+  }, []);
+
+  const toggleMode = () => {
+    const newMode = mode === "light" ? "dark" : "light";
+    setMode(newMode);
+    Cookies.set("themeMode", newMode, { expires: 365 });
+  };
 
   useEffect(() => {
     async function inicializarApp() {
@@ -107,6 +123,8 @@ export function AuthProvider({ children }) {
         setEstadoClientesProvider,
         cajaMes,
         setCajaMes,
+        mode,
+        toggleMode,
       }}
     >
       {children}

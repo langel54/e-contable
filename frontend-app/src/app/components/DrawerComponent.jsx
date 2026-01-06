@@ -32,13 +32,20 @@ const DrawerComponent = ({
           backdrop: {
             sx: {
               zIndex: zIndex - 1,
-              backgroundColor: `rgba(0,0,0,${backdropOpacity})`,
+              backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.7)' : `rgba(0,0,0,${backdropOpacity})`,
+              backdropFilter: 'blur(2px)',
             },
           },
         },
       }}
       sx={{ zIndex }}
-      PaperProps={{ sx: { width } }}
+      PaperProps={{
+        sx: {
+          width,
+          backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#1e1e1e' : theme.palette.background.paper,
+          backgroundImage: (theme) => theme.palette.mode === 'dark' ? 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))' : 'none',
+        }
+      }}
     >
       <Box
         sx={{

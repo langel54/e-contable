@@ -113,25 +113,26 @@ const PagosModal = ({ tributo, onAfterSave }) => {
         align="center"
         sx={{
           mb: 1.5,
-          p: 1,
-          borderRadius: 1,
-          bgcolor: "#f7f9fc",
-          color: "text.secondary",
+          p: 1.5,
+          borderRadius: 2,
+          bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(129, 140, 248, 0.1)' : '#f7f9fc',
+          color: "text.primary",
+          border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(129, 140, 248, 0.2)' : 'rgba(0,0,0,0.05)'}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          gap: 1,
+          gap: 1.5,
         }}
       >
         <span>Tributo:</span>
-        <strong style={{ color: "#1565c0" }}>
+        <Typography component="span" fontWeight="bold" color="primary">
           {tributo?.cliente_prov?.razonsocial}
-        </strong>{" "}
+        </Typography>{" "}
         | {tributo?.tipo_trib?.descripcion_t} |{" "}
-        <strong>
+        <Typography component="span" fontWeight="bold">
           {tributo?.mes}-{tributo?.anio}
-        </strong>{" "}
-        | S/ <strong>{tributo?.importe_reg}</strong>
+        </Typography>{" "}
+        | S/ <Typography component="span" fontWeight="bold" color="primary">{tributo?.importe_reg}</Typography>
       </Typography>
 
       <Divider sx={{ mb: 2 }} />

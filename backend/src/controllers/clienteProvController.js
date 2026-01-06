@@ -34,6 +34,7 @@ const clienteProvController = {
         regimen = "",
         status = "1",
         planilla = false,
+        search = "",
       } = req.query;
       const skip = (page - 1) * limit;
 
@@ -43,7 +44,8 @@ const clienteProvController = {
         digito,
         regimen,
         status,
-        planilla
+        planilla,
+        search
       );
 
       res.json({

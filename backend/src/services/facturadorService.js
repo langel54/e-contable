@@ -2,10 +2,20 @@ const prisma = require("../config/database");
 
 const facturadorService = {
   // Obtener todos los registros con paginación
-  async getAll(skip, limit) {
+  async getAll(skip, limit, search) {
+    const where = search
+      ? {
+          OR: [
+            { n_facturador: { contains: search } },
+            { f_obs: { contains: search } },
+          ],
+        }
+      : {};
+
     const facturadores = await prisma.facturador.findMany({
       skip,
       take: limit,
+      where,
       select: {
         idfacturador: true,
         n_facturador: true,
@@ -14,7 +24,7 @@ const facturadorService = {
       },
     });
 
-    const total = await prisma.facturador.count();
+    const total = await prisma.facturador.count({ where });
     return { facturadores, total };
   },
 

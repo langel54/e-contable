@@ -29,5 +29,9 @@ export const fetchWithAuth = async (endpoint, options = {}) => {
     throw new Error(error.message || "Error en la petición");
   }
 
+  if (response.status === 204) {
+    return null;
+  }
+
   return response.json();
 };

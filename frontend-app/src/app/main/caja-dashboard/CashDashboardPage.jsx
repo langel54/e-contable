@@ -141,10 +141,11 @@ const CashDashboardPage = () => {
           spacing={2}
           sx={{
             width: "100%",
-            border: "solid 1px " + theme.palette.secondary.light,
-            padding: 1,
-            borderRadius: 2,
+            border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : theme.palette.divider}`,
+            padding: 1.5,
+            borderRadius: 3,
             marginLeft: 2,
+            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.02)' : 'transparent',
           }}
         >
           <Typography variant="h5" fontWeight={600}>

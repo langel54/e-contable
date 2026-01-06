@@ -156,12 +156,14 @@ const tributoColumns = (
       width: 80,
       align: "right",
       renderCell: (params) => {
+        const theme = useTheme();
         const importe = params.row.importe_reg || 0;
         return (
           <Typography
             variant="body2"
             sx={{
-              backgroundColor: "#e3f2fd",
+              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(129, 140, 248, 0.15)' : '#e3f2fd',
+              color: theme.palette.mode === 'dark' ? '#a5b4fc' : 'inherit',
               padding: "4px 8px",
               borderRadius: "4px",
               fontWeight: "bold",
@@ -181,12 +183,14 @@ const tributoColumns = (
       width: 80,
       align: "right",
       renderCell: (params) => {
+        const theme = useTheme();
         const importe = params.row.importe_pc || 0;
         return (
           <Typography
             variant="body2"
             sx={{
-              backgroundColor: "#e3f2fd",
+              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(52, 211, 153, 0.15)' : '#e3f2fd',
+              color: theme.palette.mode === 'dark' ? '#6ee7b7' : 'inherit',
               padding: "4px 8px",
               borderRadius: "4px",
               fontWeight: "bold",
@@ -206,13 +210,15 @@ const tributoColumns = (
       width: 80,
       align: "right",
       renderCell: (params) => {
+        const theme = useTheme();
         const pendiente =
           (params.row.importe_reg || 0) - (params.row.importe_pc || 0);
         return (
           <Typography
             variant="body2"
             sx={{
-              backgroundColor: "#e3f2fd",
+              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(239, 68, 68, 0.15)' : '#e3f2fd',
+              color: theme.palette.mode === 'dark' ? '#fca5a5' : 'inherit',
               padding: "4px 8px",
               borderRadius: "4px",
               fontWeight: "bold",
@@ -246,6 +252,7 @@ const tributoColumns = (
       width: 80,
       align: "right",
       renderCell: (params) => {
+        const theme = useTheme();
         // Calcular interés basado en días atrasados (ejemplo: 1% por mes)
         const fechaVenc = new Date(params.row.fecha_v);
         const hoy = new Date();
@@ -259,7 +266,8 @@ const tributoColumns = (
           <Typography
             variant="body2"
             sx={{
-              backgroundColor: "#ffebee",
+              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(251, 191, 36, 0.15)' : '#ffebee',
+              color: theme.palette.mode === 'dark' ? '#fcd34d' : 'inherit',
               padding: "4px 8px",
               borderRadius: "4px",
               fontWeight: "bold",
@@ -279,6 +287,7 @@ const tributoColumns = (
       width: 80,
       align: "right",
       renderCell: (params) => {
+        const theme = useTheme();
         const pendiente =
           (params.row.importe_reg || 0) - (params.row.importe_pag || 0);
         const fechaVenc = new Date(params.row.fecha_v);
@@ -294,10 +303,12 @@ const tributoColumns = (
           <Typography
             variant="body2"
             sx={{
-              backgroundColor: "#ffebee",
+              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(239, 68, 68, 0.25)' : '#ffebee',
+              color: theme.palette.mode === 'dark' ? '#f87171' : 'inherit',
               padding: "4px 8px",
               borderRadius: "4px",
               fontWeight: "bold",
+              border: theme.palette.mode === 'dark' ? '1px solid rgba(239,68,68,0.5)' : 'none',
             }}
           >
             {deudaActual.toLocaleString("es-PE", {

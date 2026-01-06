@@ -6,11 +6,15 @@ import { esLocaleText } from "./esLocate";
 
 // Estilos con styled de MUI
 const TableContainer = styled(Box)(({ theme }) => ({
-  // width: "100%",
-  backgroundColor: "#fff",
-  borderRadius: "8px",
-  boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: theme.spacing(2),
+  boxShadow: theme.customShadows.z1,
   padding: theme.spacing(2),
+  border: `1px solid ${theme.palette.divider}`,
+  transition: 'all 0.3s ease-in-out',
+  '&:hover': {
+    boxShadow: theme.customShadows.z2,
+  },
 }));
 
 const LoadingContainer = styled(Box)({
@@ -23,24 +27,42 @@ const LoadingContainer = styled(Box)({
 const DataGridStyled = styled(DataGrid)(({ theme }) => ({
   minHeight: "650px",
   border: "none",
+  fontFamily: theme.typography.fontFamily,
+  '& .MuiDataGrid-main': {
+    borderRadius: theme.spacing(2),
+  },
   "& .MuiDataGrid-cell": {
     padding: "8px 16px",
     display: "flex",
     alignItems: "center",
+    borderColor: theme.palette.divider,
+    color: theme.palette.text.primary,
   },
   "& .MuiDataGrid-columnHeaders": {
-    backgroundColor: "#f5f5f5",
-    fontWeight: "600 !important",
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(18, 18, 18, 0.6)' : theme.palette.grey[50],
+    color: theme.palette.text.primary,
+    fontWeight: "700 !important",
+    borderBottom: `2px solid ${theme.palette.divider}`,
+    backdropFilter: 'blur(8px)',
   },
   "& .MuiDataGrid-row:hover": {
-    backgroundColor: "#f0f0f0",
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : theme.palette.grey[100],
   },
   "& .MuiDataGrid-footerContainer": {
-    backgroundColor: "#f9f9f9",
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(18, 18, 18, 0.6)' : theme.palette.grey[50],
+    color: theme.palette.text.secondary,
+    borderTop: `1px solid ${theme.palette.divider}`,
   },
   "& .MuiDataGrid-row": {
-    borderBottom: "1px solid #f0f0f0", // Agrega un borde a las filas
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    transition: 'background-color 0.2s ease',
   },
+  '& .MuiTablePagination-root': {
+    color: theme.palette.text.primary,
+  },
+  '& .MuiIconButton-root': {
+    color: theme.palette.text.secondary,
+  }
 }));
 
 const CustomTable = React.memo(

@@ -33,12 +33,12 @@ export default function AnalyticEcommerce({
   return (
     <MainCard contentSX={{ p: 2.25 }}>
       <Stack spacing={0.5}>
-        <Typography variant="h6" color="text.secondary" fontWeight={600}>
+        <Typography variant="h6" color="text.secondary" fontWeight={500}>
           {title}
         </Typography>
         <Grid container alignItems="center">
           <Grid item>
-            <Typography variant="h2" color="inherit">
+            <Typography variant="h3" fontWeight={700} color="text.primary">
               {count}
             </Typography>
           </Grid>

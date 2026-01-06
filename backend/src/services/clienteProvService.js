@@ -58,7 +58,7 @@ const clienteProvService = {
 
     return { clientesProvs, total };
   },
-  async getAllFilter(skip, limit, digito, regimen, status, planilla) {
+  async getAllFilter(skip, limit, digito, regimen, status, planilla, search = "") {
     const whereConditions = {
       AND: [],
     };
@@ -77,6 +77,24 @@ const clienteProvService = {
     if (planilla === "true") {
       whereConditions.AND.push({
         planilla_elect: "SI",
+      });
+    }
+
+    // Add search conditions if search term is provided
+    if (search) {
+      whereConditions.AND.push({
+        OR: [
+          {
+            razonsocial: {
+              contains: search,
+            },
+          },
+          {
+            ruc: {
+              contains: search,
+            },
+          },
+        ],
       });
     }
     const [clientesProvs, total] = await Promise.all([

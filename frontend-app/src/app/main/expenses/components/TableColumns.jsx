@@ -39,7 +39,14 @@ export const getColumns = ({
               <Typography color="secondary" fontSize={"10px"}>
                 {params.row.registra} :
               </Typography>
-              <Typography color="info.dark" fontSize={"10px"}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: (theme) => theme.palette.mode === 'dark' ? 'info.light' : 'info.dark',
+                  fontSize: '10px',
+                  fontWeight: 500
+                }}
+              >
                 {params.row.concepto.nombre_concepto}
               </Typography>
             </Stack>

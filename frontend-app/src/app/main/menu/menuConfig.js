@@ -5,7 +5,7 @@ import BarChartIcon from "@mui/icons-material/BarChart";
 import GroupIcon from "@mui/icons-material/Group";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ReceiptIcon from "@mui/icons-material/Receipt";
-import { AccountBalance, AccountBalanceWallet } from "@mui/icons-material";
+import { AccountBalance, AccountBalanceWallet, Description } from "@mui/icons-material";
 
 const menuItemsByRole = {
   1: [
@@ -77,6 +77,16 @@ const menuItemsByRole = {
       children: [
         { text: "Ingresos", path: "/main/incomes" },
         { text: "Egresos", path: "/main/expenses" },
+      ],
+    },
+    {
+      text: "Estado de Cuenta",
+      path: "/main/estado-cuenta",
+      icon: <Description />,
+      allowedRoles: [1, 2, 3],
+      children: [
+        { text: "Ingresos por Cliente", path: "/main/estado-cuenta" },
+        { text: "Egresos por Cliente", path: "/main/egresos-cliente" },
       ],
     },
     {

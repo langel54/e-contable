@@ -2,17 +2,26 @@ const prisma = require("../config/database");
 
 const formaPagoTribService = {
   // Obtener todos los registros con paginación
-  async getAll(skip, limit) {
+  async getAll(skip, limit, search) {
+    const where = search
+      ? {
+          descripcion: {
+            contains: search,
+          },
+        }
+      : {};
+
     const formaPagoTribs = await prisma.formaPagoTrib.findMany({
       skip,
       take: limit,
+      where,
       select: {
         idforma_pago_trib: true,
         descripcion: true,
       },
     });
 
-    const total = await prisma.formaPagoTrib.count();
+    const total = await prisma.formaPagoTrib.count({ where });
     return { formaPagoTribs, total };
   },
 

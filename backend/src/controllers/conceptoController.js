@@ -3,12 +3,13 @@ const conceptoService = require("../services/conceptoService");
 const conceptoController = {
   async getAll(req, res) {
     try {
-      const { page = 1, limit = 10 } = req.query;
+      const { page = 1, limit = 10, search } = req.query;
       const skip = (page - 1) * limit;
 
       const { conceptos, total } = await conceptoService.getAll(
         skip,
-        Number(limit)
+        Number(limit),
+        search
       );
 
       res.json({

@@ -48,6 +48,7 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 import EstadoClienteSelect from "../clients/SelectStatusClient";
 import { useAuth } from "@/app/provider";
+import SearchComponent from "@/app/components/SearchComponent";
 import SunatIcon from "@/app/components/SunatIcon";
 import SelectDigito from "./SelectDigito";
 import SelectRegimen from "./SelectRegimen";
@@ -327,8 +328,12 @@ const ClientsFilter = () => {
 
   const [filterWithPlanilla, setFilterWithPlanilla] = useState(false);
 
+  // Search state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTermValue, setSearchTermValue] = useState("");
+
   const fetchDataCliente = useCallback(
-    async (currentPage, currentPageSize, digito, regimen, estado, planilla) => {
+    async (currentPage, currentPageSize, digito, regimen, estado, planilla, search) => {
       setLoading(true);
       try {
         const data = await getFilterClientesProvs(
@@ -337,7 +342,8 @@ const ClientsFilter = () => {
           digito,
           regimen,
           estado,
-          planilla
+          planilla,
+          search
         );
         setClients(data.clientesProvs);
         setTotal(data.pagination.total);
@@ -349,6 +355,24 @@ const ClientsFilter = () => {
     },
     [] // Memoiza para evitar crear una nueva referencia en cada render
   );
+
+  // Search handlers
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    setSearchTerm(value);
+  };
+
+  const handleSearchButton = () => {
+    if (searchTerm.length >= 1) {
+      setSearchTermValue(searchTerm);
+      setPagination((prev) => ({ ...prev, page: 0 }));
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchTermValue("");
+    setSearchTerm("");
+  };
 
   useEffect(() => {
     // Si cambian los filtros, reseteamos a la primera página
@@ -362,14 +386,17 @@ const ClientsFilter = () => {
 
   useEffect(() => {
     // Hacemos la petición solo después de que pagination.page esté actualizado
-    fetchDataCliente(
-      pagination.page + 1,
-      pagination.pageSize,
-      selectedDigito,
-      selectedRegimen,
-      estadoClientesProvider,
-      filterWithPlanilla
-    );
+    if (searchTermValue.length >= 2 || searchTermValue.length === 0) {
+      fetchDataCliente(
+        pagination.page + 1,
+        pagination.pageSize,
+        selectedDigito,
+        selectedRegimen,
+        estadoClientesProvider,
+        filterWithPlanilla,
+        searchTermValue
+      );
+    }
   }, [
     pagination.page,
     pagination.pageSize,
@@ -377,6 +404,7 @@ const ClientsFilter = () => {
     selectedRegimen,
     estadoClientesProvider,
     filterWithPlanilla,
+    searchTermValue,
   ]);
 
   // Memoiza las columnas para evitar recrearlas en cada render
@@ -409,7 +437,7 @@ const ClientsFilter = () => {
   };
 
   //para eexcel
-  const fetchAllDataCliente = async (digito, regimen, estado, planilla) => {
+  const fetchAllDataCliente = async (digito, regimen, estado, planilla, search = "") => {
     let allData = [];
     let currentPage = 1;
     const pageSize = 100;
@@ -422,7 +450,8 @@ const ClientsFilter = () => {
           digito,
           regimen,
           estado,
-          planilla
+          planilla,
+          search
         );
 
         allData = [...allData, ...data.clientesProvs];
@@ -460,7 +489,8 @@ const ClientsFilter = () => {
       selectedDigito,
       selectedRegimen,
       estadoClientesProvider,
-      filterWithPlanilla
+      filterWithPlanilla,
+      searchTermValue
     );
 
     // Ahora generamos el reporte usando los datos obtenidos
@@ -500,6 +530,12 @@ const ClientsFilter = () => {
           alignItems: "center",
         }}
       >
+        <SearchComponent
+          handleClearSearch={handleClearSearch}
+          handleSearchButton={handleSearchButton}
+          handleSearchChange={handleSearchChange}
+          searchTerm={searchTerm}
+        />
         <Stack direction={"row"} justifyContent={"end"} spacing={4}>
           <SelectDigito
             selected={selectedDigito}

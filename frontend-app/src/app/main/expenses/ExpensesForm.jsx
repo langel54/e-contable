@@ -229,14 +229,15 @@ const ExpensesForm = ({ salidaEdit = null, handleCloseModal }) => {
                           <div style={{ fontWeight: 500 }}>
                             {option.razonsocial}
                           </div>
-                          <div
-                            style={{
-                              fontSize: "0.8em",
-                              color: "rgba(0, 0, 0, 0.6)",
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: 'text.secondary',
+                              display: 'block'
                             }}
                           >
                             RUC: {option.ruc}
-                          </div>
+                          </Typography>
                         </div>
                       </li>
                     )}
@@ -293,7 +294,7 @@ const ExpensesForm = ({ salidaEdit = null, handleCloseModal }) => {
                   helperText={errors.importe ? errors.importe : ""}
                   sx={{
                     "& .MuiInputBase-input": {
-                      color: (theme) => theme.palette.info.dark,
+                      color: (theme) => theme.palette.mode === 'dark' ? '#818cf8' : theme.palette.info.dark,
                       fontWeight: 600,
                       textAlign: "end",
                     },

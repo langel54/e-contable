@@ -7,6 +7,8 @@ import {
   Divider,
   Paper,
   Box,
+  useTheme,
+  Stack,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { styled } from "@mui/material/styles";
@@ -52,7 +54,42 @@ const Value = styled(Typography)(({ theme }) => ({
 }));
 
 export default function ClientDetailsModal({ data }) {
-  // console.log("🚀 ~ ClientDetailsModal ~ data:", data);
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
+  const gradientColors = [
+    { 
+      start: isDark ? "rgba(129, 140, 248, 0.15)" : "#e3f2fd", 
+      end: isDark ? "rgba(129, 140, 248, 0.05)" : "#fff", 
+      title: isDark ? theme.palette.primary.light : "#1565c0", 
+      icon: <PersonIcon sx={{ color: isDark ? 'primary.light' : 'primary.main' }} /> 
+    },
+    { 
+      start: isDark ? "rgba(168, 85, 247, 0.15)" : "#f3e5f5", 
+      end: isDark ? "rgba(168, 85, 247, 0.05)" : "#fff", 
+      title: isDark ? "#c084fc" : "#6a1b9a", 
+      icon: <KeyIcon sx={{ color: isDark ? "#c084fc" : "#6a1b9a" }} /> 
+    },
+    { 
+      start: isDark ? "rgba(34, 197, 94, 0.15)" : "#e8f5e9", 
+      end: isDark ? "rgba(34, 197, 94, 0.05)" : "#fff", 
+      title: isDark ? "#4ade80" : "#1b5e20", 
+      icon: <SettingsIcon sx={{ color: isDark ? "#4ade80" : "#1b5e20" }} /> 
+    },
+    {
+      start: isDark ? "rgba(249, 115, 22, 0.15)" : "#fff3e0",
+      end: isDark ? "rgba(249, 115, 22, 0.05)" : "#fff",
+      title: isDark ? "#fb923c" : "#e65100",
+      icon: <MiscellaneousServicesIcon sx={{ color: isDark ? "#fb923c" : "#e65100" }} />,
+    },
+    {
+      start: isDark ? "rgba(255, 255, 255, 0.05)" : "#f5f5f5",
+      end: isDark ? "rgba(255, 255, 255, 0.02)" : "#fff",
+      title: isDark ? "text.secondary" : "#424242",
+      icon: <MiscellaneousServicesIcon sx={{ color: "text.secondary" }} />,
+    },
+  ];
+
   const groups = [
     {
       title: "Datos Generales",
@@ -120,45 +157,60 @@ export default function ClientDetailsModal({ data }) {
 
   return (
     <Box p={2}>
-      {allGroups.map((group, i) => (
-        <StyledAccordion
-          key={i}
-          gradient={gradientColors[i] || gradientColors[4]}
-        >
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
+      {allGroups.map((group, i) => {
+        const colors = gradientColors[i] || gradientColors[4];
+        return (
+          <StyledAccordion
+            key={i}
+            gradient={colors}
             sx={{
-              background: gradientColors[i]?.start,
-              borderBottom: "1px solid rgba(0,0,0,0.05)",
+              '&:before': { display: 'none' },
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.05)' : 'none',
+              overflow: 'hidden'
             }}
           >
-            <Box display="flex" alignItems="center" gap={1}>
-              {gradientColors[i]?.icon}
-              <Typography
-                variant="subtitle1"
-                fontWeight="bold"
-                color={gradientColors[i]?.title}
-              >
-                {group.title}
-              </Typography>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Grid container spacing={1.5}>
-              {group.fields.map(
-                (field, j) =>
-                  field.key && (
-                    <Grid item xs={12} sm={6} key={`${i}-${j}`}>
-                      <Label>{field.label}</Label>
-                      <Value>{data[field.key] || "-"}</Value>
-                      <Divider sx={{ my: 0.5 }} />
-                    </Grid>
-                  )
-              )}
-            </Grid>
-          </AccordionDetails>
-        </StyledAccordion>
-      ))}
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon sx={{ color: 'text.secondary' }} />}
+              sx={{
+                background: colors.start,
+                borderBottom: isDark ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid rgba(0,0,0,0.05)",
+                minHeight: 56,
+                '& .MuiAccordionSummary-content': { margin: '12px 0' }
+              }}
+            >
+              <Box display="flex" alignItems="center" gap={1.5}>
+                {colors.icon}
+                <Typography
+                  variant="subtitle1"
+                  sx={{ 
+                    fontWeight: 600, 
+                    color: colors.title,
+                    letterSpacing: '0.02em'
+                  }}
+                >
+                  {group.title}
+                </Typography>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails sx={{ backgroundColor: isDark ? 'rgba(0,0,0,0.1)' : 'transparent' }}>
+              <Grid container spacing={3} sx={{ p: 1 }}>
+                {group.fields.map(
+                  (field, j) =>
+                    field.key && (
+                      <Grid item xs={12} sm={6} key={`${i}-${j}`}>
+                        <Stack spacing={0.5}>
+                          <Label>{field.label}</Label>
+                          <Value>{data[field.key] || "-"}</Value>
+                        </Stack>
+                        <Divider sx={{ mt: 1, opacity: isDark ? 0.3 : 0.8 }} />
+                      </Grid>
+                    )
+                )}
+              </Grid>
+            </AccordionDetails>
+          </StyledAccordion>
+        );
+      })}
     </Box>
   );
 }
