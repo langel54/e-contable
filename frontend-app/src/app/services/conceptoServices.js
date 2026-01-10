@@ -3,7 +3,8 @@
 import { fetchWithAuth } from "@/app/services/apiClient";
 
 // Obtener todos los conceptos con paginación
-export const getConceptos = async (page = 1, limit = 10, search) => {
+// Obtener todos los conceptos con paginación
+export const getConceptos = async (page = 1, limit = 100, search = "") => {
   return fetchWithAuth(
     `/concepto?page=${page}&limit=${limit}&search=${search}`
   );
