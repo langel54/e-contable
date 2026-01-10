@@ -1,20 +1,21 @@
-import * as ExcelJS from "exceljs";
-import { saveAs } from "file-saver";
-
 const excelExport = ({
   data,
   imageUrl,
   fileName = "exported_data.xlsx",
   title = "Reporte de Datos",
-  columnsToShow, // Parámetro para seleccionar y renombrar columnas / en orden de la data sin variar 
+  columnsToShow, // Parámetro para seleccionar y renombrar columnas
 }) => {
   const exportToExcel = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Sheet 1", {
-      views: [{ state: "frozen", xSplit: 1, ySplit: 3 }],
-    });
-
     try {
+      // Dynamic imports for heavy libraries
+      const ExcelJS = await import("exceljs");
+      const { saveAs } = await import("file-saver");
+
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Sheet 1", {
+        views: [{ state: "frozen", xSplit: 1, ySplit: 3 }],
+      });
+
       // Manejo de la imagen
       if (imageUrl) {
         let imageBase64 = imageUrl;
@@ -40,12 +41,11 @@ const excelExport = ({
         });
       }
 
-      const totalColumns = Object.keys(columnsToShow || {}).length || (data[0] ? Object.keys(data[0]).length : 1); // Número total de columnas
-      console.log("🚀 ~ exportToExcel ~ totalColumns:", totalColumns);
+      const totalColumns = Object.keys(columnsToShow || {}).length || (data[0] ? Object.keys(data[0]).length : 1);
+
       const titleCellRange = `A2:${String.fromCharCode(
         65 + totalColumns - 1
-      )}2`; // Desde 'A2' hasta la última columna
-      console.log("🚀 ~ exportToExcel ~ titleCellRange:", titleCellRange);
+      )}2`;
 
       worksheet.mergeCells(titleCellRange);
       const titleCell = worksheet.getCell("A2");
@@ -83,7 +83,7 @@ const excelExport = ({
         cell.fill = {
           type: "pattern",
           pattern: "solid",
-          fgColor: { argb: "FFB0C4DE" }, // Sombreado solo en encabezados
+          fgColor: { argb: "FFB0C4DE" },
         };
         cell.border = {
           top: { style: "thin" },
@@ -109,6 +109,7 @@ const excelExport = ({
           };
         });
       });
+
       // Ajustar automáticamente el ancho de las columnas
       worksheet.columns.forEach((column) => {
         let maxLength = 0;
@@ -122,9 +123,8 @@ const excelExport = ({
       worksheet.pageSetup = {
         paperSize: "A4",
         orientation: "landscape",
-        printArea: `A1:${String.fromCharCode(65 + totalColumns - 1)}${
-          data.length + 4
-        }`,
+        printArea: `A1:${String.fromCharCode(65 + totalColumns - 1)}${data.length + 4
+          }`,
       };
 
       const buffer = await workbook.xlsx.writeBuffer();
@@ -137,7 +137,7 @@ const excelExport = ({
     }
   };
 
-  return exportToExcel; // Devuelve la función que se ejecutará al llamar al botón
+  return exportToExcel;
 };
 
 export default excelExport;

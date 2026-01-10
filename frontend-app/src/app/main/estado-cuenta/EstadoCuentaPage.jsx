@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
+import CustomTable from "@/app/components/CustonTable";
 import {
   Box,
   Button,
@@ -15,19 +16,26 @@ import {
   TextField,
   Typography,
   Paper,
-  Divider,
   CircularProgress,
   Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
 import {
   Search as SearchIcon,
   Print as PrintIcon,
-  AttachMoney as AttachMoneyIcon,
+  TrendingUp as TrendingUpIcon,
+  TrendingDown as TrendingDownIcon,
 } from "@mui/icons-material";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { getEstadoCuenta } from "@/app/services/estadoCuentaService";
-import { pdfEstadoCuentaService } from "@/app/services/pdfServices";
+import { getEgresosCliente } from "@/app/services/egresosClienteService";
+import { pdfEstadoCuentaService, pdfEgresosClienteService } from "@/app/services/pdfServices";
 import InfiniteSelect from "@/app/components/AutocompleteComponent";
 import { getClientesProvs } from "@/app/services/clienteProvService";
 import dayjs from "dayjs";
@@ -69,21 +77,37 @@ const ClienteAutocomplete = ({ value, onChange, sx }) => {
 };
 
 const EstadoCuentaPage = () => {
+  const [viewMode, setViewMode] = useState("INGRESOS"); // "INGRESOS" or "EGRESOS"
   const [selectedClient, setSelectedClient] = useState(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(false);
   const [transacciones, setTransacciones] = useState([]);
-  const [totalAnual, setTotalAnual] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
   const [error, setError] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 10,
+  });
 
-  const handleYearChange = (date) => {
+  const handleYearChange = useCallback((date) => {
     if (date) {
       setSelectedYear(date.getFullYear());
     }
-  };
+  }, []);
 
-  const handleSearch = async () => {
+  const handleModeChange = useCallback((event, newMode) => {
+    if (newMode !== null) {
+      setViewMode(newMode);
+      // Clear previous results when changing mode
+      setTransacciones([]);
+      setTotalAmount(0);
+      setHasSearched(false);
+      setError(null);
+    }
+  }, []);
+
+  const handleSearch = useCallback(async () => {
     if (!selectedClient) {
       setError("Por favor seleccione un cliente");
       return;
@@ -94,23 +118,36 @@ const EstadoCuentaPage = () => {
     setHasSearched(true);
 
     try {
-      const result = await getEstadoCuenta(
-        selectedClient.idclienteprov,
-        selectedYear
-      );
-      setTransacciones(result.transacciones || []);
-      setTotalAnual(result.totalAnual || 0);
+      let result;
+      if (viewMode === "INGRESOS") {
+        result = await getEstadoCuenta(
+          selectedClient.idclienteprov,
+          selectedYear
+        );
+        setTotalAmount(result.totalAnual || 0);
+      } else {
+        result = await getEgresosCliente(
+          selectedClient.idclienteprov,
+          selectedYear
+        );
+        setTotalAmount(result.totalEgresos || 0);
+      }
+      const transaccionesWithIndex = (result.transacciones || []).map((t, index) => ({
+        ...t,
+        nro: index + 1
+      }));
+      setTransacciones(transaccionesWithIndex);
     } catch (err) {
-      console.error("Error fetching estado de cuenta:", err);
-      setError("Error al obtener el estado de cuenta. Por favor intente nuevamente.");
+      console.error(`Error fetching ${viewMode.toLowerCase()}:`, err);
+      setError(`Error al obtener los ${viewMode.toLowerCase()}. Por favor intente nuevamente.`);
       setTransacciones([]);
-      setTotalAnual(0);
+      setTotalAmount(0);
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedClient, selectedYear, viewMode]);
 
-  const handlePrint = async () => {
+  const handlePrint = useCallback(async () => {
     if (!selectedClient) {
       setError("Por favor seleccione un cliente");
       return;
@@ -118,16 +155,28 @@ const EstadoCuentaPage = () => {
 
     try {
       setLoading(true);
-      const pdfBlob = await pdfEstadoCuentaService(
-        selectedClient.idclienteprov,
-        selectedYear
-      );
+      let pdfBlob;
+      let filename;
+      
+      if (viewMode === "INGRESOS") {
+        pdfBlob = await pdfEstadoCuentaService(
+          selectedClient.idclienteprov,
+          selectedYear
+        );
+        filename = `Estado-Cuenta-${selectedClient.idclienteprov}-${selectedYear}.pdf`;
+      } else {
+        pdfBlob = await pdfEgresosClienteService(
+          selectedClient.idclienteprov,
+          selectedYear
+        );
+        filename = `Egresos-Cliente-${selectedClient.idclienteprov}-${selectedYear}.pdf`;
+      }
       
       // Crear URL del blob y descargar
       const url = window.URL.createObjectURL(pdfBlob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `Estado-Cuenta-${selectedClient.idclienteprov}-${selectedYear}.pdf`;
+      link.download = filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -138,7 +187,7 @@ const EstadoCuentaPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedClient, selectedYear, viewMode]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("es-PE", {
@@ -153,13 +202,88 @@ const EstadoCuentaPage = () => {
     return dayjs(date).format("DD-MM-YYYY");
   };
 
+  // Dynamic styles based on view mode
+  const titleText = viewMode === "INGRESOS" ? "INGRESOS POR CLIENTE" : "EGRESOS POR CLIENTE";
+  const totalLabel = viewMode === "INGRESOS" ? "Total Anual de Ingresos:" : "Total Anual de Egresos:";
+  const cardBorderColor = viewMode === "INGRESOS" ? "primary.light" : "error.light";
+  const totalColor = viewMode === "INGRESOS" ? "primary" : "error";
+
+  const columns = useMemo(() => {
+    const baseColumns = [
+      { 
+        field: "nro", 
+        headerName: "Nro", 
+        width: 70,
+      },
+      { 
+        field: "fecha", 
+        headerName: "Fecha", 
+        width: 120,
+        valueFormatter: (value) => formatDate(value)
+      },
+      { field: "tipo_pago", headerName: "Tipo de pago", width: 130 },
+      { field: "id_cliente", headerName: "ID cliente", width: 120 },
+      { field: "razon_social", headerName: "Razón Social", width: 200 },
+      { field: "concepto", headerName: "Por Concepto", width: 200 },
+      { field: "periodo", headerName: "Periodo", width: 100 },
+      { field: "anio", headerName: "Año", width: 80 },
+      { 
+        field: "importe", 
+        headerName: "Importe (S/.)", 
+        width: 130,
+        type: "number",
+        align: "right",
+        headerAlign: "right",
+        valueGetter: (value, row) => {
+           if (viewMode === "INGRESOS" && row.tipo === "SALIDA") return -value;
+           return value;
+        },
+        valueFormatter: (value) => formatCurrency(Math.abs(value))
+      },
+      { field: "estado", headerName: "Estado", width: 120 },
+      { field: "observacion", headerName: "Observacion", width: 200 },
+      { field: "registra", headerName: "Registra", width: 120 },
+      { field: "caja", headerName: "CAJA", width: 100 },
+    ];
+
+    if (viewMode === "EGRESOS") {
+        baseColumns.splice(1, 0, { field: "id", headerName: "Egreso", width: 90 });
+    }
+
+    return baseColumns;
+  }, [viewMode]);
+
+  const getRowId = useCallback((row) => {
+    return viewMode === "EGRESOS" ? row.id : `${row.tipo}-${row.id}`;
+  }, [viewMode]);
+
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, minHeight: "100vh" }}>
       {/* Header Section */}
-      <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-        <Typography variant="h5" fontWeight="700" color="primary.main" sx={{ mb: 3 }}>
-          ESTADO DE CUENTA POR CLIENTE
-        </Typography>
+      <Paper elevation={0} sx={{ mb: 3, borderRadius: 2 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+          <Typography variant="h5" fontWeight="700" color={viewMode === "INGRESOS" ? "primary.main" : "error.main"}>
+            {titleText}
+          </Typography>
+          
+          {/* Mode Selector */}
+          <ToggleButtonGroup
+            value={viewMode}
+            exclusive
+            onChange={handleModeChange}
+            aria-label="modo de vista"
+            size="small"
+          >
+            <ToggleButton value="INGRESOS" aria-label="ingresos">
+              <TrendingUpIcon sx={{ mr: 1 }} />
+              Ingresos
+            </ToggleButton>
+            <ToggleButton value="EGRESOS" aria-label="egresos">
+              <TrendingDownIcon sx={{ mr: 1 }} />
+              Egresos
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Stack>
 
         {/* Search Filters */}
         <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems="flex-start">
@@ -180,8 +304,10 @@ const EstadoCuentaPage = () => {
               customInput={
                 <TextField
                   fullWidth
-                  size="small"
+                  size="large"
                   label="Año"
+
+                  // sx={{ height: "52px" }}
                   InputProps={{
                     startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />,
                   }}
@@ -192,7 +318,7 @@ const EstadoCuentaPage = () => {
 
           <Button
             variant="contained"
-            color="primary"
+            color={viewMode === "INGRESOS" ? "primary" : "error"}
             startIcon={<SearchIcon />}
             onClick={handleSearch}
             disabled={loading || !selectedClient}
@@ -211,7 +337,7 @@ const EstadoCuentaPage = () => {
 
       {/* Results Section */}
       {hasSearched && (
-        <Paper elevation={0} sx={{ p: 3, borderRadius: 2 }}>
+        <Paper elevation={0} sx={{ borderRadius: 2 }}>
           <Stack
             direction={{ xs: "column", md: "row" }}
             justifyContent="space-between"
@@ -224,7 +350,7 @@ const EstadoCuentaPage = () => {
             </Typography>
             <Button
               variant="contained"
-              color="error"
+              color={viewMode === "INGRESOS" ? "primary" : "error"}
               startIcon={<PrintIcon />}
               onClick={handlePrint}
               disabled={transacciones.length === 0}
@@ -235,111 +361,37 @@ const EstadoCuentaPage = () => {
 
           {loading ? (
             <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-              <CircularProgress />
+              <CircularProgress color={viewMode === "INGRESOS" ? "primary" : "error"} />
             </Box>
           ) : transacciones.length > 0 ? (
             <>
-              <TableContainer
-                component={Paper}
-                elevation={0}
-                sx={{ border: (theme) => `1px solid ${theme.palette.divider}`, borderRadius: 2 }}
-              >
-                <Table size="small" stickyHeader>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ backgroundColor: "primary.main", color: "primary.contrastText", fontWeight: "bold" }}>
-                        Nro
-                      </TableCell>
-                      <TableCell sx={{ backgroundColor: "primary.main", color: "primary.contrastText", fontWeight: "bold" }}>
-                        Fecha
-                      </TableCell>
-                      <TableCell sx={{ backgroundColor: "primary.main", color: "primary.contrastText", fontWeight: "bold" }}>
-                        Tipo de pago
-                      </TableCell>
-                      <TableCell sx={{ backgroundColor: "primary.main", color: "primary.contrastText", fontWeight: "bold" }}>
-                        ID cliente
-                      </TableCell>
-                      <TableCell sx={{ backgroundColor: "primary.main", color: "primary.contrastText", fontWeight: "bold" }}>
-                        Razón Social
-                      </TableCell>
-                      <TableCell sx={{ backgroundColor: "primary.main", color: "primary.contrastText", fontWeight: "bold" }}>
-                        Por Concepto
-                      </TableCell>
-                      <TableCell sx={{ backgroundColor: "primary.main", color: "primary.contrastText", fontWeight: "bold" }}>
-                        Periodo
-                      </TableCell>
-                      <TableCell sx={{ backgroundColor: "primary.main", color: "primary.contrastText", fontWeight: "bold" }}>
-                        Año
-                      </TableCell>
-                      <TableCell
-                        align="right"
-                        sx={{ backgroundColor: "primary.main", color: "primary.contrastText", fontWeight: "bold" }}
-                      >
-                        Importe (S/.)
-                      </TableCell>
-                      <TableCell sx={{ backgroundColor: "primary.main", color: "primary.contrastText", fontWeight: "bold" }}>
-                        Estado
-                      </TableCell>
-                      <TableCell sx={{ backgroundColor: "primary.main", color: "primary.contrastText", fontWeight: "bold" }}>
-                        Observacion
-                      </TableCell>
-                      <TableCell sx={{ backgroundColor: "primary.main", color: "primary.contrastText", fontWeight: "bold" }}>
-                        Registra
-                      </TableCell>
-                      <TableCell sx={{ backgroundColor: "primary.main", color: "primary.contrastText", fontWeight: "bold" }}>
-                        CAJA
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {transacciones.map((transaccion, index) => (
-                      <TableRow
-                        key={`${transaccion.tipo}-${transaccion.id}`}
-                        hover
-                        sx={{
-                          backgroundColor: transaccion.tipo === "SALIDA" ? "warning.lighter" : "background.paper",
-                          "&:last-child td, &:last-child th": { border: 0 },
-                        }}
-                      >
-                        <TableCell>{index + 1}</TableCell>
-                        <TableCell>{formatDate(transaccion.fecha)}</TableCell>
-                        <TableCell>{transaccion.tipo_pago || "-"}</TableCell>
-                        <TableCell>{transaccion.id_cliente || "-"}</TableCell>
-                        <TableCell>{transaccion.razon_social || "-"}</TableCell>
-                        <TableCell>{transaccion.concepto || "-"}</TableCell>
-                        <TableCell>{transaccion.periodo || "-"}</TableCell>
-                        <TableCell>{transaccion.anio || "-"}</TableCell>
-                        <TableCell align="right">
-                          {transaccion.tipo === "SALIDA" ? "-" : ""}
-                          {formatCurrency(transaccion.importe)}
-                        </TableCell>
-                        <TableCell>{transaccion.estado || "-"}</TableCell>
-                        <TableCell>{transaccion.observacion || "-"}</TableCell>
-                        <TableCell>{transaccion.registra || "-"}</TableCell>
-                        <TableCell>{transaccion.caja || "-"}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+              <CustomTable
+                columns={columns}
+                data={transacciones}
+                paginationModel={paginationModel}
+                setPaginationModel={setPaginationModel}
+                loading={loading}
+                getRowId={getRowId}
+                paginationMode="client"
+              />
 
               {/* Total Anual */}
               <Card
                 elevation={0}
                 sx={{
                   mt: 3,
-                  bgcolor: (theme) => theme.palette.mode === 'dark' ? 'primary.darker' : 'primary.lighter',
-                  border: (theme) => `1px solid ${theme.palette.primary.light}`,
+                  // bgcolor: cardBgColor,
+                  border: (theme) => `1px solid ${theme.palette[cardBorderColor]}`,
                   borderRadius: 2,
                 }}
               >
                 <CardContent>
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Typography variant="h6" fontWeight="bold" color="primary.dark">
-                      Total Anual:
+                    <Typography variant="h6" fontWeight="bold" color={`${totalColor}.dark`}>
+                      {totalLabel}
                     </Typography>
-                    <Typography variant="h5" fontWeight="800" color="primary.main">
-                      {formatCurrency(totalAnual)}
+                    <Typography variant="h5" fontWeight="800" color={`${totalColor}.main`}>
+                      {formatCurrency(totalAmount)}
                     </Typography>
                   </Stack>
                 </CardContent>
@@ -348,7 +400,7 @@ const EstadoCuentaPage = () => {
           ) : (
             <Box sx={{ textAlign: "center", p: 4 }}>
               <Typography variant="body1" color="text.secondary">
-                No se encontraron transacciones para el cliente seleccionado en el año {selectedYear}.
+                No se encontraron {viewMode.toLowerCase()} para el cliente seleccionado en el año {selectedYear}.
               </Typography>
             </Box>
           )}
@@ -359,4 +411,3 @@ const EstadoCuentaPage = () => {
 };
 
 export default EstadoCuentaPage;
-

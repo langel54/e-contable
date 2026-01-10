@@ -74,6 +74,7 @@ const CustomTable = React.memo(
     rowCount,
     loading,
     getRowId,
+    paginationMode = "server"
   }) => {
     return (
       <TableContainer>
@@ -87,9 +88,9 @@ const CustomTable = React.memo(
           columns={columns}
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
-          pageSizeOptions={[5, 10, 20]}
+          pageSizeOptions={[5, 10, 20, 50, 100]}
           rowCount={rowCount}
-          paginationMode="server"
+          paginationMode={paginationMode}
           loading={loading}
           getRowId={getRowId}
           rowHeight={54}

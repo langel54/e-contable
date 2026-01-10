@@ -7,3 +7,8 @@ export const getEgresosCliente = async (idclienteprov, year) => {
   );
 };
 
+// Reporte anual de egresos
+export const getAnnualExpenseReport = async (year) => {
+  return fetchWithAuth(`/egresos-cliente/annual-report?year=${year}`);
+};
+
