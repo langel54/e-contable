@@ -13,12 +13,18 @@ export const getDashboardClientesTablas = async () => {
   return fetchWithAuth("/dashboard/clientes/tablas");
 };
 
-export const getDashboardTributosKPIs = async () => {
-  return fetchWithAuth("/dashboard/tributos/kpis");
+export const getDashboardTributosKPIs = async ({ anio, mes } = {}) => {
+  const params = new URLSearchParams();
+  if (anio) params.append("anio", anio);
+  if (mes) params.append("mes", mes);
+  return fetchWithAuth(`/dashboard/tributos/kpis?${params.toString()}`);
 };
 
-export const getDashboardTributosGraficos = async () => {
-  return fetchWithAuth("/dashboard/tributos/graficos");
+export const getDashboardTributosGraficos = async ({ anio, mes } = {}) => {
+  const params = new URLSearchParams();
+  if (anio) params.append("anio", anio);
+  if (mes) params.append("mes", mes);
+  return fetchWithAuth(`/dashboard/tributos/graficos?${params.toString()}`);
 };
 
 export const getDashboardTributosTablas = async () => {
@@ -34,11 +40,11 @@ export const getDashboardCajaKPIs = async ({ modo, anio, idperiodo }) => {
 export const getDashboardCajaGraficos = async ({ modo, anio, idperiodo }) => {
   return fetchWithAuth(
     "/dashboard/caja/graficos?modo=" +
-      modo +
-      "&anio=" +
-      anio +
-      "&mes=" +
-      idperiodo
+    modo +
+    "&anio=" +
+    anio +
+    "&mes=" +
+    idperiodo
   );
 };
 
