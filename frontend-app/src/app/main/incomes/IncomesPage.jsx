@@ -27,7 +27,7 @@ import { getEstados } from "@/app/services/estadoDocServices";
 import { getColumns } from "./components/TableColumns";
 import IncomesFilters from "./components/IncomesFilters";
 import IncomesActionsPopover from "./components/IncomesActionsPopover";
-import { handleGenerateExcel } from "./utils";
+import { handleGenerateExcel, handleGeneratePDF } from "./utils";
 import { useIncomesData } from "./hooks/useIncomesData";
 
 dayjs.extend(utc);
@@ -278,7 +278,17 @@ const IncomesPage = () => {
           })
         }
         exportingExcel={exportingExcel}
-        onOtherAction={() => {}}
+        onOtherAction={() => 
+          handleGeneratePDF({
+            startDate,
+            endDate,
+            conceptFilter,
+            periodo,
+            selectedAnio,
+            selectedEstado,
+            handleActionOpen,
+          })
+        }
         handleClosePop={handleActionOpen}
       />
       <CustomTable

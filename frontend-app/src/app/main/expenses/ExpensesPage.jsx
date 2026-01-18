@@ -64,6 +64,7 @@ import {
   handleYearChange,
   renderYearContent,
   handleResetFilter,
+  handleGeneratePDF,
 } from "./utils/expensesUtils";
 
 const ExpensesPage = () => {
@@ -429,7 +430,15 @@ const ExpensesPage = () => {
                 sx={{ cursor: "pointer" }}
                 onClick={() => {
                   // Acción PDF, igual que IncomesPage
-                  handleActionOpen();
+                  handleGeneratePDF({
+                    startDate,
+                    endDate,
+                    conceptFilter,
+                    periodo,
+                    selectedAnio,
+                    selectedEstado,
+                    handleActionOpen,
+                  });
                 }}
               >
                 <ListItemIcon

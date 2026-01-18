@@ -76,6 +76,76 @@ export async function handleGenerateExcel({
     handleActionOpen();
   }
 }
+
+export async function handleGeneratePDF({
+  startDate,
+  endDate,
+  conceptFilter,
+  periodo,
+  selectedAnio,
+  selectedEstado,
+  handleActionOpen,
+}) {
+  const selectedColumns = {
+    idingreso: "Nro",
+    fecha: "FECHA",
+    razonsocial: "Razon Social",
+    concepto: "CONCEPTO",
+    importe: "IMPORTE",
+    estado: "ESTADO",
+    observacion: "OBS",
+  };
+
+  let startDateFormat = "";
+  let endDateFormat = "";
+  if (startDate && endDate) {
+    let start = new Date(startDate);
+    let end = new Date(endDate);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+    startDateFormat = dayjs(start).utc().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
+    endDateFormat = dayjs(end).utc().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
+  }
+
+  try {
+    const fetchedData = await fetchAllIngresos(
+      getIngresos,
+      startDateFormat,
+      endDateFormat,
+      conceptFilter,
+      periodo,
+      selectedAnio,
+      selectedEstado
+    );
+
+    const transformedData = fetchedData.map((item) => ({
+      idingreso: item.idingreso,
+      fecha: dayjs(item.fecha).format("DD/MM/YYYY HH:mm"),
+      razonsocial: item.cliente_prov ? item.cliente_prov.razonsocial : "",
+      anio: item.anio,
+      concepto: item.concepto ? item.concepto.nombre_concepto : "",
+      importe: item.importe,
+      estado: item.estado ? item.estado.nom_estado : "",
+      observacion: item.observacion,
+    }));
+
+    const { default: pdfExport } = await import("@/app/components/pdfReport");
+
+    const generate = pdfExport({
+      data: transformedData,
+      fileName: "Reporte_Ingresos.pdf",
+      title: "Reporte de Ingresos",
+      columnsToShow: selectedColumns,
+    });
+
+    await generate();
+
+  } catch (error) {
+    console.error("Error generating PDF", error);
+  } finally {
+    handleActionOpen();
+  }
+}
 // import dayjs from "dayjs";
 // dayjs.extend(require("dayjs/plugin/utc"));
 
