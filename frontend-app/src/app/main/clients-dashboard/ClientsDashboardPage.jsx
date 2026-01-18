@@ -2,7 +2,6 @@ import { Box, Grid, Stack, Typography, useTheme } from "@mui/material";
 import AuthGuard from "../menu/AuthGuard";
 import AnalyticEcommerce from "@/app/ui-components/cards/statistics/AnalyticEcommerce";
 import MainCard from "@/app/ui-components/MainCard";
-import MonthlyBarChart from "../dashboard/MonthlyBarChart";
 import UniqueVisitorCard from "./UniqueVisitorCard";
 import { useEffect, useState } from "react";
 import {

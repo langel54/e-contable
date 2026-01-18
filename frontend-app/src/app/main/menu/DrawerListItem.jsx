@@ -186,7 +186,15 @@ const DrawerListItem = ({ item, open }) => {
               elevation={3}
               onMouseEnter={cancelCloseHover}
               onMouseLeave={scheduleCloseHover}
-              sx={{ minWidth: 200, py: 0 }}
+              sx={{ 
+                minWidth: 200, 
+                py: 0,
+                // Match the Slate theme
+                backgroundImage: 'none',
+                backgroundColor: 'background.paper',
+                border: '1px solid',
+                borderColor: 'divider',
+              }}
             >
               <MenuList autoFocusItem={false} disablePadding>
                 {item.children.map((subItem) => {
@@ -199,9 +207,13 @@ const DrawerListItem = ({ item, open }) => {
                       onClick={() => setHoverOpen(false)}
                       sx={{
                         backgroundColor: isSubActive
-                          ? "rgba(0,0,0,0.08)"
+                          ? "primary.lighter"
                           : "transparent",
-                        "&:hover": { backgroundColor: "action.hover" },
+                        color: isSubActive ? "primary.main" : "text.primary",
+                        "&:hover": { 
+                          backgroundColor: isSubActive ? "primary.lighter" : "action.hover",
+                          color: isSubActive ? "primary.main" : "primary.main",
+                        },
                       }}
                     >
                       {subItem.text}

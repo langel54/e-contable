@@ -341,7 +341,7 @@ const ExpensesPage = () => {
           <FormControl size="medium" sx={{ width: 150 }}>
             <DatePicker
               selected={selectedAnio ? new Date(selectedAnio, 0, 1) : null}
-              onChange={handleYearChange}
+              onChange={(date) => handleYearChange(date, setSelectedAnio)}
               showYearPicker
               dateFormat="yyyy"
               renderYearContent={renderYearContent}

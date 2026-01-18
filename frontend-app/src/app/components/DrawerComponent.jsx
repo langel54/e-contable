@@ -42,8 +42,9 @@ const DrawerComponent = ({
       PaperProps={{
         sx: {
           width,
-          backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#1e1e1e' : theme.palette.background.paper,
-          backgroundImage: (theme) => theme.palette.mode === 'dark' ? 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))' : 'none',
+          // Use theme palette for consistency
+          backgroundColor: (theme) => theme.palette.mode === 'dark' ? theme.palette.background.paper : theme.palette.background.paper, 
+          backgroundImage: 'none', 
         }
       }}
     >

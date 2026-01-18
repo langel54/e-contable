@@ -126,10 +126,7 @@ const CashDashboardPage = () => {
     categoriesMes: categoriesMesSaldo,
     seriesDataMes: seriesDataMesSaldo,
   } = resultMesSaldo;
-  console.log(
-    "🚀 ~ CashDashboardPage ~ categoriesMesSaldo:",
-    seriesDataMesSaldo
-  );
+
 
   return (
     <AuthGuard allowedRoles={[1]}>

@@ -3,6 +3,7 @@ import { Tabs, Tab, Box, Typography, Stack, Divider } from "@mui/material";
 import { useState } from "react";
 import ClientsDashboardPage from "./clients-dashboard/ClientsDashboardPage";
 import CashDashboardPage from "./caja-dashboard/CashDashboardPage";
+import TributosDashboardPage from "./tributos-dashboard/TributosDashboardPage";
 
 export default function Main() {
   const [tab, setTab] = useState(0);
@@ -23,7 +24,7 @@ export default function Main() {
       <Box sx={{ p: 2 }}>
         {tab === 0 && <ClientsDashboardPage />}
         {tab === 1 && <CashDashboardPage />}
-        {tab === 2 && <Typography>Contenido del Paso 3</Typography>}
+        {tab === 2 && <TributosDashboardPage />}
       </Box>
     </Box>
   );

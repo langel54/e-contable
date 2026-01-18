@@ -15,12 +15,7 @@ const menuItemsByRole = {
       icon: <HomeIcon />,
       allowedRoles: [1, 2, 3],
     },
-    {
-      text: "Dashboard",
-      path: "/main/dashboard",
-      icon: <BarChartIcon />,
-      allowedRoles: [1],
-    },
+
     {
       text: "Usuarios",
       path: "/main/users",
@@ -80,13 +75,15 @@ const menuItemsByRole = {
       ],
     },
     {
-      text: "Estado de Cuenta",
+      text: "Reportes",
       path: "/main/estado-cuenta",
       icon: <Description />,
       allowedRoles: [1, 2, 3],
       children: [
-        { text: "Ingresos por Cliente", path: "/main/estado-cuenta" },
-        { text: "Egresos por Cliente", path: "/main/egresos-cliente" },
+        { text: "Estado Cta por cliente", path: "/main/estado-cuenta" },
+        { text: "Ingresos Anuales", path: "/main/incomes/annual-report" },
+        { text: "Egresos Anuales", path: "/main/expenses/annual-report" },
+
       ],
     },
     {

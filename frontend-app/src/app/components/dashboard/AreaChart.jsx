@@ -35,7 +35,7 @@ const AreaChart = ({
     // dataLabels: {
     //   enabled: true,
     //   style: {
-    //     fontSize: "12px",
+    //     fontSize: "11px",
     //     colors: [text.primary],
     //   },
     //   offsetY: type === "bar" ? -8 : -5,
@@ -80,6 +80,30 @@ const AreaChart = ({
     grid: {
       borderColor: divider,
     },
+    
+    // ⭐ CONFIGURACIÓN DEL TOOLTIP
+    tooltip: {
+      theme: theme.palette.mode, // 'dark' o 'light'
+      style: {
+        fontSize: '12px',
+        fontFamily: theme.typography.fontFamily,
+      },
+      background: {
+       enabled: true,
+       foreColor: theme.palette.text.primary,
+      },
+      marker: {
+        show: true,
+      },
+      // Aseguramos contraste fix si el automode falla
+      ...(theme.palette.mode === 'dark' && {
+        cssClass: 'apexcharts-tooltip-dark-custom', // Opcional si queremos CSS específico
+        style: {
+          color: '#f8fafc' // Slate 50
+        }
+      })
+    },
+
     // ✅ Agregar línea horizontal en 0 si la propiedad está activada
     annotations: horizontalLineAtZero
       ? {
