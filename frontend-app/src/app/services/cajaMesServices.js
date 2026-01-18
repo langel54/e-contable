@@ -36,3 +36,15 @@ export const deleteCajaMes = async (codcaja_m) => {
     method: "DELETE",
   });
 };
+
+// Cerrar caja mensual
+export const closeCajaMes = async (codcaja_m) => {
+  return fetchWithAuth(`/caja-mes/close/${codcaja_m}`, {
+    method: "PUT"
+  });
+};
+
+// Obtener saldo anterior
+export const getLastMesBalance = async (monthCode) => {
+  return fetchWithAuth(`/caja-mes/getLastBalance?monthCode=${monthCode}`);
+};

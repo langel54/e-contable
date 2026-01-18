@@ -5,10 +5,10 @@ const formaPagoTribService = {
   async getAll(skip, limit, search) {
     const where = search
       ? {
-          descripcion: {
-            contains: search,
-          },
-        }
+        descripcion: {
+          contains: search,
+        },
+      }
       : {};
 
     const formaPagoTribs = await prisma.formaPagoTrib.findMany({
@@ -18,6 +18,9 @@ const formaPagoTribService = {
       select: {
         idforma_pago_trib: true,
         descripcion: true,
+      },
+      orderBy: {
+        idforma_pago_trib: "asc",
       },
     });
 

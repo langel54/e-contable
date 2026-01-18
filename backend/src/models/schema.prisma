@@ -7,14 +7,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model ActEspecifica {
-  nact_especifica   String  @id
-  idact_especifica  Int?
+model actespecifica {
+  nact_especifica  String @id
+  idact_especifica Int?
 }
 
-model CajaAnual {
+model cajaanual {
   nro             Int?
-  codcaja_a       String     @id
+  codcaja_a       String    @id
   fecha_apertura  DateTime?
   monto_inicial_a Float?
   ingreso_a       Float?
@@ -23,10 +23,10 @@ model CajaAnual {
   fechacierre     DateTime?
   registra        String?
   estado_c_a      String?
-  caja_mes        CajaMes[]
+  cajames         cajames[]
 }
 
-model CajaMes {
+model cajames {
   nro             Int?
   codcaja_m       String    @id
   fecha_apertura  DateTime?
@@ -38,100 +38,106 @@ model CajaMes {
   codcaja_a       String
   registra        String?
   estado_c_m      String?
-  caja_anual      CajaAnual @relation(fields: [codcaja_a], references: [codcaja_a])
-  ingreso         Ingreso[]
-  salida          Salida[]
+  cajaanual       cajaanual @relation(fields: [codcaja_a], references: [codcaja_a], map: "CajaMes_codcaja_a_fkey")
+  ingreso         ingreso[]
+  salida          salida[]
+
+  @@index([codcaja_a], map: "CajaMes_codcaja_a_fkey")
 }
 
-model ClienteProv {
-  nro              Int?
-  idclienteprov    String   @id
-  nregimen         String?
-  razonsocial      String?  @db.VarChar(85)
-  u_digito         String?  @db.Char(2)
-  ruc              String?  @db.VarChar(11)
-  c_usuario        String?  @db.VarChar(20)
-  c_passw          String?  @db.VarChar(45)
-  dni              String?  @db.VarChar(8)
-  cod_envio        String?
-  pdt_621          String?  @db.Char(2)
-  planilla_elect   String?  @db.Char(2)
-  fact_elect       String?  @db.Char(2)
-  libro_elect      String?  @db.Char(2)
-  tipo_cronog      String?  @db.Char(2)
-  ple_desde        String?  @default("0000-00-00")
-  cta_detraccion   String?
-  paga_detraccion  String?  @db.Char(2)
-  paga_percepcion  String?  @db.Char(2)
-  compensa_percepcion String? @db.Char(2)
-  sujeta_retencion String?  @db.Char(2)
-  clave_afpnet     String?
-  clave_rnp        String?  @db.Char(2)
-  nrubro           String?
-  nact_especifica  String?
-  fecha_ingreso    String?  @default("0000-00-00")
-  contacto         String?
-  telefono         Int?
-  direccion        String?
-  responsable      String?
-  montoref         Float?
-  honorario_anual  String?
-  obs              String?
-  idfacturador     Int
-  f_usuario        String
-  f_pass           String   @db.VarChar(50)
-  estado           String   @db.Char(2)
-  declarado        String   @db.VarChar(2)
-  regimen          Regimen? @relation(fields: [nregimen], references: [nregimen])
-  rubro            Rubro?   @relation(fields: [nrubro], references: [nrubro])
-  facturador       Facturador @relation(fields: [idfacturador], references: [idfacturador])
-  ingreso          Ingreso[]
-  salida           Salida[]
-  tributos         Tributos[]
+model clienteprov {
+  nro                 Int?
+  idclienteprov       String     @id
+  nregimen            String?
+  razonsocial         String?    @db.VarChar(85)
+  u_digito            String?    @db.Char(2)
+  ruc                 String?    @db.VarChar(11)
+  c_usuario           String?    @db.VarChar(20)
+  c_passw             String?    @db.VarChar(45)
+  dni                 String?    @db.VarChar(8)
+  cod_envio           String?
+  pdt_621             String?    @db.Char(2)
+  planilla_elect      String?    @db.Char(2)
+  fact_elect          String?    @db.Char(2)
+  libro_elect         String?    @db.Char(2)
+  tipo_cronog         String?    @db.Char(2)
+  ple_desde           String?    @default("0000-00-00")
+  cta_detraccion      String?
+  paga_detraccion     String?    @db.Char(2)
+  paga_percepcion     String?    @db.Char(2)
+  compensa_percepcion String?    @db.Char(2)
+  sujeta_retencion    String?    @db.Char(2)
+  clave_afpnet        String?
+  clave_rnp           String?    @db.Char(2)
+  nrubro              String?
+  nact_especifica     String?
+  fecha_ingreso       String?    @default("0000-00-00")
+  contacto            String?
+  telefono            Int?
+  direccion           String?
+  responsable         String?
+  montoref            Float?
+  honorario_anual     String?
+  obs                 String?
+  idfacturador        Int
+  f_usuario           String
+  f_pass              String     @db.VarChar(50)
+  estado              String     @db.Char(2)
+  declarado           String     @db.VarChar(2)
+  facturador          facturador @relation(fields: [idfacturador], references: [idfacturador], map: "ClienteProv_idfacturador_fkey")
+  regimen             regimen?   @relation(fields: [nregimen], references: [nregimen], map: "ClienteProv_nregimen_fkey")
+  rubro               rubro?     @relation(fields: [nrubro], references: [nrubro], map: "ClienteProv_nrubro_fkey")
+  ingreso             ingreso[]
+  salida              salida[]
+  tributos            tributos[]
+
+  @@index([idfacturador], map: "ClienteProv_idfacturador_fkey")
+  @@index([nregimen], map: "ClienteProv_nregimen_fkey")
+  @@index([nrubro], map: "ClienteProv_nrubro_fkey")
 }
 
-model Concepto {
-  idconcepto      Int      @id @default(autoincrement())
+model concepto {
+  idconcepto      Int       @id @default(autoincrement())
   nombre_concepto String?
-  ingreso         Ingreso[]
-  salida          Salida[]
+  ingreso         ingreso[]
+  salida          salida[]
 }
 
-model Configuracion {
-  idconfig       Int      @id @default(autoincrement())
-  e_razonsocial  String?
-  e_ncomercial   String?
-  igv            Float?
-  tim            Float?
-  e_ruc          String?
+model configuracion {
+  idconfig      Int     @id @default(autoincrement())
+  e_razonsocial String?
+  e_ncomercial  String?
+  igv           Float?
+  tim           Float?
+  e_ruc         String?
 }
 
-model Estado {
-  idestado    Int       @id @default(autoincrement())
-  nom_estado  String?
-  ingreso     Ingreso[]
-  salida      Salida[]
+model estado {
+  idestado   Int       @id @default(autoincrement())
+  nom_estado String?
+  ingreso    ingreso[]
+  salida     salida[]
 }
 
-model EstadoCliente {
-  idestadocliente    Int       @id @default(autoincrement())
-  descripcion  String?
+model estadocliente {
+  idestadocliente Int     @id @default(autoincrement())
+  descripcion     String?
 }
 
-model Facturador {
-  idfacturador  Int           @id @default(autoincrement())
-  n_facturador  String?
-  f_obs         String?
-  cliente_prov  ClienteProv[]
+model facturador {
+  idfacturador Int           @id @default(autoincrement())
+  n_facturador String?
+  f_obs        String?
+  clienteprov  clienteprov[]
 }
 
-model FormaPagoTrib {
-  idforma_pago_trib  String  @id
-  descripcion        String?
+model formapagotrib {
+  idforma_pago_trib String  @id
+  descripcion       String?
 }
 
-model Ingreso {
-  idingreso     Int       @id @default(autoincrement())
+model ingreso {
+  idingreso     Int            @id @default(autoincrement())
   fecha         DateTime?
   idtipo_op     Int?
   idtipo_doc    Int?
@@ -146,16 +152,24 @@ model Ingreso {
   observacion   String?
   registra      String?
   codcaja_m     String
-  cliente_prov  ClienteProv @relation(fields: [idclienteprov], references: [idclienteprov])
-  concepto      Concepto    @relation(fields: [idconcepto], references: [idconcepto])
-  periodo       Periodo     @relation(fields: [idperiodo], references: [idperiodo])
-  tipo_doc      TipoDocumento? @relation(fields: [idtipo_doc], references: [idtipo_doc])
-  tipo_op       TipoOperacion? @relation(fields: [idtipo_op], references: [idtipo_op])
-  estado        Estado?     @relation(fields: [idestado], references: [idestado])
-  caja_mes      CajaMes     @relation(fields: [codcaja_m], references: [codcaja_m])
+  cajames       cajames        @relation(fields: [codcaja_m], references: [codcaja_m], map: "Ingreso_codcaja_m_fkey")
+  clienteprov   clienteprov    @relation(fields: [idclienteprov], references: [idclienteprov], map: "Ingreso_idclienteprov_fkey")
+  concepto      concepto       @relation(fields: [idconcepto], references: [idconcepto], map: "Ingreso_idconcepto_fkey")
+  estado        estado?        @relation(fields: [idestado], references: [idestado], map: "Ingreso_idestado_fkey")
+  periodo       periodo        @relation(fields: [idperiodo], references: [idperiodo], map: "Ingreso_idperiodo_fkey")
+  tipodocumento tipodocumento? @relation(fields: [idtipo_doc], references: [idtipo_doc], map: "Ingreso_idtipo_doc_fkey")
+  tipooperacion tipooperacion? @relation(fields: [idtipo_op], references: [idtipo_op], map: "Ingreso_idtipo_op_fkey")
+
+  @@index([codcaja_m], map: "Ingreso_codcaja_m_fkey")
+  @@index([idclienteprov], map: "Ingreso_idclienteprov_fkey")
+  @@index([idconcepto], map: "Ingreso_idconcepto_fkey")
+  @@index([idestado], map: "Ingreso_idestado_fkey")
+  @@index([idperiodo], map: "Ingreso_idperiodo_fkey")
+  @@index([idtipo_doc], map: "Ingreso_idtipo_doc_fkey")
+  @@index([idtipo_op], map: "Ingreso_idtipo_op_fkey")
 }
 
-model Notas {
+model notas {
   idnotas       Int       @id @default(autoincrement())
   n_fecha       DateTime? @db.Date
   idclienteprov String?   @db.Char(5)
@@ -165,8 +179,8 @@ model Notas {
   neditor       String?
 }
 
-model Pagos {
-  idpagos           Int      @id @default(autoincrement())
+model pagos {
+  idpagos           Int       @id @default(autoincrement())
   idtributos        Int
   fecha_p           DateTime? @db.Date
   importe_p         Float
@@ -174,37 +188,37 @@ model Pagos {
   detalles          String?
 }
 
-model Periodo {
-  idperiodo    Int       @id @default(autoincrement())
-  nom_periodo  String?
-  ingreso      Ingreso[]
-  salida       Salida[]
+model periodo {
+  idperiodo   Int       @id @default(autoincrement())
+  nom_periodo String?
+  ingreso     ingreso[]
+  salida      salida[]
 }
 
-model Personal {
-  id_personal  Int       @id @default(autoincrement())
-  nombres      String?
-  apellidos    String?
-  direccion    String?
-  telefono     String?   @db.Char(9)
-  personalcol  String?
-  usuario      Usuario[]
+model personal {
+  id_personal Int       @id @default(autoincrement())
+  nombres     String?
+  apellidos   String?
+  direccion   String?
+  telefono    String?   @db.Char(9)
+  personalcol String?
+  usuario     usuario[]
 }
 
-model Regimen {
+model regimen {
   nregimen    String        @id
   idregimen   Int?
-  cliente_prov ClienteProv[]
+  clienteprov clienteprov[]
 }
 
-model Rubro {
-  nrubro       String        @id
-  idrubro      Int?
-  cliente_prov ClienteProv[]
+model rubro {
+  nrubro      String        @id
+  idrubro     Int?
+  clienteprov clienteprov[]
 }
 
-model Salida {
-  idsalida      Int       @id @default(autoincrement())
+model salida {
+  idsalida      Int            @id @default(autoincrement())
   fecha         DateTime?
   idtipo_op     Int?
   idtipo_doc    Int?
@@ -219,42 +233,50 @@ model Salida {
   observacion   String?
   registra      String?
   codcaja_m     String
-  cliente_prov  ClienteProv @relation(fields: [idclienteprov], references: [idclienteprov])
-  concepto      Concepto    @relation(fields: [idconcepto], references: [idconcepto])
-  periodo       Periodo     @relation(fields: [idperiodo], references: [idperiodo])
-  tipo_doc      TipoDocumento? @relation(fields: [idtipo_doc], references: [idtipo_doc])
-  tipo_op       TipoOperacion? @relation(fields: [idtipo_op], references: [idtipo_op])
-  estado        Estado?     @relation(fields: [idestado], references: [idestado])
-  caja_mes      CajaMes     @relation(fields: [codcaja_m], references: [codcaja_m])
+  cajames       cajames        @relation(fields: [codcaja_m], references: [codcaja_m], map: "Salida_codcaja_m_fkey")
+  clienteprov   clienteprov    @relation(fields: [idclienteprov], references: [idclienteprov], map: "Salida_idclienteprov_fkey")
+  concepto      concepto       @relation(fields: [idconcepto], references: [idconcepto], map: "Salida_idconcepto_fkey")
+  estado        estado?        @relation(fields: [idestado], references: [idestado], map: "Salida_idestado_fkey")
+  periodo       periodo        @relation(fields: [idperiodo], references: [idperiodo], map: "Salida_idperiodo_fkey")
+  tipodocumento tipodocumento? @relation(fields: [idtipo_doc], references: [idtipo_doc], map: "Salida_idtipo_doc_fkey")
+  tipooperacion tipooperacion? @relation(fields: [idtipo_op], references: [idtipo_op], map: "Salida_idtipo_op_fkey")
+
+  @@index([codcaja_m], map: "Salida_codcaja_m_fkey")
+  @@index([idclienteprov], map: "Salida_idclienteprov_fkey")
+  @@index([idconcepto], map: "Salida_idconcepto_fkey")
+  @@index([idestado], map: "Salida_idestado_fkey")
+  @@index([idperiodo], map: "Salida_idperiodo_fkey")
+  @@index([idtipo_doc], map: "Salida_idtipo_doc_fkey")
+  @@index([idtipo_op], map: "Salida_idtipo_op_fkey")
 }
 
-model TipoDocumento {
+model tipodocumento {
   idtipo_doc  Int       @id
   descripcion String?
-  ingreso     Ingreso[]
-  salida      Salida[]
+  ingreso     ingreso[]
+  salida      salida[]
 }
 
-model TipoOperacion {
-  idtipo_op  Int       @id
-  nombre_op  String?
-  ingreso    Ingreso[]
-  salida     Salida[]
+model tipooperacion {
+  idtipo_op Int       @id
+  nombre_op String?
+  ingreso   ingreso[]
+  salida    salida[]
 }
 
-model TipoTrib {
+model tipotrib {
   idtipo_trib   String     @id
   descripcion_t String?
-  tributos      Tributos[]
+  tributos      tributos[]
 }
 
-model TipoUsuario {
+model tipousuario {
   id_tipo     Int       @id @default(autoincrement())
   descripcion String?
-  usuario     Usuario[]
+  usuario     usuario[]
 }
 
-model Tmp {
+model tmp {
   idtmp             Int      @id @default(autoincrement())
   fecha_p           DateTime @db.Date
   importe_p         Float
@@ -263,35 +285,41 @@ model Tmp {
   session_id        String
 }
 
-model Tributos {
-  idtributos    Int       @id @default(autoincrement())
-  fecha_v       String?  @default("0000-00-00")
+model tributos {
+  idtributos    Int         @id @default(autoincrement())
+  fecha_v       String?     @default("0000-00-00")
   idclienteprov String
-  anio          String?   @db.Char(4)
-  mes           String?   @db.Char(2)
+  anio          String?     @db.Char(4)
+  mes           String?     @db.Char(2)
   idtipo_trib   String
   importe_reg   Float?
   importe_pc    Int?
   importe_pend  Int?
   importe_pag   Float?
-  estado        String    @db.Char(1)
+  estado        String      @db.Char(1)
   obs           String?
-  fecha_reg     DateTime? @db.Date
-  cliente_prov  ClienteProv @relation(fields: [idclienteprov], references: [idclienteprov])
-  tipo_trib     TipoTrib   @relation(fields: [idtipo_trib], references: [idtipo_trib])
+  fecha_reg     DateTime?   @db.Date
+  clienteprov   clienteprov @relation(fields: [idclienteprov], references: [idclienteprov], map: "Tributos_idclienteprov_fkey")
+  tipotrib      tipotrib    @relation(fields: [idtipo_trib], references: [idtipo_trib], map: "Tributos_idtipo_trib_fkey")
+
+  @@index([idclienteprov], map: "Tributos_idclienteprov_fkey")
+  @@index([idtipo_trib], map: "Tributos_idtipo_trib_fkey")
 }
 
-model Usuario {
+model usuario {
   id_usuario  Int         @id @default(autoincrement())
-  usuario     String? @unique
+  usuario     String?     @unique(map: "Usuario_usuario_key")
   password    String?
   id_personal Int
   id_tipo     Int
-  personal    Personal    @relation(fields: [id_personal], references: [id_personal])
-  tipo_usuario TipoUsuario @relation(fields: [id_tipo], references: [id_tipo])
+  personal    personal    @relation(fields: [id_personal], references: [id_personal], map: "Usuario_id_personal_fkey")
+  tipousuario tipousuario @relation(fields: [id_tipo], references: [id_tipo], map: "Usuario_id_tipo_fkey")
+
+  @@index([id_personal], map: "Usuario_id_personal_fkey")
+  @@index([id_tipo], map: "Usuario_id_tipo_fkey")
 }
 
-model Vencimientos {
+model vencimientos {
   idvencimientos Int      @id @default(autoincrement())
   d0             DateTime @db.Date
   d1             DateTime @db.Date

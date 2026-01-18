@@ -5,11 +5,11 @@ const facturadorService = {
   async getAll(skip, limit, search) {
     const where = search
       ? {
-          OR: [
-            { n_facturador: { contains: search } },
-            { f_obs: { contains: search } },
-          ],
-        }
+        OR: [
+          { n_facturador: { contains: search } },
+          { f_obs: { contains: search } },
+        ],
+      }
       : {};
 
     const facturadores = await prisma.facturador.findMany({
@@ -21,6 +21,9 @@ const facturadorService = {
         n_facturador: true,
         f_obs: true,
         // cliente_prov: true, // Incluye datos relacionados con ClienteProv
+      },
+      orderBy: {
+        idfacturador: "desc",
       },
     });
 

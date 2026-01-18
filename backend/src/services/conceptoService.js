@@ -17,6 +17,9 @@ const conceptoService = {
         idconcepto: true,
         nombre_concepto: true,
       },
+      orderBy: {
+        idconcepto: "asc",
+      },
     });
 
     const total = await prisma.concepto.count({ where });

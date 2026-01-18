@@ -9,8 +9,8 @@ export const getVencimientos = async (anio, mes, u_digito) => {
 };
 
 // Get all vencimientos
-export const getAllVencimientos = async () => {
-  return fetchWithAuth("/vencimientos");
+export const getAllVencimientos = async (page = 1, limit = 10) => {
+  return fetchWithAuth(`/vencimientos/all?page=${page}&limit=${limit}`);
 };
 
 // Create vencimiento

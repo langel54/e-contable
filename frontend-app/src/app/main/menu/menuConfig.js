@@ -92,6 +92,25 @@ const menuItemsByRole = {
       icon: <ReceiptIcon />,
       allowedRoles: [1, 2, 3],
     },
+    {
+      text: "Administración",
+      path: "/main/admin",
+      icon: <SettingsIcon />,
+      allowedRoles: [1],
+      children: [
+        { text: "Facturadores", path: "/main/admin/facturadores" },
+        { text: "Conceptos", path: "/main/admin/conceptos" },
+        { text: "Tipos de Tributo", path: "/main/admin/tipos-tributo" },
+        { text: "Formas de Pago", path: "/main/admin/formas-pago" },
+        { text: "Vencimientos", path: "/main/admin/vencimientos" },
+      ],
+    },
+    {
+      text: "Gestión Cajas",
+      icon: <AccountBalance />,
+      path: "/main/admin/caja",
+      allowedRoles: [1],
+    },
   ],
   2: [
     { text: "Inicio", path: "/main", icon: <HomeIcon /> },
