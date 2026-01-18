@@ -35,7 +35,21 @@ export default function DataGrid(theme) {
                     },
                     '& .MuiDataGrid-footerContainer': {
                         borderTop: `1px solid ${theme.palette.divider}`,
-                    }
+                    },
+                    // Fix for interactions with IconButtons inside the grid
+                    // Force specific colors to win over DataGrid's default grey
+                    '& .MuiIconButton-colorInfo': {
+                        color: `${theme.palette.info.main} !important`,
+                    },
+                    '& .MuiIconButton-colorSuccess': {
+                        color: `${theme.palette.success.main} !important`,
+                    },
+                    '& .MuiIconButton-colorError': {
+                        color: `${theme.palette.error.main} !important`,
+                    },
+                    '& .MuiIconButton-colorWarning': {
+                        color: `${theme.palette.warning.main} !important`,
+                    },
                 }
             }
         }

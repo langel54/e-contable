@@ -87,25 +87,25 @@ export const getColumns = ({
       headerAlign: "right",
       align: "right",
       renderCell: (params) => (
-        <Stack direction={"row"} spacing={"2"}>
+        <Stack direction={"row"} spacing={1}>
           <Tooltip title="Editar" arrow placement="top">
             <IconButton
-              color="info"
               size="small"
               onClick={() => {
                 setEditSalidaData(params.row);
                 setOpenFormModal(true);
               }}
-              style={{ marginRight: 8 }}
+              color="info" // Uses theme.palette.info.main
+              sx={{ marginRight: 1 }}
             >
               <DriveFileRenameOutline />
             </IconButton>
           </Tooltip>
           <Tooltip title="Anular" arrow placement="top">
             <IconButton
-              color="error"
               size="small"
-              style={{ marginRight: 8 }}
+              color="error" // Uses theme.palette.error.main
+              sx={{ marginRight: 1 }}
               onClick={() => {
                 if (typeof openDeleteModal === "function") {
                   openDeleteModal(params.row.idsalida);
@@ -117,9 +117,9 @@ export const getColumns = ({
           </Tooltip>
           <Tooltip title="Ver / Imprimir" arrow placement="top">
             <IconButton
-              color="success"
               size="small"
               onClick={() => handleOpenPDFModal(params.row)}
+              color="success" // Uses theme.palette.success.main
             >
               <ReceiptLong />
             </IconButton>
