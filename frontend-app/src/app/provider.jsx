@@ -4,7 +4,7 @@ import { authService } from "./services/authService";
 import { useRouter } from "next/navigation";
 import { getCajasMes } from "./services/cajaMesServices";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 const AuthContext = createContext({
   isAuthenticated: false,
@@ -55,6 +55,10 @@ export function AuthProvider({ children }) {
             headers: { Authorization: `Bearer ${token}` },
           });
 
+          if (!response.ok) {
+            throw new Error("Token inválido");
+          }
+
           const data = await response.json();
           if (data.valid) {
             setIsAuthenticated(true);
@@ -65,6 +69,7 @@ export function AuthProvider({ children }) {
             router.push("/authentication");
           }
         } catch (error) {
+          console.error("Error al validar token:", error);
           setIsAuthenticated(false);
           router.push("/authentication");
         }
@@ -77,7 +82,7 @@ export function AuthProvider({ children }) {
       try {
         const cajaResponse = await getCajasMes(); // Ajusta la URL de tu API
         const cajas = cajaResponse.cajasMensuales;
-        if (cajas.length > 0) {
+        if (cajas && cajas.length > 0) {
           const ultimaCaja = cajas.reduce(
             (max, obj) => (obj.nro > max.nro ? obj : max),
             cajas[0]
@@ -86,6 +91,7 @@ export function AuthProvider({ children }) {
         }
       } catch (error) {
         console.error("Error al obtener las cajas:", error);
+
       }
 
       setLoadingAuth(false);

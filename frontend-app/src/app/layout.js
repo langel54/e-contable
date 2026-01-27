@@ -3,6 +3,7 @@
 import { CssBaseline } from "@mui/material";
 import ThemeCustomization from "./themes";
 import { AuthProvider } from "./provider";
+import { NotificationProvider } from "./context/NotificationContext";
 import "./globals.css";
 
 export default function RootLayout({ children }) {
@@ -15,10 +16,12 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <AuthProvider>
-          <ThemeCustomization>
-            <CssBaseline />
-            {children}
-          </ThemeCustomization>
+          <NotificationProvider>
+            <ThemeCustomization>
+              <CssBaseline />
+              {children}
+            </ThemeCustomization>
+          </NotificationProvider>
         </AuthProvider>
       </body>
     </html>

@@ -1,8 +1,9 @@
 import React, { useEffect } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { Box, CircularProgress } from "@mui/material";
-import { styled } from "@mui/material"; // Importa styled de MUI
+import { Box, CircularProgress, Typography } from "@mui/material";
+import { styled } from "@mui/material";
 import { esLocaleText } from "./esLocate";
+import InboxOutlined from "@ant-design/icons/InboxOutlined";
 
 // Estilos con styled de MUI
 const TableContainer = styled(Box)(({ theme }) => ({
@@ -65,6 +66,17 @@ const DataGridStyled = styled(DataGrid)(({ theme }) => ({
   }
 }));
 
+const EmptyStateContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  minHeight: "400px",
+  gap: theme.spacing(2),
+  padding: theme.spacing(4),
+  color: theme.palette.text.secondary,
+}));
+
 const CustomTable = React.memo(
   ({
     columns,
@@ -74,17 +86,33 @@ const CustomTable = React.memo(
     rowCount,
     loading,
     getRowId,
-    paginationMode = "server"
+    paginationMode = "server",
+    emptyMessage = "No se encontraron registros",
   }) => {
+    // Si no está cargando y no hay datos, mostrar estado vacío
+    const hasData = data && data.length > 0;
+    const showEmptyState = !loading && !hasData;
+
+    if (showEmptyState) {
+      return (
+        <TableContainer>
+          <EmptyStateContainer>
+            <InboxOutlined style={{ fontSize: 64, opacity: 0.3 }} />
+            <Typography variant="h6" color="text.secondary">
+              {emptyMessage}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Intenta ajustar los filtros de búsqueda
+            </Typography>
+          </EmptyStateContainer>
+        </TableContainer>
+      );
+    }
+
     return (
       <TableContainer>
-        {/* {loading ? (
-          <LoadingContainer>
-            <CircularProgress />
-          </LoadingContainer>
-        ) : ( */}
         <DataGridStyled
-          rows={data}
+          rows={data || []}
           columns={columns}
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
@@ -94,11 +122,19 @@ const CustomTable = React.memo(
           loading={loading}
           getRowId={getRowId}
           rowHeight={54}
-          // density="compact"
-          disableColumnMenu={true} // Desactiva el menú de las columnas
+          disableColumnMenu={true}
           localeText={esLocaleText}
+          slots={{
+            noRowsOverlay: () => (
+              <EmptyStateContainer>
+                <InboxOutlined style={{ fontSize: 64, opacity: 0.3 }} />
+                <Typography variant="h6" color="text.secondary">
+                  {emptyMessage}
+                </Typography>
+              </EmptyStateContainer>
+            ),
+          }}
         />
-        {/* )} */}
       </TableContainer>
     );
   }
