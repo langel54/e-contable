@@ -4,6 +4,7 @@ const {
   accessSunatTramites,
   accessSunatDeclaracionesPagos,
   accessSunatRentaAnual,
+  accessSunatMenuHandler,
 } = require("../controllers/sunatController");
 
 const router = express.Router();
@@ -12,5 +13,6 @@ const router = express.Router();
 router.post("/tramites", accessSunatTramites); // con web extension
 router.post("/declaraciones-pagos", accessSunatDeclaracionesPagos);
 router.post("/renta-anual", accessSunatRentaAnual);
+router.post("/menu", accessSunatMenuHandler);
 
 module.exports = router;

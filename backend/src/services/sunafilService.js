@@ -1,4 +1,4 @@
-const puppeteer = require("puppeteer");
+const { chromium } = require("playwright");
 
 async function accessSunafil({ ruc, usuario, password }) {
   filterList = ["Actos Administrativos", "Alertas"];
@@ -6,26 +6,26 @@ async function accessSunafil({ ruc, usuario, password }) {
   const url =
     "https://api-seguridad.sunat.gob.pe/v1/clientessol/b6474e23-8a3b-4153-b301-dafcc9646250/oauth2/login?originalUrl=https://casillaelectronica.sunafil.gob.pe/si.inbox/Login/Empresa&state=s";
 
-  const browser = await puppeteer.launch({
+  const browser = await chromium.launch({
     headless: false,
-    defaultViewport: null,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"], // Optimización para servidores
   });
   const page = await browser.newPage();
 
   try {
-    await page.goto(url, { waitUntil: "networkidle2" });
+    await page.goto(url, { waitUntil: "networkidle", timeout: 30000 });
 
     await page.waitForSelector("#txtRuc", { timeout: 10000 });
     await page.waitForSelector("#txtUsuario", { timeout: 10000 });
     await page.waitForSelector("#txtContrasena", { timeout: 10000 });
 
-    await page.type("#txtRuc", ruc);
-    await page.type("#txtUsuario", usuario);
-    await page.type("#txtContrasena", password);
+    await page.fill("#txtRuc", ruc);
+    await page.fill("#txtUsuario", usuario);
+    await page.fill("#txtContrasena", password);
 
     await Promise.all([
       page.click("#btnAceptar"),
-      page.waitForNavigation({ waitUntil: "networkidle2" }),
+      page.waitForLoadState("networkidle", { timeout: 30000 }),
     ]);
 
     const currentUrl = page.url();
@@ -79,7 +79,7 @@ async function accessSunafil({ ruc, usuario, password }) {
     console.log(items); // Muestra los items de la tabla
 
     // Extraer los menús después del login
-    await page.waitForSelector("ul.sidebar-menu");
+    await page.waitForSelector("ul.sidebar-menu", { timeout: 10000 });
 
     const menuItems = await page.$$eval(
       "ul.sidebar-menu > li.treeview",
@@ -111,12 +111,13 @@ async function accessSunafil({ ruc, usuario, password }) {
 
     console.log(JSON.stringify(menuItems, null, 2));
 
-
     return { success: true, url: currentUrl, menuItems };
   } catch (error) {
     console.error("❌ Error en login:", error);
-    await browser.close();
     return { success: false, error: error.message };
+  } finally {
+    // Asegurar que el navegador se cierre siempre
+    // await browser.close();
   }
 }
 module.exports = { accessSunafil };
