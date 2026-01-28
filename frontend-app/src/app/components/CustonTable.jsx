@@ -63,7 +63,10 @@ const DataGridStyled = styled(DataGrid)(({ theme }) => ({
   },
   '& .MuiIconButton-root': {
     color: theme.palette.text.secondary,
-  }
+  },
+  '& .MuiDataGrid-scrollbar': {
+    zIndex: 1, // Reducir de 6 a 1 para evitar que se superponga a otros elementos
+  },
 }));
 
 const EmptyStateContainer = styled(Box)(({ theme }) => ({

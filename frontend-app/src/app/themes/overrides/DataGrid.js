@@ -50,6 +50,9 @@ export default function DataGrid(theme) {
                     '& .MuiIconButton-colorWarning': {
                         color: `${theme.palette.warning.main} !important`,
                     },
+                    '& .MuiDataGrid-scrollbar': {
+                        zIndex: 1, // Reducir de 6 a 1 para evitar superposiciones
+                    },
                 }
             }
         }

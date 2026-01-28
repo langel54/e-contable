@@ -55,7 +55,7 @@ const DrawerComponent = ({
           justifyContent: "space-between",
           px: 2,
           py: 1.5,
-          paddingTop: "72px",
+          // paddingTop: "72px",
         }}
       >
         <Stack direction="row" spacing={1.5} alignItems="center">

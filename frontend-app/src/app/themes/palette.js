@@ -34,10 +34,11 @@ export default function Palette(mode, presetColor) {
 
   // Custom primary for dark mode to be a softer blue/indigo
   if (mode === "dark") {
-    paletteColor.primary.main = "#6366f1"; // Vibrant Indigo
-    paletteColor.primary.light = "#818cf8";
-    paletteColor.primary.dark = "#4f46e5";
-    paletteColor.primary.lighter = "rgba(99, 102, 241, 0.1)";
+    paletteColor.primary.main = "#2f6df6";
+    paletteColor.primary.light = "#5b8cff";
+    paletteColor.primary.dark = "#1f4fe0";
+
+    paletteColor.primary.lighter = "rgba(15, 15, 32, 0.1)";
 
     // Override secondary colors to be Slate-based for Dark Mode
     paletteColor.secondary.main = "#94a3b8"; // Slate 400

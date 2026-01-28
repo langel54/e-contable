@@ -68,12 +68,12 @@ const DrawerListItem = ({ item, open }) => {
     clearTimeout(leaveTimer.current);
   };
 
-  const activeBackgroundColor = alpha(theme.palette.primary.main, 0.08);
-  const hoverBackgroundColor = alpha(theme.palette.primary.main, 0.04);
+  const activeBackgroundColor = alpha(theme.palette.primary.main, 0.12);
+  const hoverBackgroundColor = alpha(theme.palette.primary.main, 0.08);
 
   return (
     <>
-      <ListItem disablePadding sx={{ display: "block", mb: 0.5 }}>
+      <ListItem disablePadding sx={{ display: "block", mb: 0.8 }}>
         <ListItemButton
           ref={anchorRef}
           component={hasChildren ? "div" : Link}
@@ -82,20 +82,21 @@ const DrawerListItem = ({ item, open }) => {
           onMouseEnter={!open && hasChildren ? openHover : undefined}
           onMouseLeave={!open && hasChildren ? scheduleCloseHover : undefined}
           sx={{
-            minHeight: 48,
-            mx: 1,
-            borderRadius: 1.5,
+            minHeight: 44,
+            mx: 1.5,
+            borderRadius: 2,
             justifyContent: open ? "initial" : "center",
             px: 2.5,
             backgroundColor: isActive || (open && isChildActive) ? activeBackgroundColor : "transparent",
             color: isActive || (open && isChildActive) ? "primary.main" : "text.secondary",
-            width: "auto", // Allow margin to work correctly
-            transition: theme.transitions.create(['background-color', 'color'], {
-              duration: theme.transitions.duration.shortest,
+            width: "auto",
+            transition: theme.transitions.create(['background-color', 'color', 'transform'], {
+              duration: 200,
             }),
             "&:hover": {
               backgroundColor: isActive || (open && isChildActive) ? activeBackgroundColor : hoverBackgroundColor,
               color: isActive || (open && isChildActive) ? "primary.main" : "text.primary",
+              transform: !isActive ? 'translateX(4px)' : 'none'
             },
           }}
         >
@@ -104,9 +105,9 @@ const DrawerListItem = ({ item, open }) => {
               minWidth: 0,
               mr: open ? 2 : "auto",
               justifyContent: "center",
-              color: isActive || (open && isChildActive) ? "inherit" : "text.secondary",
-              "& .MuiSku": { // Target icon if possible, or assume inherit works
-                 fontSize: '1.5rem'
+              color: "inherit",
+              "& .MuiSvgIcon-root": {
+                 fontSize: '1.25rem'
               }
             }}
           >
