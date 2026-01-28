@@ -43,6 +43,7 @@ const checkOrigin = require("./middlewares/checkOrigin");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const corsOptions = require("./config/corsConfig");
 const sunatRoutes = require("./routes/sunatRoutes");
+const buzonRoutes = require("./routes/buzonRoutes");
 
 // const clienteRoutes = require("./routes/clienteRoutes");
 
@@ -97,6 +98,7 @@ app.use("/api/pdf-egresos-cliente", pdfEgresosClienteRoutes);
 app.use("/api/sunafil", sunafilRoutes);
 app.use("/api/estado-cuenta", estadoCuentaRoutes);
 app.use("/api/egresos-cliente", egresosClienteRoutes);
+app.use("/api/buzon", buzonRoutes);
 app.use("/api", dashboardRoutes);
 
 // Error Handler

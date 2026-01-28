@@ -7,12 +7,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model actespecifica {
+model actEspecifica {
   nact_especifica  String @id
   idact_especifica Int?
+
+  @@map("actespecifica")
 }
 
-model cajaanual {
+model cajaAnual {
   nro             Int?
   codcaja_a       String    @id
   fecha_apertura  DateTime?
@@ -23,10 +25,12 @@ model cajaanual {
   fechacierre     DateTime?
   registra        String?
   estado_c_a      String?
-  cajames         cajames[]
+  caja_mes        cajaMes[]
+
+  @@map("cajaanual")
 }
 
-model cajames {
+model cajaMes {
   nro             Int?
   codcaja_m       String    @id
   fecha_apertura  DateTime?
@@ -38,14 +42,15 @@ model cajames {
   codcaja_a       String
   registra        String?
   estado_c_m      String?
-  cajaanual       cajaanual @relation(fields: [codcaja_a], references: [codcaja_a], map: "CajaMes_codcaja_a_fkey")
+  caja_anual      cajaAnual @relation(fields: [codcaja_a], references: [codcaja_a], map: "CajaMes_codcaja_a_fkey")
   ingreso         ingreso[]
   salida          salida[]
 
   @@index([codcaja_a], map: "CajaMes_codcaja_a_fkey")
+  @@map("cajames")
 }
 
-model clienteprov {
+model clienteProv {
   nro                 Int?
   idclienteprov       String     @id
   nregimen            String?
@@ -94,6 +99,7 @@ model clienteprov {
   @@index([idfacturador], map: "ClienteProv_idfacturador_fkey")
   @@index([nregimen], map: "ClienteProv_nregimen_fkey")
   @@index([nrubro], map: "ClienteProv_nrubro_fkey")
+  @@map("clienteprov")
 }
 
 model concepto {
@@ -101,6 +107,8 @@ model concepto {
   nombre_concepto String?
   ingreso         ingreso[]
   salida          salida[]
+
+  @@map("concepto")
 }
 
 model configuracion {
@@ -110,6 +118,8 @@ model configuracion {
   igv           Float?
   tim           Float?
   e_ruc         String?
+
+  @@map("configuracion")
 }
 
 model estado {
@@ -117,23 +127,31 @@ model estado {
   nom_estado String?
   ingreso    ingreso[]
   salida     salida[]
+
+  @@map("estado")
 }
 
-model estadocliente {
+model estadoCliente {
   idestadocliente Int     @id @default(autoincrement())
   descripcion     String?
+
+  @@map("estadocliente")
 }
 
 model facturador {
   idfacturador Int           @id @default(autoincrement())
   n_facturador String?
   f_obs        String?
-  clienteprov  clienteprov[]
+  cliente_prov clienteProv[]
+
+  @@map("facturador")
 }
 
-model formapagotrib {
+model formaPagoTrib {
   idforma_pago_trib String  @id
   descripcion       String?
+
+  @@map("formapagotrib")
 }
 
 model ingreso {
@@ -152,13 +170,13 @@ model ingreso {
   observacion   String?
   registra      String?
   codcaja_m     String
-  cajames       cajames        @relation(fields: [codcaja_m], references: [codcaja_m], map: "Ingreso_codcaja_m_fkey")
-  clienteprov   clienteprov    @relation(fields: [idclienteprov], references: [idclienteprov], map: "Ingreso_idclienteprov_fkey")
+  caja_mes      cajaMes        @relation(fields: [codcaja_m], references: [codcaja_m], map: "Ingreso_codcaja_m_fkey")
+  cliente_prov  clienteProv    @relation(fields: [idclienteprov], references: [idclienteprov], map: "Ingreso_idclienteprov_fkey")
   concepto      concepto       @relation(fields: [idconcepto], references: [idconcepto], map: "Ingreso_idconcepto_fkey")
   estado        estado?        @relation(fields: [idestado], references: [idestado], map: "Ingreso_idestado_fkey")
   periodo       periodo        @relation(fields: [idperiodo], references: [idperiodo], map: "Ingreso_idperiodo_fkey")
-  tipodocumento tipodocumento? @relation(fields: [idtipo_doc], references: [idtipo_doc], map: "Ingreso_idtipo_doc_fkey")
-  tipooperacion tipooperacion? @relation(fields: [idtipo_op], references: [idtipo_op], map: "Ingreso_idtipo_op_fkey")
+  tipo_doc      tipoDocumento? @relation(fields: [idtipo_doc], references: [idtipo_doc], map: "Ingreso_idtipo_doc_fkey")
+  tipo_op       tipoOperacion? @relation(fields: [idtipo_op], references: [idtipo_op], map: "Ingreso_idtipo_op_fkey")
 
   @@index([codcaja_m], map: "Ingreso_codcaja_m_fkey")
   @@index([idclienteprov], map: "Ingreso_idclienteprov_fkey")
@@ -167,6 +185,7 @@ model ingreso {
   @@index([idperiodo], map: "Ingreso_idperiodo_fkey")
   @@index([idtipo_doc], map: "Ingreso_idtipo_doc_fkey")
   @@index([idtipo_op], map: "Ingreso_idtipo_op_fkey")
+  @@map("ingreso")
 }
 
 model notas {
@@ -177,6 +196,8 @@ model notas {
   fecha_ed      DateTime  @db.Date
   ncreador      String?
   neditor       String?
+
+  @@map("notas")
 }
 
 model pagos {
@@ -186,6 +207,8 @@ model pagos {
   importe_p         Float
   idforma_pago_trib String
   detalles          String?
+
+  @@map("pagos")
 }
 
 model periodo {
@@ -193,6 +216,8 @@ model periodo {
   nom_periodo String?
   ingreso     ingreso[]
   salida      salida[]
+
+  @@map("periodo")
 }
 
 model personal {
@@ -203,18 +228,24 @@ model personal {
   telefono    String?   @db.Char(9)
   personalcol String?
   usuario     usuario[]
+
+  @@map("personal")
 }
 
 model regimen {
-  nregimen    String        @id
-  idregimen   Int?
-  clienteprov clienteprov[]
+  nregimen     String        @id
+  idregimen    Int?
+  cliente_prov clienteProv[]
+
+  @@map("regimen")
 }
 
 model rubro {
-  nrubro      String        @id
-  idrubro     Int?
-  clienteprov clienteprov[]
+  nrubro       String        @id
+  idrubro      Int?
+  cliente_prov clienteProv[]
+
+  @@map("rubro")
 }
 
 model salida {
@@ -233,13 +264,13 @@ model salida {
   observacion   String?
   registra      String?
   codcaja_m     String
-  cajames       cajames        @relation(fields: [codcaja_m], references: [codcaja_m], map: "Salida_codcaja_m_fkey")
-  clienteprov   clienteprov    @relation(fields: [idclienteprov], references: [idclienteprov], map: "Salida_idclienteprov_fkey")
+  caja_mes      cajaMes        @relation(fields: [codcaja_m], references: [codcaja_m], map: "Salida_codcaja_m_fkey")
+  cliente_prov  clienteProv    @relation(fields: [idclienteprov], references: [idclienteprov], map: "Salida_idclienteprov_fkey")
   concepto      concepto       @relation(fields: [idconcepto], references: [idconcepto], map: "Salida_idconcepto_fkey")
   estado        estado?        @relation(fields: [idestado], references: [idestado], map: "Salida_idestado_fkey")
   periodo       periodo        @relation(fields: [idperiodo], references: [idperiodo], map: "Salida_idperiodo_fkey")
-  tipodocumento tipodocumento? @relation(fields: [idtipo_doc], references: [idtipo_doc], map: "Salida_idtipo_doc_fkey")
-  tipooperacion tipooperacion? @relation(fields: [idtipo_op], references: [idtipo_op], map: "Salida_idtipo_op_fkey")
+  tipo_doc      tipoDocumento? @relation(fields: [idtipo_doc], references: [idtipo_doc], map: "Salida_idtipo_doc_fkey")
+  tipo_op       tipoOperacion? @relation(fields: [idtipo_op], references: [idtipo_op], map: "Salida_idtipo_op_fkey")
 
   @@index([codcaja_m], map: "Salida_codcaja_m_fkey")
   @@index([idclienteprov], map: "Salida_idclienteprov_fkey")
@@ -248,32 +279,41 @@ model salida {
   @@index([idperiodo], map: "Salida_idperiodo_fkey")
   @@index([idtipo_doc], map: "Salida_idtipo_doc_fkey")
   @@index([idtipo_op], map: "Salida_idtipo_op_fkey")
+  @@map("salida")
 }
 
-model tipodocumento {
+model tipoDocumento {
   idtipo_doc  Int       @id
   descripcion String?
   ingreso     ingreso[]
   salida      salida[]
+
+  @@map("tipodocumento")
 }
 
-model tipooperacion {
+model tipoOperacion {
   idtipo_op Int       @id
   nombre_op String?
   ingreso   ingreso[]
   salida    salida[]
+
+  @@map("tipooperacion")
 }
 
-model tipotrib {
+model tipoTrib {
   idtipo_trib   String     @id
   descripcion_t String?
   tributos      tributos[]
+
+  @@map("tipotrib")
 }
 
-model tipousuario {
+model tipoUsuario {
   id_tipo     Int       @id @default(autoincrement())
   descripcion String?
   usuario     usuario[]
+
+  @@map("tipousuario")
 }
 
 model tmp {
@@ -283,6 +323,8 @@ model tmp {
   idforma_pago_trib String?
   detalles          String?
   session_id        String
+
+  @@map("tmp")
 }
 
 model tributos {
@@ -299,24 +341,26 @@ model tributos {
   estado        String      @db.Char(1)
   obs           String?
   fecha_reg     DateTime?   @db.Date
-  clienteprov   clienteprov @relation(fields: [idclienteprov], references: [idclienteprov], map: "Tributos_idclienteprov_fkey")
-  tipotrib      tipotrib    @relation(fields: [idtipo_trib], references: [idtipo_trib], map: "Tributos_idtipo_trib_fkey")
+  cliente_prov  clienteProv @relation(fields: [idclienteprov], references: [idclienteprov], map: "Tributos_idclienteprov_fkey")
+  tipo_trib     tipoTrib    @relation(fields: [idtipo_trib], references: [idtipo_trib], map: "Tributos_idtipo_trib_fkey")
 
   @@index([idclienteprov], map: "Tributos_idclienteprov_fkey")
   @@index([idtipo_trib], map: "Tributos_idtipo_trib_fkey")
+  @@map("tributos")
 }
 
 model usuario {
-  id_usuario  Int         @id @default(autoincrement())
-  usuario     String?     @unique(map: "Usuario_usuario_key")
-  password    String?
-  id_personal Int
-  id_tipo     Int
-  personal    personal    @relation(fields: [id_personal], references: [id_personal], map: "Usuario_id_personal_fkey")
-  tipousuario tipousuario @relation(fields: [id_tipo], references: [id_tipo], map: "Usuario_id_tipo_fkey")
+  id_usuario   Int         @id @default(autoincrement())
+  usuario      String?     @unique(map: "Usuario_usuario_key")
+  password     String?
+  id_personal  Int
+  id_tipo      Int
+  personal     personal    @relation(fields: [id_personal], references: [id_personal], map: "Usuario_id_personal_fkey")
+  tipo_usuario tipoUsuario @relation(fields: [id_tipo], references: [id_tipo], map: "Usuario_id_tipo_fkey")
 
   @@index([id_personal], map: "Usuario_id_personal_fkey")
   @@index([id_tipo], map: "Usuario_id_tipo_fkey")
+  @@map("usuario")
 }
 
 model vencimientos {
@@ -333,4 +377,42 @@ model vencimientos {
   d9             DateTime @db.Date
   anio_v         String   @db.Char(4)
   mes_v          String   @db.VarChar(2)
+
+  @@map("vencimientos")
+}
+
+model monitoreo_buzon {
+  id                  Int      @id @default(autoincrement())
+  idclienteprov       String   @unique
+  fecha_inicio        DateTime @default(now())
+  cantidad_no_leidos  Int      @default(0)
+  ultima_revision     DateTime?
+}
+
+model monitoreo_mensaje {
+  id             Int      @id @default(autoincrement())
+  idclienteprov  String
+  mensajeId      String   @unique
+  asunto         String   @db.Text
+  fecha          DateTime
+  tag            String?
+  leido          Boolean  @default(false)
+}
+
+model monitoreo_sunafil {
+  id                  Int      @id @default(autoincrement())
+  idclienteprov       String   @unique
+  fecha_inicio        DateTime @default(now())
+  cantidad_pendientes Int      @default(0)
+  ultima_revision     DateTime?
+}
+
+model monitoreo_sunafil_alerta {
+  id             Int      @id @default(autoincrement())
+  idclienteprov  String
+  alertaId       String   @unique @default(cuid())
+  descripcion    String   @db.Text
+  cantidad       String?
+  fecha_captura  DateTime @default(now())
+  leido          Boolean  @default(false)
 }

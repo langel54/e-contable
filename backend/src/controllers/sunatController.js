@@ -26,10 +26,12 @@ async function accessSunat({ ruc, usuario, password }) {
   const url = process.env.SUNAT_TRAMITES_CONSULTAS_URL;
 
   const browser = await chromium.launch({
-    headless: false,
+    headless: true,
     args: ["--no-sandbox", "--disable-setuid-sandbox"], // Optimización para servidores
   });
-  const page = await browser.newPage();
+  const page = await browser.newPage({
+    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+  });
 
   try {
     await page.goto(url, { waitUntil: "networkidle", timeout: 30000 });

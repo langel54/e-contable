@@ -103,6 +103,8 @@ const menuItemsByRole = {
         { text: "Tipos de Tributo", path: "/main/admin/tipos-tributo" },
         { text: "Formas de Pago", path: "/main/admin/formas-pago" },
         { text: "Vencimientos", path: "/main/admin/vencimientos" },
+        { text: "Buzón SOL", path: "/main/admin/buzon" },
+        { text: "Buzón SUNAFIL", path: "/main/admin/sunafil" },
       ],
     },
     {

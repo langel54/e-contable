@@ -5,10 +5,12 @@ async function accessSunatMenu({ ruc, usuario, password }) {
         "https://api-seguridad.sunat.gob.pe/v1/clientessol/4f3b88b3-d9d6-402a-b85d-6a0bc857746a/oauth2/loginMenuSol?originalUrl=https://e-menu.sunat.gob.pe/cl-ti-itmenu/AutenticaMenuInternet.htm&state=rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcAUH2sHDFmDRAwACRgAKbG9hZEZhY3RvckkACXRocmVzaG9sZHhwP0AAAAAAAAx3CAAAABAAAAADdAAEZXhlY3B0AAZwYXJhbXN0AEsqJiomL2NsLXRpLWl0bWVudS9NZW51SW50ZXJuZXQuaHRtJmI2NGQyNmE4YjVhZjA5MTkyM2IyM2I2NDA3YTFjMWRiNDFlNzMzYTZ0AANleGV0AAVidXpvbng=";
 
     const browser = await chromium.launch({
-        headless: false,
+        headless: true,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
-    const page = await browser.newPage();
+    const page = await browser.newPage({
+        userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    });
 
     try {
         await page.goto(url, { waitUntil: "networkidle", timeout: 30000 });
@@ -97,7 +99,7 @@ async function accessSunatMenu({ ruc, usuario, password }) {
         console.error("❌ Error en login SUNAT Menu:", error);
         return { success: false, error: error.message };
     } finally {
-        // browser.close() se omite según el patrón de sunafilService.js
+        browser.close()
     }
 }
 
