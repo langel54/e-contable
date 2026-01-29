@@ -146,7 +146,7 @@ async function getMonitoringData() {
 
   const clients = await prisma.clienteProv.findMany({
     where: { idclienteprov: { in: clientIds } },
-    select: { idclienteprov: true, ruc: true, razonsocial: true },
+    select: { idclienteprov: true, ruc: true, razonsocial: true, c_usuario: true, c_passw: true },
   });
 
   const alerts = await prisma.monitoreo_sunafil_alerta.findMany({

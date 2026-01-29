@@ -116,7 +116,9 @@ async function getMonitoringData() {
         select: {
             idclienteprov: true,
             ruc: true,
-            razonsocial: true
+            razonsocial: true,
+            c_usuario: true,
+            c_passw: true
         }
     });
 

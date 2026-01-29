@@ -16,7 +16,7 @@ import {
   TableRow,
   Paper,
 } from "@mui/material";
-import { Refresh, Notifications, Add, Delete, CheckCircle } from "@mui/icons-material";
+import { Refresh, Notifications, Add, Delete, CheckCircle, Launch } from "@mui/icons-material";
 import CustomTable from "@/app/components/CustonTable";
 import sunafilServices from "@/app/services/sunafilServices";
 import { getClientesProvs } from "@/app/services/clienteProvService";
@@ -232,12 +232,30 @@ const SunafilDashboard = () => {
     {
       field: "actions",
       headerName: "Acciones",
-      width: 100,
+      width: 120,
       align: "center",
       renderCell: (params) => (
-        <IconButton size="small" color="error" onClick={() => handleRemoveClient(params.row.idclienteprov)}>
-          <Delete fontSize="small" />
-        </IconButton>
+        <Stack direction="row" spacing={1}>
+          <Tooltip title="Acceder a Sunafil">
+            <IconButton 
+              size="small" 
+              color="primary" 
+              onClick={() => {
+                const data = {
+                  ruc: params.row.ruc,
+                  usuario: params.row.c_usuario,
+                  password: params.row.c_passw
+                };
+                sunafilServices.accessSunafil(data);
+              }}
+            >
+              <Launch fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <IconButton size="small" color="error" onClick={() => handleRemoveClient(params.row.idclienteprov)}>
+            <Delete fontSize="small" />
+          </IconButton>
+        </Stack>
       )
     }
   ];

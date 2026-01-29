@@ -1,25 +1,8 @@
 const { chromium } = require("playwright");
 const { accessSunatMenu } = require("../services/sunatMenuService");
+const { buildAutologinUrl } = require("../utils/sunatAuthHelper");
 
-// --- Helper para autologin ---
-function buildSunatUrl(base, ruc, usuario, password, origin) {
-  const encodePayload = (obj) => {
-    const json = JSON.stringify(obj);
-    return Buffer.from(json, "utf8").toString("base64");
-  };
-
-  const payload = {
-    u: String(ruc),
-    usuario: String(usuario),
-    p: String(password),
-    ts: Date.now(),
-    maxAgeMs: 2 * 60 * 1000,
-    origin, // importante para diferenciar
-  };
-
-  const b64 = encodePayload(payload);
-  return `${base}#autologin=${b64}`;
-}
+// Helper local eliminado para usar el util de /utils/
 
 // --- Playwright directo (más eficiente que Puppeteer) ---
 async function accessSunat({ ruc, usuario, password }) {
@@ -85,7 +68,7 @@ async function accessSunatTramites(req, res) {
     });
   }
   try {
-    const url = buildSunatUrl(
+    const url = buildAutologinUrl(
       process.env.SUNAT_TRAMITES_CONSULTAS_URL,
       ruc,
       usuario,
@@ -109,7 +92,7 @@ async function accessSunatDeclaracionesPagos(req, res) {
     });
   }
   try {
-    const url = buildSunatUrl(
+    const url = buildAutologinUrl(
       process.env.SUNAT_DECLARACIONES_PAGOS,
       ruc,
       usuario,
@@ -133,7 +116,7 @@ async function accessSunatRentaAnual(req, res) {
     });
   }
   try {
-    const url = buildSunatUrl(
+    const url = buildAutologinUrl(
       process.env.SUNAT_RENTA_ANUAL,
       ruc,
       usuario,

@@ -1,4 +1,5 @@
 const sunafilService = require("../services/sunafilService");
+const { buildAutologinUrl } = require("../utils/sunatAuthHelper");
 
 const sunafilController = {
   async login(req, res) {
@@ -7,14 +8,21 @@ const sunafilController = {
       return res.status(400).json({ error: "Faltan campos obligatorios." });
     }
     try {
-      const result = await sunafilService.accessSunafil({ ruc, usuario, password });
-      if (result.success) {
-        res.json({ message: "Login exitoso", items: result.items, url: result.url });
-      } else {
-        res.status(500).json({ error: "Error en login", detail: result.error });
-      }
+      // Ya no usamos Playwright para el login manual, generamos URL con hash para la extensión
+      const url = buildAutologinUrl(
+        process.env.SUNAFIL_LOGIN_URL,
+        ruc,
+        usuario,
+        password,
+        "SUNAFIL"
+      );
+
+      res.json({
+        message: "URL de acceso generada correctamente",
+        url
+      });
     } catch (error) {
-      console.error("❌ Error general:", error);
+      console.error("❌ Error generando URL Sunafil:", error);
       res.status(500).json({ error: "Error en el servidor." });
     }
   },

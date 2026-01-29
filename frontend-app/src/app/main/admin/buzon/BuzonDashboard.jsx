@@ -18,7 +18,12 @@ import {
   TableRow,
   Paper,
 } from "@mui/material";
-import { Refresh, Mail, Add, Delete, CheckCircle } from "@mui/icons-material";
+import { Refresh, Mail, Add, Delete, CheckCircle, Launch } from "@mui/icons-material";
+import SunatIcon from "@/app/components/SunatIcon";
+import { 
+  accessSunatTramites
+  //  accessSunatDeclaracionesPagos 
+  } from "@/app/services/sunServices";
 import CustomTable from "@/app/components/CustonTable";
 import buzonServices from "@/app/services/buzonServices";
 import { getClientesProvs } from "@/app/services/clienteProvService";
@@ -233,12 +238,48 @@ const BuzonDashboard = () => {
     {
       field: "actions",
       headerName: "Acciones",
-      width: 100,
+      width: 150,
       align: "center",
       renderCell: (params) => (
-        <IconButton size="small" color="error" onClick={() => handleRemoveClient(params.row.idclienteprov)}>
-          <Delete fontSize="small" />
-        </IconButton>
+        <Stack direction="row" spacing={1}>
+          <Tooltip title="Trámites SUNAT">
+            <IconButton 
+              size="small" 
+              color="primary" 
+              onClick={async () => {
+                const data = {
+                  ruc: params.row.ruc,
+                  usuario: params.row.c_usuario,
+                  password: params.row.c_passw
+                };
+                const res = await accessSunatTramites(data);
+                if (res.url) window.open(res.url, "_blank", "noopener,noreferrer,width=1200,height=800");
+              }}
+            >
+              <SunatIcon size={20} />
+            </IconButton>
+          </Tooltip>
+          {/* <Tooltip title="Declaraciones y Pagos">
+            <IconButton 
+              size="small" 
+              color="secondary" 
+              onClick={async () => {
+                const data = {
+                  ruc: params.row.ruc,
+                  usuario: params.row.c_usuario,
+                  password: params.row.c_passw
+                };
+                const res = await accessSunatDeclaracionesPagos(data);
+                if (res.url) window.open(res.url, "_blank", "noopener,noreferrer,width=1200,height=800");
+              }}
+            >
+              <SunatIcon size={20} />
+            </IconButton>
+          </Tooltip> */}
+          <IconButton size="small" color="error" onClick={() => handleRemoveClient(params.row.idclienteprov)}>
+            <Delete fontSize="small" />
+          </IconButton>
+        </Stack>
       )
     }
   ];

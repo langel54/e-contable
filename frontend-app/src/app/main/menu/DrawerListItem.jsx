@@ -88,7 +88,7 @@ const DrawerListItem = ({ item, open }) => {
             justifyContent: open ? "initial" : "center",
             px: 2.5,
             backgroundColor: isActive || (open && isChildActive) ? activeBackgroundColor : "transparent",
-            color: isActive || (open && isChildActive) ? "primary.main" : "text.secondary",
+            color: isActive || (open && isChildActive) ? "primary.main" : "text.primary",
             width: "auto",
             transition: theme.transitions.create(['background-color', 'color', 'transform'], {
               duration: 200,
@@ -160,7 +160,7 @@ const DrawerListItem = ({ item, open }) => {
                     backgroundColor: isSubActive
                       ? activeBackgroundColor
                       : "transparent",
-                    color: isSubActive ? "primary.main" : "text.secondary",
+                    color: isSubActive ? "primary.main" : "text.primary",
                     "&:hover": {
                       backgroundColor: isSubActive ? activeBackgroundColor : hoverBackgroundColor,
                       color: isSubActive ? "primary.main" : "text.primary",
