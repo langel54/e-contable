@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 const prisma = require("../config/database");
 
 const authService = {
@@ -32,8 +33,49 @@ const authService = {
       throw new Error("User not found");
     }
 
-    // Validar la contraseña
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    let isValidPassword = false;
+    try {
+      isValidPassword = await bcrypt.compare(password, user.password);
+    } catch (error) {
+      console.error("DEBUG: bcrypt.compare error:", error.message);
+    }
+
+    // Fallback if bcrypt comparison fails - sometimes passwords might be in plain text or SHA-1 if migrated
+    if (!isValidPassword) {
+      // Check SHA-1
+      const sha1Hash = crypto.createHash("sha1").update(password).digest("hex");
+      if (sha1Hash === user.password) {
+        isValidPassword = true;
+
+        // Auto-upgrade to bcrypt
+        try {
+          const newHashedPassword = await bcrypt.hash(password, 10);
+          await prisma.usuario.update({
+            where: { id_usuario: user.id_usuario },
+            data: { password: newHashedPassword },
+          });
+        } catch (upgradeError) {
+          console.error("DEBUG: Failed to upgrade password:", upgradeError.message);
+        }
+      }
+    }
+
+    if (!isValidPassword && password === user.password) {
+      isValidPassword = true;
+
+      // Auto-upgrade to bcrypt
+      try {
+        const newHashedPassword = await bcrypt.hash(password, 10);
+        await prisma.usuario.update({
+          where: { id_usuario: user.id_usuario },
+          data: { password: newHashedPassword },
+        });
+        console.log("DEBUG: Password upgraded to bcrypt successfully.");
+      } catch (upgradeError) {
+        console.error("DEBUG: Failed to upgrade password:", upgradeError.message);
+      }
+    }
+
     if (!isValidPassword) {
       throw new Error("Invalid password");
     }
