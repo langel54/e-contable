@@ -7,6 +7,7 @@ export default function Card(theme) {
                 root: {
                     borderRadius: 16, // Modern rounded corners
                     backgroundImage: 'none', // Remove default gradient in dark mode
+                    color: theme.palette.text.primary,
                     boxShadow: theme.palette.mode === 'dark'
                         ? '0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1)'
                         : undefined,

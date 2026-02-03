@@ -11,17 +11,40 @@ export default function DataGrid(theme) {
                     '& .MuiDataGrid-withBorderColor': {
                         borderColor: theme.palette.divider,
                     },
+                    '& .MuiDataGrid-columnHeader': {
+                        backgroundColor: `${theme.palette.primary.main} !important`,
+                        color: theme.palette.primary.contrastText,
+                    },
                     '& .MuiDataGrid-columnHeaders': {
                         borderColor: theme.palette.divider,
-                        backgroundColor: theme.palette.mode === 'dark' ? '#1e293b' : '#f8fafc',
-                        borderBottom: `1px solid ${theme.palette.divider}`,
+                        backgroundColor: theme.palette.primary.main,
+                        borderBottom: 'none',
                     },
                     '& .MuiDataGrid-columnHeaderTitle': {
                         fontWeight: 700,
                         textTransform: 'uppercase',
                         fontSize: '0.75rem',
                         letterSpacing: 0.5,
-                        color: theme.palette.text.secondary,
+                        color: 'inherit', // Follow parent color
+                    },
+                    '& .MuiDataGrid-iconButtonContainer': {
+                        visibility: 'visible',
+                        width: 'auto',
+                        color: theme.palette.primary.contrastText,
+                        '& .MuiIconButton-root': {
+                            color: 'inherit',
+                        }
+                    },
+                    '& .MuiDataGrid-menuIcon': {
+                        visibility: 'visible',
+                        width: 'auto',
+                        color: theme.palette.primary.contrastText,
+                        '& .MuiIconButton-root': {
+                            color: 'inherit',
+                        }
+                    },
+                    '& .MuiDataGrid-sortIcon': {
+                        color: theme.palette.primary.contrastText,
                     },
                     '& .MuiDataGrid-row': {
                         '&:hover': {

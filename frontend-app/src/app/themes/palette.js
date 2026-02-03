@@ -12,6 +12,18 @@ import ThemeOption from "./theme";
 export default function Palette(mode, presetColor) {
   const colors = presetPalettes;
 
+  // Theme configuration from environment variables with sensible fallbacks
+  // PRIMARY COLOR (Institutional)
+  const themePrimary = process.env.NEXT_PUBLIC_THEME_PRIMARY_MAIN || "#1e3a8a";
+
+  // LIGHT MODE BACKGROUNDS
+  const themeBgDefault = process.env.NEXT_PUBLIC_THEME_BG_DEFAULT || "#f8fafc";
+  const themeBgPaper = process.env.NEXT_PUBLIC_THEME_BG_PAPER || "#ffffff";
+
+  // DARK MODE BACKGROUNDS
+  const themeDarkBg = process.env.NEXT_PUBLIC_THEME_DARK_BG || "#0f172a";
+  const themeDarkPaper = process.env.NEXT_PUBLIC_THEME_DARK_PAPER || "#1e293b";
+
   let greyPrimary = [
     "#ffffff",
     "#fafafa",
@@ -32,24 +44,27 @@ export default function Palette(mode, presetColor) {
 
   const paletteColor = ThemeOption(colors, presetColor, mode);
 
-  // Custom primary for dark mode to be a softer blue/indigo
-  if (mode === "dark") {
-    paletteColor.primary.main = "#2f6df6";
-    paletteColor.primary.light = "#5b8cff";
-    paletteColor.primary.dark = "#1f4fe0";
+  // Apply institutional primary color to BOTH modes
+  paletteColor.primary.main = themePrimary;
+  paletteColor.primary.light = themePrimary;
+  paletteColor.primary.dark = themePrimary;
 
-    paletteColor.primary.lighter = "rgba(15, 15, 32, 0.1)";
+  if (mode === "dark") {
+    // Primary remains the same as institutional, just ensuring contrast
+    paletteColor.primary.contrastText = "#ffffff";
+
+    paletteColor.primary.lighter = "rgba(15, 23, 42, 0.1)";
 
     // Override secondary colors to be Slate-based for Dark Mode
     paletteColor.secondary.main = "#94a3b8"; // Slate 400
     paletteColor.secondary.light = "#cbd5e1"; // Slate 300
     paletteColor.secondary.dark = "#64748b"; // Slate 500
-    paletteColor.secondary.lighter = "#1e293b"; // Slate 800 (Card bg)
-    paletteColor.secondary.darker = "#0f172a"; // Slate 900 (Main bg)
+    paletteColor.secondary.lighter = themeDarkPaper; // Surface bg
+    paletteColor.secondary.darker = themeDarkBg; // Main bg
 
-    // Adjust grey palette to avoid bright flashes if components use it directly
-    paletteColor.grey[0] = "#1e293b"; // Replaces paper
-    paletteColor.grey[50] = "#253046";
+    // Adjust grey palette to align with Slate/Midnight theme
+    paletteColor.grey[0] = themeDarkPaper;
+    paletteColor.grey[50] = "#1e293b"; // Same as paper for consistency
     paletteColor.grey[100] = "#334155";
     paletteColor.grey[200] = "#475569";
     paletteColor.grey[300] = "#64748b";
@@ -59,6 +74,11 @@ export default function Palette(mode, presetColor) {
     paletteColor.grey[700] = "#f1f5f9";
     paletteColor.grey[800] = "#f8fafc";
     paletteColor.grey[900] = "#ffffff";
+  } else {
+    // Light mode refinements
+    if (!paletteColor.background) paletteColor.background = {};
+    paletteColor.background.default = themeBgDefault;
+    paletteColor.background.paper = themeBgPaper;
   }
 
   return createTheme({
@@ -70,8 +90,8 @@ export default function Palette(mode, presetColor) {
       },
       ...paletteColor,
       text: {
-        primary: mode === "dark" ? "#f1f5f9" : paletteColor.grey[700], // Slate 100
-        secondary: mode === "dark" ? "#94a3b8" : paletteColor.grey[500], // Slate 400
+        primary: mode === "dark" ? "#f1f5f9" : "#1e293b", // Slate 100 on dark, Slate 800 on light
+        secondary: mode === "dark" ? "#94a3b8" : "#64748b", // Slate 400 on dark, Slate 500 on light
         disabled: paletteColor.grey[400],
       },
       action: {
@@ -79,8 +99,8 @@ export default function Palette(mode, presetColor) {
       },
       divider: mode === "dark" ? "rgba(255, 255, 255, 0.08)" : paletteColor.grey[200],
       background: {
-        paper: mode === "dark" ? "#1e293b" : "#ffffff",
-        default: mode === "dark" ? "#0f172a" : "#f8f8f8", // Soft slate grey for light mode
+        paper: mode === "dark" ? themeDarkPaper : themeBgPaper,
+        default: mode === "dark" ? themeDarkBg : themeBgDefault,
       },
     },
   });
