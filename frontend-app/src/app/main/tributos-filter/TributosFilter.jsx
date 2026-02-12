@@ -237,7 +237,13 @@ const tributoColumns = (
       headerName: "D-Atrasados",
       width: 80,
       renderCell: (params) => {
-        const fechaVenc = new Date(params.row.fecha_v);
+        const fechaVencStr = params.row.fecha_v;
+        const fechaVenc = (fechaVencStr && fechaVencStr !== "0000-00-00") ? new Date(fechaVencStr) : null;
+        
+        if (!fechaVenc || isNaN(fechaVenc.getTime())) {
+          return <Typography variant="body2">0 días</Typography>;
+        }
+
         const hoy = new Date();
         const diffTime = hoy - fechaVenc;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -253,14 +259,14 @@ const tributoColumns = (
       align: "right",
       renderCell: (params) => {
         const theme = useTheme();
-        // Calcular interés basado en días atrasados (ejemplo: 1% por mes)
-        const fechaVenc = new Date(params.row.fecha_v);
+        const fechaVenc = params.row.fecha_v ? new Date(params.row.fecha_v) : null;
+        if (!fechaVenc) return <Typography variant="body2">0.00</Typography>;
+
         const hoy = new Date();
         const diffTime = hoy - fechaVenc;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         const mesesAtrasados = Math.max(0, diffDays / 30);
-        const interes =
-          (params.row.importe_reg || 0) * (mesesAtrasados * 0.004);
+        const interes = (params.row.importe_reg || 0) * (mesesAtrasados * 0.004);
 
         return (
           <Typography
@@ -289,14 +295,16 @@ const tributoColumns = (
       renderCell: (params) => {
         const theme = useTheme();
         const pendiente =
-          (params.row.importe_reg || 0) - (params.row.importe_pag || 0);
-        const fechaVenc = new Date(params.row.fecha_v);
-        const hoy = new Date();
-        const diffTime = hoy - fechaVenc;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        const mesesAtrasados = Math.max(0, diffDays / 30);
-        const interes =
-          (params.row.importe_reg || 0) * (mesesAtrasados * 0.004);
+          (params.row.importe_reg || 0) - (params.row.importe_pc || 0);
+        const fechaVenc = params.row.fecha_v ? new Date(params.row.fecha_v) : null;
+        let interes = 0;
+        if (fechaVenc) {
+          const hoy = new Date();
+          const diffTime = hoy - fechaVenc;
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          const mesesAtrasados = Math.max(0, diffDays / 30);
+          interes = (params.row.importe_reg || 0) * (mesesAtrasados * 0.004);
+        }
         const deudaActual = pendiente + interes;
 
         return (
@@ -491,19 +499,25 @@ const TributosFilter = () => {
       const exportData =
         data.tributos?.map((tributo) => {
           // Calcular días atrasados
-          const fechaVenc = new Date(tributo.fecha_v);
-          const hoy = new Date();
-          const diffTime = hoy - fechaVenc;
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          const diasAtrasados = diffDays > 0 ? diffDays : 0;
+          const fechaVencStr = tributo.fecha_v;
+          const fechaVenc = (fechaVencStr && fechaVencStr !== "0000-00-00") ? new Date(fechaVencStr) : null;
+          
+          let diffDays = 0;
+          let diasAtrasados = 0;
+
+          if (fechaVenc && !isNaN(fechaVenc.getTime())) {
+            const hoy = new Date();
+            const diffTime = hoy - fechaVenc;
+            diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            diasAtrasados = diffDays > 0 ? diffDays : 0;
+          }
 
           // Calcular interés
           const mesesAtrasados = Math.max(0, diffDays / 30);
           const interes = (tributo.importe_reg || 0) * (mesesAtrasados * 0.004);
 
           // Calcular deuda actual
-          const pendiente =
-            (tributo.importe_reg || 0) - (tributo.importe_pc || 0);
+          const pendiente = (tributo.importe_reg || 0) - (tributo.importe_pc || 0);
           const deudaActual = pendiente + interes;
 
           // Formatear fecha

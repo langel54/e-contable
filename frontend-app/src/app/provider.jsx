@@ -3,6 +3,7 @@ import Cookies from "js-cookie";
 import { authService } from "./services/authService";
 import { useRouter } from "next/navigation";
 import { getCajasMes } from "./services/cajaMesServices";
+import { notifyNetworkError, NETWORK_ERROR_MESSAGE } from "./services/networkErrorHandler";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
@@ -69,7 +70,11 @@ export function AuthProvider({ children }) {
             router.push("/authentication");
           }
         } catch (error) {
-          console.error("Error al validar token:", error);
+          if (error instanceof TypeError && error.message === "Failed to fetch") {
+            notifyNetworkError();
+          } else {
+            console.error("Error al validar token:", error);
+          }
           setIsAuthenticated(false);
           router.push("/authentication");
         }
@@ -90,8 +95,15 @@ export function AuthProvider({ children }) {
           setCajaMes(ultimaCaja);
         }
       } catch (error) {
-        console.error("Error al obtener las cajas:", error);
-
+        const isNetworkError =
+          (error instanceof TypeError && error.message === "Failed to fetch") ||
+          error?.message === NETWORK_ERROR_MESSAGE;
+        if (isNetworkError && error?.message !== NETWORK_ERROR_MESSAGE) {
+          notifyNetworkError();
+        }
+        if (!isNetworkError) {
+          console.error("Error al obtener las cajas:", error);
+        }
       }
 
       setLoadingAuth(false);

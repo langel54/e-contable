@@ -209,9 +209,10 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
         });
         return false;
       } else {
-        setFechaVencimiento(
-          dayjs(vencimientos.fecha_vencimiento).format("YYYY-MM-DD")
-        );
+        const fv = dayjs(vencimientos.fecha_vencimiento).format("YYYY-MM-DD");
+        setFechaVencimiento(fv);
+        // Important: Update Formik state so it gets sent in the payload
+        return fv;
       }
 
       setVencimientoValidado(true);
@@ -239,13 +240,12 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
   };
 
   const handleSubmit = async (values, setFieldError, setSubmitting) => {
-    // Validar vencimientos antes de proceder
-    const vencimientoValido = await validarVencimiento(
+    const resVencimiento = await validarVencimiento(
       values.anio,
       values.mes,
       selectedClient?.u_digito
     );
-    if (!vencimientoValido) {
+    if (!resVencimiento) {
       setSubmitting(false);
       return;
     }
@@ -254,7 +254,7 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
     try {
       const payload = {
         // ...values,
-        fecha_v: values.fecha_v,
+        fecha_v: typeof resVencimiento === "string" ? resVencimiento : values.fecha_v,
         idclienteprov: values.idclienteprov,
         idtipo_trib: values.idtipo_trib,
         anio: values.anio?.toString?.() || String(values.anio),

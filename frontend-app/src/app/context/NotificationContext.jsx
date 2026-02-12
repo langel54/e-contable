@@ -1,6 +1,7 @@
 "use client";
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { Snackbar, Alert } from "@mui/material";
+import { setOnNetworkError } from "@/app/services/networkErrorHandler";
 
 const NotificationContext = createContext({
   showNotification: () => {},
@@ -53,6 +54,11 @@ export function NotificationProvider({ children }) {
     [showNotification]
   );
 
+  useEffect(() => {
+    setOnNetworkError(showError);
+    return () => setOnNetworkError(null);
+  }, [showError]);
+
   const handleClose = useCallback((event, reason) => {
     if (reason === "clickaway") {
       return;
@@ -73,9 +79,9 @@ export function NotificationProvider({ children }) {
       {children}
       <Snackbar
         open={notification.open}
-        autoHideDuration={6000}
+        autoHideDuration={5000}
         onClose={handleClose}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
           onClose={handleClose}

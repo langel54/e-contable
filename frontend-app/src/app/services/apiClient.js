@@ -1,6 +1,7 @@
 // services/apiClient.js
 
 import Cookies from "js-cookie";
+import { notifyNetworkError, NETWORK_ERROR_MESSAGE } from "./networkErrorHandler";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
@@ -38,9 +39,8 @@ export const fetchWithAuth = async (endpoint, options = {}) => {
   } catch (error) {
     // Handle network errors (Failed to fetch, CORS, etc.)
     if (error instanceof TypeError && error.message === "Failed to fetch") {
-      throw new Error(
-        `No se pudo conectar con el servidor. Verifica que la API esté ejecutándose en ${API_URL}`
-      );
+      notifyNetworkError();
+      throw new Error(NETWORK_ERROR_MESSAGE);
     }
     // Re-throw other errors
     throw error;
