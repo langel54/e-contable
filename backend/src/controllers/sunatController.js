@@ -1,6 +1,10 @@
 const { chromium } = require("playwright");
 const { accessSunatMenu } = require("../services/sunatMenuService");
 const { buildAutologinUrl } = require("../utils/sunatAuthHelper");
+const { loginSunatAndGetUrl } = require("../services/sunatCurlLoginService");
+
+// plugin = URL con #autologin para extensión; curl = login en servidor (Playwright) y retorno de URL final
+const DEFAULT_ACCESS_MODE = process.env.SUNAT_ACCESS_MODE || "curl";
 
 // Helper local eliminado para usar el util de /utils/
 
@@ -59,15 +63,36 @@ async function accessSunatHandlerPuppeter(req, res) {
   }
 }
 
-// --- API con autologin por payload ---
+// --- API con autologin por payload (plugin) o login en servidor (curl) ---
 async function accessSunatTramites(req, res) {
-  const { ruc, usuario, password } = req.body;
+  const { ruc, usuario, password, mode } = req.body;
+  const accessMode = mode || req.query.mode || DEFAULT_ACCESS_MODE;
+
   if (!ruc || !usuario || !password) {
     return res.status(400).json({
       error: "Todos los campos (RUC, usuario, contraseña) son obligatorios.",
     });
   }
   try {
+    if (accessMode === "curl") {
+      const baseUrl = process.env.SUNAT_TRAMITES_CONSULTAS_URL;
+      const result = await loginSunatAndGetUrl({
+        baseUrl,
+        ruc,
+        usuario,
+        password,
+      });
+      if (!result.success) {
+        return res.status(502).json({
+          error: "No se pudo completar el login en el servidor.",
+          detail: result.error,
+        });
+      }
+      return res
+        .status(200)
+        .json({ message: "URL logueada generada correctamente", url: result.url, mode: "curl" });
+    }
+
     const url = buildAutologinUrl(
       process.env.SUNAT_TRAMITES_CONSULTAS_URL,
       ruc,
@@ -75,7 +100,7 @@ async function accessSunatTramites(req, res) {
       password,
       "TRAMITES_CONSULTAS"
     );
-    res.status(200).json({ message: "URL generada correctamente", url });
+    res.status(200).json({ message: "URL generada correctamente", url, mode: "plugin" });
   } catch (error) {
     console.error("Error en el acceso a SUNAT:", error);
     res
@@ -85,13 +110,34 @@ async function accessSunatTramites(req, res) {
 }
 
 async function accessSunatDeclaracionesPagos(req, res) {
-  const { ruc, usuario, password } = req.body;
+  const { ruc, usuario, password, mode } = req.body;
+  const accessMode = mode || req.query.mode || DEFAULT_ACCESS_MODE;
+
   if (!ruc || !usuario || !password) {
     return res.status(400).json({
       error: "Todos los campos (RUC, usuario, contraseña) son obligatorios.",
     });
   }
   try {
+    if (accessMode === "curl") {
+      const baseUrl = process.env.SUNAT_DECLARACIONES_PAGOS;
+      const result = await loginSunatAndGetUrl({
+        baseUrl,
+        ruc,
+        usuario,
+        password,
+      });
+      if (!result.success) {
+        return res.status(502).json({
+          error: "No se pudo completar el login en el servidor.",
+          detail: result.error,
+        });
+      }
+      return res
+        .status(200)
+        .json({ message: "URL logueada generada correctamente", url: result.url, mode: "curl" });
+    }
+
     const url = buildAutologinUrl(
       process.env.SUNAT_DECLARACIONES_PAGOS,
       ruc,
@@ -99,7 +145,7 @@ async function accessSunatDeclaracionesPagos(req, res) {
       password,
       "DECLARACIONES_PAGOS"
     );
-    res.status(200).json({ message: "URL generada correctamente", url });
+    res.status(200).json({ message: "URL generada correctamente", url, mode: "plugin" });
   } catch (error) {
     console.error("Error en el acceso a SUNAT:", error);
     res
@@ -109,13 +155,34 @@ async function accessSunatDeclaracionesPagos(req, res) {
 }
 
 async function accessSunatRentaAnual(req, res) {
-  const { ruc, usuario, password } = req.body;
+  const { ruc, usuario, password, mode } = req.body;
+  const accessMode = mode || req.query.mode || DEFAULT_ACCESS_MODE;
+
   if (!ruc || !usuario || !password) {
     return res.status(400).json({
       error: "Todos los campos (RUC, usuario, contraseña) son obligatorios.",
     });
   }
   try {
+    if (accessMode === "curl") {
+      const baseUrl = process.env.SUNAT_RENTA_ANUAL;
+      const result = await loginSunatAndGetUrl({
+        baseUrl,
+        ruc,
+        usuario,
+        password,
+      });
+      if (!result.success) {
+        return res.status(502).json({
+          error: "No se pudo completar el login en el servidor.",
+          detail: result.error,
+        });
+      }
+      return res
+        .status(200)
+        .json({ message: "URL logueada generada correctamente", url: result.url, mode: "curl" });
+    }
+
     const url = buildAutologinUrl(
       process.env.SUNAT_RENTA_ANUAL,
       ruc,
@@ -123,7 +190,7 @@ async function accessSunatRentaAnual(req, res) {
       password,
       "RENTA_ANUAL"
     );
-    res.status(200).json({ message: "URL generada correctamente", url });
+    res.status(200).json({ message: "URL generada correctamente", url, mode: "plugin" });
   } catch (error) {
     console.error("Error en el acceso a SUNAT:", error);
     res

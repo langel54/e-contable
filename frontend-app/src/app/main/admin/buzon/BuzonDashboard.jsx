@@ -24,6 +24,7 @@ import {
   accessSunatTramites
   //  accessSunatDeclaracionesPagos 
   } from "@/app/services/sunServices";
+import { openSunatOrSunafilInNewTab } from "@/app/services/sunatOpenInTab";
 import CustomTable from "@/app/components/CustonTable";
 import buzonServices from "@/app/services/buzonServices";
 import { getClientesProvs } from "@/app/services/clienteProvService";
@@ -253,7 +254,7 @@ const BuzonDashboard = () => {
                   password: params.row.c_passw
                 };
                 const res = await accessSunatTramites(data);
-                if (res.url) window.open(res.url, "_blank", "noopener,noreferrer,width=1200,height=800");
+                if (res.url) openSunatOrSunafilInNewTab(res.url, "sunat");
               }}
             >
               <SunatIcon size={20} />
@@ -270,7 +271,7 @@ const BuzonDashboard = () => {
                   password: params.row.c_passw
                 };
                 const res = await accessSunatDeclaracionesPagos(data);
-                if (res.url) window.open(res.url, "_blank", "noopener,noreferrer,width=1200,height=800");
+                if (res.url) openSunatOrSunafilInNewTab(res.url, "sunat");
               }}
             >
               <SunatIcon size={20} />

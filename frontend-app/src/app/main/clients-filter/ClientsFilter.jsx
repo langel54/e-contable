@@ -9,6 +9,7 @@ import {
   accessSunatDeclaracionesPagos,
   accessSunatTramites,
 } from "@/app/services/sunServices";
+import { openSunatOrSunafilInNewTab } from "@/app/services/sunatOpenInTab";
 import {
   AccountBalance,
   AssignmentInd,
@@ -271,12 +272,7 @@ const ActionPopover = ({ params }) => {
           <ListItemButton
             onClick={async () => {
               const res = await accessSunatTramites(data);
-              if (res.url)
-                window.open(
-                  res.url,
-                  "_blank",
-                  "noopener,noreferrer,width=1200,height=800"
-                );
+              if (res.url) openSunatOrSunafilInNewTab(res.url, "sunat");
             }}
           >
             <ListItemIcon>
@@ -287,12 +283,7 @@ const ActionPopover = ({ params }) => {
           <ListItemButton
             onClick={async () => {
               const res = await accessSunatDeclaracionesPagos(data);
-              if (res.url)
-                window.open(
-                  res.url,
-                  "_blank",
-                  "noopener,noreferrer,width=1200,height=800"
-                );
+              if (res.url) openSunatOrSunafilInNewTab(res.url, "sunat");
             }}
           >
             <ListItemIcon>

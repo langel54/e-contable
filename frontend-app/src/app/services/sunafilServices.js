@@ -1,5 +1,7 @@
 import { fetchWithAuth } from "@/app/services/apiClient";
+import { openSunatOrSunafilInNewTab } from "@/app/services/sunatOpenInTab";
 
+// El modo (plugin | curl) se configura en el .env del backend: SUNAFIL_ACCESS_MODE
 export async function accessSunafil(data) {
   try {
     const res = await fetchWithAuth("/sunafil", {
@@ -7,7 +9,7 @@ export async function accessSunafil(data) {
       body: JSON.stringify(data),
     });
     if (res.url) {
-      window.open(res.url, "_blank", "noopener,noreferrer,width=1200,height=800");
+      openSunatOrSunafilInNewTab(res.url, "sunafil");
     }
     return res;
   } catch (error) {
