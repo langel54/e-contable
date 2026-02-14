@@ -8,7 +8,7 @@ const egresosClienteService = {
       where: {
         idclienteprov: idclienteprov,
         anio: year,
-        idestado: 1, // Solo egresos válidos/pagados
+        idestado: { not: 2 }, // Excluir anulados
       },
       select: {
         idsalida: true,

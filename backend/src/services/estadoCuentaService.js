@@ -8,7 +8,7 @@ const estadoCuentaService = {
       where: {
         idclienteprov: idclienteprov,
         anio: year,
-        idestado: 1, // Solo estados válidos/pagados
+        idestado: { not: 2 }, // Excluir anulados
       },
       select: {
         idingreso: true,
@@ -78,7 +78,7 @@ const estadoCuentaService = {
       where: {
         idclienteprov: idclienteprov,
         anio: year,
-        idestado: 1, // Solo estados válidos/pagados
+        idestado: { not: 2 }, // Excluir anulados
       },
       select: {
         idsalida: true,

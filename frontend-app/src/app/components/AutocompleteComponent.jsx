@@ -19,7 +19,7 @@ const InfiniteSelect = ({
   label = "Seleccionar",
   placeholder = "Buscar...",
   pageSize = 10,
-  initialValue = null,
+  value = null, // Changed from initialValue
   onChange,
   // Props adicionales
   noOptionsText = "No hay resultados",
@@ -89,7 +89,7 @@ const InfiniteSelect = ({
     <Autocomplete
       sx={{ width: "100%" }}
       options={options}
-      value={initialValue}
+      value={value} // Changed from initialValue
       getOptionLabel={getOptionLabel}
       filterOptions={(x) => x}
       onInputChange={handleInputChange}
