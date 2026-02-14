@@ -16,6 +16,8 @@ import {
     Typography,
     Paper,
     GlobalStyles,
+    Skeleton,
+    LinearProgress
 } from "@mui/material";
 import { Search as SearchIcon, FileDownload as FileDownloadIcon } from "@mui/icons-material";
 import DatePicker from "react-datepicker";
@@ -109,22 +111,24 @@ const AnnualExpenseReportPage = () => {
         saveAs(blob, `Reporte_Egresos_Anual_${selectedYear}.xlsx`);
     };
 
-    // Cell style helper adapted for Expenses (Red theme)
+    // Cell style helper adapted for Expenses
     const getCellStyle = (value) => {
         if (value > 0) {
             return {
-                backgroundColor: "#ffebee", // Red 50
-                color: "#c62828", // Red 800
+                backgroundColor: "error.lighter",
+                color: "error.dark",
                 textAlign: "center",
                 fontWeight: "bold",
-                borderRight: "1px solid rgba(0, 0, 0, 0.05)",
+                borderRight: "1px solid",
+                borderColor: "divider",
                 height: '40px'
             };
         }
         return {
             textAlign: "center",
-            borderRight: "1px solid #e0e0e0",
-            color: '#757575'
+            borderRight: "1px solid",
+            borderColor: 'divider',
+            color: 'text.disabled'
         };
     };
 
@@ -137,10 +141,10 @@ const AnnualExpenseReportPage = () => {
     };
 
     return (
-        <Box sx={{ p: { xs: 2, md: 3 }, backgroundColor: '#f5f7fa', minHeight: '100vh' }}>
+        <Box sx={{ p: { xs: 2, md: 3 }, bgcolor: 'background.default', minHeight: '100vh' }}>
             <GlobalStyles styles={{ '.react-datepicker-popper': { zIndex: '9999 !important' } }} />
             {/* Header Section */}
-            <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2, backgroundColor: '#fff' }}>
+            <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
                 <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" alignItems="center" spacing={2}>
                     <Box>
                         <Typography variant="h5" fontWeight="700" color="error.main"> {/* Error color for expenses */}
@@ -152,7 +156,7 @@ const AnnualExpenseReportPage = () => {
                     </Box>
 
                     <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
-                        <Card elevation={0} sx={{ bgcolor: '#fff', border: '1px solid #e0e0e0', borderRadius: 2, minWidth: 120 }}>
+                        <Card elevation={0} sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 2, minWidth: 120 }}>
                             <CardContent sx={{ py: 1, px: 2, '&:last-child': { pb: 1 } }}>
                                 <Typography variant="caption" color="text.secondary" fontWeight="bold">
                                     CLIENTES
@@ -163,7 +167,7 @@ const AnnualExpenseReportPage = () => {
                             </CardContent>
                         </Card>
 
-                        <Card elevation={0} sx={{ bgcolor: '#ffebee', border: '1px solid #ffcdd2', borderRadius: 2, minWidth: 200, display: { xs: 'none', md: 'block' } }}>
+                        <Card elevation={0} sx={{ bgcolor: 'error.lighter', border: '1px solid', borderColor: 'error.light', borderRadius: 2, minWidth: 200, display: { xs: 'none', md: 'block' } }}>
                             <CardContent sx={{ py: 1, px: 2, '&:last-child': { pb: 1 } }}>
                                 <Typography variant="caption" color="error.dark" fontWeight="bold">
                                     TOTAL EGRESOS
@@ -186,7 +190,7 @@ const AnnualExpenseReportPage = () => {
                                     InputProps={{
                                         startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />
                                     }}
-                                    sx={{ width: 120, bgcolor: 'white' }}
+                                    sx={{ width: 120, bgcolor: 'background.paper' }}
                                 />
                             }
                         />
@@ -206,46 +210,61 @@ const AnnualExpenseReportPage = () => {
             </Paper>
 
             {/* Table Section */}
-            <Card elevation={0} sx={{ borderRadius: 2, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
+            <Card elevation={0} sx={{ borderRadius: 2, overflow: 'hidden', border: '1px solid', borderColor: 'divider', position: 'relative' }}>
+                {loading && (
+                    <LinearProgress
+                        color="error"
+                        sx={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            zIndex: 2,
+                            height: 3
+                        }}
+                    />
+                )}
                 <TableContainer sx={{ maxHeight: 'calc(100vh - 220px)' }}>
                     <Table stickyHeader size="small">
                         <TableHead>
                             <TableRow>
-                                <TableCell sx={{ backgroundColor: '#d32f2f', color: 'white', fontWeight: 'bold' }}>ID</TableCell>
-                                <TableCell sx={{ backgroundColor: '#d32f2f', color: 'white', fontWeight: 'bold', minWidth: 200 }}>Razon Social</TableCell>
-                                <TableCell sx={{ backgroundColor: '#d32f2f', color: 'white', fontWeight: 'bold', whiteSpace: 'nowrap', textAlign: 'center' }}>Cant. Pagos</TableCell>
+                                <TableCell sx={{ backgroundColor: 'error.main', color: 'error.contrastText', fontWeight: 'bold' }}>ID</TableCell>
+                                <TableCell sx={{ backgroundColor: 'error.main', color: 'error.contrastText', fontWeight: 'bold', minWidth: 200 }}>Razon Social</TableCell>
+                                <TableCell sx={{ backgroundColor: 'error.main', color: 'error.contrastText', fontWeight: 'bold', whiteSpace: 'nowrap', textAlign: 'center' }}>Cant. Pagos</TableCell>
                                 {months.map((m) => (
-                                    <TableCell key={m} sx={{ backgroundColor: '#c62828', color: 'white', textAlign: 'center', fontWeight: '600', minWidth: 60 }}>
+                                    <TableCell key={m} sx={{ backgroundColor: 'error.dark', color: 'error.contrastText', textAlign: 'center', fontWeight: '600', minWidth: 60 }}>
                                         {m}
                                     </TableCell>
                                 ))}
-                                <TableCell sx={{ backgroundColor: '#b71c1c', color: 'white', textAlign: 'center', fontWeight: 'bold', minWidth: 100 }}>TOTAL</TableCell>
+                                <TableCell sx={{ backgroundColor: 'error.darker', color: 'error.contrastText', textAlign: 'center', fontWeight: 'bold', minWidth: 100 }}>TOTAL</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {loading ? (
                                 // Skeleton Loading Rows
-                                Array.from(new Array(5)).map((_, index) => (
+                                Array.from(new Array(10)).map((_, index) => (
                                     <TableRow key={index}>
-                                        <TableCell colSpan={16} sx={{ p: 1 }}>
-                                            <Stack direction="row" spacing={2} alignItems="center">
-                                                <div style={{ width: '100%', height: 30, backgroundColor: '#f0f0f0', borderRadius: 4 }} />
-                                            </Stack>
-                                        </TableCell>
+                                        <TableCell sx={{ p: 1.5 }}><Skeleton variant="text" width={20} /></TableCell>
+                                        <TableCell sx={{ p: 1.5 }}><Skeleton variant="text" width="80%" /></TableCell>
+                                        <TableCell sx={{ p: 1.5 }}><Skeleton variant="text" width={30} sx={{ mx: 'auto' }} /></TableCell>
+                                        {monthKeys.map((k) => (
+                                            <TableCell key={k} sx={{ p: 1.5 }}><Skeleton variant="rectangular" height={24} width="100%" /></TableCell>
+                                        ))}
+                                        <TableCell sx={{ p: 1.5 }}><Skeleton variant="text" width={40} sx={{ mx: 'auto' }} /></TableCell>
                                     </TableRow>
                                 ))
                             ) : reportData.length > 0 ? (
                                 reportData.map((row) => (
                                     <TableRow key={row.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                                         <TableCell sx={{ fontWeight: '500', color: 'text.secondary', fontSize: '0.8rem' }}>{row.id}</TableCell>
-                                        <TableCell sx={{ fontWeight: '600', color: '#1e293b' }}>{row.razon_social}</TableCell>
+                                        <TableCell sx={{ fontWeight: '600', color: 'text.primary' }}>{row.razon_social}</TableCell>
                                         <TableCell align="center" sx={{ color: 'text.secondary' }}>{row.cant_pagos}</TableCell>
                                         {monthKeys.map((key) => (
                                             <TableCell key={key} sx={getCellStyle(row[key])}>
                                                 {row[key] > 0 ? row[key] : '-'}
                                             </TableCell>
                                         ))}
-                                        <TableCell align="center" sx={{ fontWeight: '800', backgroundColor: '#fff', color: 'error.main', borderLeft: '1px solid #ffebee' }}>
+                                        <TableCell align="center" sx={{ fontWeight: '800', backgroundColor: 'background.paper', color: 'error.main', borderLeft: '1px solid', borderColor: 'divider' }}>
                                             {row.anual > 0 ? row.anual : 0}
                                         </TableCell>
                                     </TableRow>
