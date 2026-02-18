@@ -7,9 +7,7 @@ export default function Dialog(theme) {
                 paper: {
                     borderRadius: 16,
                     backgroundImage: 'none',
-                    boxShadow: theme.palette.mode === 'dark'
-                        ? '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
-                        : undefined
+                    boxShadow: theme.customShadows?.z2 ?? theme.shadows[4]
                 },
                 container: {
                     backdropFilter: 'blur(3px)' // Modern glass morphism effect for backdrop

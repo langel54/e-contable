@@ -7,6 +7,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import CloseIcon from "@mui/icons-material/Close";
 
 const DrawerComponent = ({
@@ -32,7 +33,9 @@ const DrawerComponent = ({
           backdrop: {
             sx: {
               zIndex: zIndex - 1,
-              backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.7)' : `rgba(0,0,0,${backdropOpacity})`,
+              backgroundColor: (theme) => theme.palette.mode === 'dark'
+              ? alpha(theme.palette.common.black, 0.7)
+              : alpha(theme.palette.common.black, backdropOpacity),
               backdropFilter: 'blur(2px)',
             },
           },

@@ -23,7 +23,7 @@ const PagosTable = ({ pagos, loading, onDelete }) => {
     >
       <Table size="small">
         <TableHead>
-          <TableRow sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#f5f5f5' }}>
+          <TableRow sx={{ backgroundColor: 'grey.100' }}>
             <TableCell sx={{ fontWeight: 600 }}>Fecha</TableCell>
             <TableCell sx={{ fontWeight: 600 }}>Importe</TableCell>
             <TableCell sx={{ fontWeight: 600 }}>Forma de Pago</TableCell>

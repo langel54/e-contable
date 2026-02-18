@@ -40,17 +40,17 @@ const DataGridStyled = styled(DataGrid)(({ theme }) => ({
     color: theme.palette.text.primary,
   },
   "& .MuiDataGrid-columnHeaders": {
-    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(18, 18, 18, 0.6)' : theme.palette.grey[50],
+    backgroundColor: theme.palette.grey[50],
     color: theme.palette.text.primary,
     fontWeight: "700 !important",
     borderBottom: `2px solid ${theme.palette.divider}`,
     backdropFilter: 'blur(8px)',
   },
   "& .MuiDataGrid-row:hover": {
-    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : theme.palette.grey[100],
+    backgroundColor: theme.palette.action.hover,
   },
   "& .MuiDataGrid-footerContainer": {
-    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(18, 18, 18, 0.6)' : theme.palette.grey[50],
+    backgroundColor: theme.palette.grey[50],
     color: theme.palette.text.secondary,
     borderTop: `1px solid ${theme.palette.divider}`,
   },

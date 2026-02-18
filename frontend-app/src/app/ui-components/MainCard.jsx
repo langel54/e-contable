@@ -43,7 +43,7 @@ function MainCard(
       sx={{
         border: border ? '1px solid' : 'none',
         borderRadius: 3, // Increased for a more modern look
-        borderColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
+        borderColor: 'divider',
         boxShadow: boxShadow ? shadow || theme.customShadows.z1 : 'none',
         transition: 'all 0.3s ease-in-out',
         background: theme.palette.mode === 'dark' ? theme.palette.background.paper : theme.palette.background.paper,

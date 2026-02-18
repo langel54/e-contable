@@ -43,7 +43,6 @@ import {
   Switch,
   Tooltip,
   Typography,
-  useTheme,
   Zoom,
 } from "@mui/material";
 import React, { useCallback, useEffect, useState } from "react";
@@ -503,7 +502,6 @@ const ClientsFilter = () => {
     setFilterWithPlanilla(!filterWithPlanilla);
   };
 
-  const theme = useTheme();
   return (
     <Box>
       <Stack sx={{ pb: 2 }} direction="row" spacing={2}>
@@ -542,7 +540,8 @@ const ClientsFilter = () => {
               // background: theme.palette.background.paper,
               borderRadius: 2,
               paddingRight: 2,
-              border: "1px solid" + theme.palette.grey[300],
+              border: '1px solid',
+              borderColor: 'divider',
             }}
             control={
               <Checkbox
@@ -590,7 +589,7 @@ const ClientsFilter = () => {
                 }}
               >
                 <ListItemIcon
-                  sx={(theme) => ({ color: theme.palette.success.main })}
+                  sx={{ color: 'success.main' }}
                 >
                   <FileExcelFilled />
                 </ListItemIcon>
@@ -605,7 +604,7 @@ const ClientsFilter = () => {
                 }}
               >
                 <ListItemIcon
-                  sx={(theme) => ({ color: theme.palette.error.main })}
+                  sx={{ color: 'error.main' }}
                 >
                   <FilePdfFilled />
                 </ListItemIcon>

@@ -11,6 +11,7 @@ import {
   MoreVert,
   Search,
   Visibility,
+  CloudUpload,
 } from "@mui/icons-material";
 import {
   Avatar,
@@ -44,6 +45,7 @@ import EstatusEditForm from "./EstatusEditForm";
 import SunatIcon from "@/app/components/SunatIcon";
 import { clientsStore } from "@/app/store/clientsStore";
 import ClientDetails from "./ClientDetails";
+import BulkUploadModal from "./BulkUploadModal";
 
 const clientColumns = (
   setEditedClient,
@@ -70,7 +72,7 @@ const clientColumns = (
                 fontSize: 10,
                 height: 18,
                 alignSelf: "start",
-                borderColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.2)' : theme.palette.secondary.main,
+                borderColor: 'divider',
                 color: 'text.secondary'
               }}
             />
@@ -329,6 +331,7 @@ const ClientPage = () => {
   const [openAddModal, setOpenAddModal] = useState(false);
   const [openStatusModal, setOpenStatusModal] = useState(false);
   const [openDetailsModal, setOpenDetailsModal] = useState(false);
+  const [openBulkModal, setOpenBulkModal] = useState(false);
 
   const [editedClient, setEditedClient] = useState(null);
 
@@ -445,16 +448,23 @@ const ClientPage = () => {
           <EstadoClienteSelect />
           <Button
             size="medium"
+            variant="outlined"
+            onClick={() => setOpenBulkModal(true)}
+            startIcon={<CloudUpload />}
+            sx={{ borderRadius: 2 }}
+          >
+            Carga Masiva
+          </Button>
+          <Button
+            size="medium"
             variant="contained"
             onClick={() => {
               setOpenAddModal(true);
             }}
             startIcon={<AddCircleOutlineSharp fontSize="inherit" />}
             sx={{
-              backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#818cf8' : theme.palette.primary.main,
-              '&:hover': {
-                backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#6366f1' : theme.palette.primary.dark,
-              }
+              backgroundColor: 'primary.main',
+              '&:hover': { backgroundColor: 'primary.dark' }
             }}
           >
             Agregar Cliente
@@ -507,6 +517,12 @@ const ClientPage = () => {
         handleClose={handleCloseDetailsModal}
         content={<ClientDetails data={editedClient} />}
         width="800px"
+      />
+      
+      <BulkUploadModal
+        open={openBulkModal}
+        handleClose={() => setOpenBulkModal(false)}
+        refreshTable={refreshTable}
       />
     </Box>
   );

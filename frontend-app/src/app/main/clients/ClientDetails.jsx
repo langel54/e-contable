@@ -17,29 +17,11 @@ import KeyIcon from "@mui/icons-material/Key";
 import SettingsIcon from "@mui/icons-material/Settings";
 import MiscellaneousServicesIcon from "@mui/icons-material/MiscellaneousServices";
 
-const gradientColors = [
-  { start: "#e3f2fd", end: "#fff", title: "#1565c0", icon: <PersonIcon /> },
-  { start: "#f3e5f5", end: "#fff", title: "#6a1b9a", icon: <KeyIcon /> },
-  { start: "#e8f5e9", end: "#fff", title: "#1b5e20", icon: <SettingsIcon /> },
-  {
-    start: "#fff3e0",
-    end: "#fff",
-    title: "#e65100",
-    icon: <MiscellaneousServicesIcon />,
-  },
-  {
-    start: "#f5f5f5",
-    end: "#fff",
-    title: "#424242",
-    icon: <MiscellaneousServicesIcon />,
-  },
-];
-
-const StyledAccordion = styled(Accordion)(({ gradient }) => ({
+const StyledAccordion = styled(Accordion)(({ theme, gradient }) => ({
   background: `linear-gradient(135deg, ${gradient.start}, ${gradient.end})`,
   borderRadius: 12,
   marginBottom: 8,
-  boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+  boxShadow: theme.customShadows?.z1 || theme.shadows[1],
 }));
 
 const Label = styled(Typography)(({ theme }) => ({
@@ -58,35 +40,35 @@ export default function ClientDetailsModal({ data }) {
   const isDark = theme.palette.mode === 'dark';
 
   const gradientColors = [
-    { 
-      start: isDark ? "rgba(129, 140, 248, 0.15)" : "#e3f2fd", 
-      end: isDark ? "rgba(129, 140, 248, 0.05)" : "#fff", 
-      title: isDark ? theme.palette.primary.light : "#1565c0", 
-      icon: <PersonIcon sx={{ color: isDark ? 'primary.light' : 'primary.main' }} /> 
-    },
-    { 
-      start: isDark ? "rgba(168, 85, 247, 0.15)" : "#f3e5f5", 
-      end: isDark ? "rgba(168, 85, 247, 0.05)" : "#fff", 
-      title: isDark ? "#c084fc" : "#6a1b9a", 
-      icon: <KeyIcon sx={{ color: isDark ? "#c084fc" : "#6a1b9a" }} /> 
-    },
-    { 
-      start: isDark ? "rgba(34, 197, 94, 0.15)" : "#e8f5e9", 
-      end: isDark ? "rgba(34, 197, 94, 0.05)" : "#fff", 
-      title: isDark ? "#4ade80" : "#1b5e20", 
-      icon: <SettingsIcon sx={{ color: isDark ? "#4ade80" : "#1b5e20" }} /> 
+    {
+      start: theme.palette.info.lighter,
+      end: theme.palette.background.paper,
+      title: theme.palette.info.main,
+      icon: <PersonIcon sx={{ color: 'info.main' }} />
     },
     {
-      start: isDark ? "rgba(249, 115, 22, 0.15)" : "#fff3e0",
-      end: isDark ? "rgba(249, 115, 22, 0.05)" : "#fff",
-      title: isDark ? "#fb923c" : "#e65100",
-      icon: <MiscellaneousServicesIcon sx={{ color: isDark ? "#fb923c" : "#e65100" }} />,
+      start: theme.palette.secondary.lighter || theme.palette.grey[100],
+      end: theme.palette.background.paper,
+      title: theme.palette.secondary.dark || theme.palette.grey[700],
+      icon: <KeyIcon sx={{ color: 'secondary.dark' }} />
     },
     {
-      start: isDark ? "rgba(255, 255, 255, 0.05)" : "#f5f5f5",
-      end: isDark ? "rgba(255, 255, 255, 0.02)" : "#fff",
-      title: isDark ? "text.secondary" : "#424242",
-      icon: <MiscellaneousServicesIcon sx={{ color: "text.secondary" }} />,
+      start: theme.palette.success.lighter,
+      end: theme.palette.background.paper,
+      title: theme.palette.success.main,
+      icon: <SettingsIcon sx={{ color: 'success.main' }} />
+    },
+    {
+      start: theme.palette.warning.lighter,
+      end: theme.palette.background.paper,
+      title: theme.palette.warning.main,
+      icon: <MiscellaneousServicesIcon sx={{ color: 'warning.main' }} />,
+    },
+    {
+      start: theme.palette.grey[100],
+      end: theme.palette.background.paper,
+      title: theme.palette.text.secondary,
+      icon: <MiscellaneousServicesIcon sx={{ color: 'text.secondary' }} />,
     },
   ];
 
@@ -165,7 +147,8 @@ export default function ClientDetailsModal({ data }) {
             gradient={colors}
             sx={{
               '&:before': { display: 'none' },
-              border: isDark ? '1px solid rgba(255, 255, 255, 0.05)' : 'none',
+              border: '1px solid',
+                borderColor: 'divider',
               overflow: 'hidden'
             }}
           >
@@ -173,7 +156,7 @@ export default function ClientDetailsModal({ data }) {
               expandIcon={<ExpandMoreIcon sx={{ color: 'text.secondary' }} />}
               sx={{
                 background: colors.start,
-                borderBottom: isDark ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid rgba(0,0,0,0.05)",
+                borderBottom: `1px solid ${theme.palette.divider}`,
                 minHeight: 56,
                 '& .MuiAccordionSummary-content': { margin: '12px 0' }
               }}
@@ -192,7 +175,7 @@ export default function ClientDetailsModal({ data }) {
                 </Typography>
               </Box>
             </AccordionSummary>
-            <AccordionDetails sx={{ backgroundColor: isDark ? 'rgba(0,0,0,0.1)' : 'transparent' }}>
+            <AccordionDetails sx={{ backgroundColor: isDark ? 'action.hover' : 'transparent' }}>
               <Grid container spacing={3} sx={{ p: 1 }}>
                 {group.fields.map(
                   (field, j) =>

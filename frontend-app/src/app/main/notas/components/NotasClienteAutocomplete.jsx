@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Box } from "@mui/material";
 import InfiniteSelect from "@/app/components/AutocompleteComponent";
 import { getClientesProvs, getClienteProvById } from "@/app/services/clienteProvService";
 
@@ -44,9 +45,9 @@ const NotasClienteAutocomplete = ({ value, onChange, sx }) => {
         <li {...props} key={option.idclienteprov}>
           <div style={{ padding: "8px 0" }}>
             <div style={{ fontWeight: 500 }}>{option.razonsocial}</div>
-            <div style={{ fontSize: "0.8em", color: "rgba(0, 0, 0, 0.6)" }}>
+            <Box component="span" sx={{ fontSize: "0.8em", color: "text.secondary" }}>
               RUC: {option.ruc || option.dni}
-            </div>
+            </Box>
           </div>
         </li>
       )}

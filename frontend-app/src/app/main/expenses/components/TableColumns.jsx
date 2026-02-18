@@ -42,7 +42,7 @@ export const getColumns = ({
               <Typography
                 variant="caption"
                 sx={{
-                  color: (theme) => theme.palette.mode === 'dark' ? 'info.light' : 'info.dark',
+                  color: 'info.main',
                   fontSize: '10px',
                   fontWeight: 500
                 }}

@@ -93,14 +93,14 @@ const AddUserModal = ({ modalOpen, handleCloseModal, onUserAdded }) => {
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: 400,
-            bgcolor: "background.paper", // Let theme handle it
-            backgroundImage: theme.palette.mode === 'dark' ? 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))' : 'none', // Elevation effect
+            bgcolor: "background.paper",
             boxShadow: theme.customShadows.z1,
             p: 4,
             borderRadius: 3,
             maxHeight: "90vh",
             overflowY: "auto",
-            border: theme.palette.mode === 'dark' ? '1px solid rgba(255, 255, 255, 0.08)' : 'none',
+            border: '1px solid',
+            borderColor: 'divider',
           }}
         >
           <Box component="form" onSubmit={handleSubmit}>

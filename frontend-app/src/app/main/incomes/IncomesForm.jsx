@@ -322,7 +322,7 @@ const IncomeForm = ({ ingresoEdit = null, handleCloseModal }) => {
                   helperText={errors.importe ? errors.importe : ""}
                   sx={{
                     "& .MuiInputBase-input": {
-                      color: (theme) => theme.palette.mode === 'dark' ? '#818cf8' : theme.palette.info.dark,
+                      color: 'info.main',
                       fontWeight: 600,
                       textAlign: "end",
                     },

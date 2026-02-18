@@ -13,17 +13,16 @@ const SwitchIosComponent = ({ label = "iOS style", ...props }) => {
       transitionDuration: "300ms",
       "&.Mui-checked": {
         transform: "translateX(16px)",
-        color: "#fff",
+        color: theme.palette.common.white,
         "& + .MuiSwitch-track": {
-          backgroundColor:
-            theme.palette.mode === "dark" ? "#2ECA45" : "#65C466",
+          backgroundColor: theme.palette.success.main,
           opacity: 1,
           border: 0,
         },
       },
       "&.Mui-focusVisible .MuiSwitch-thumb": {
-        color: "#33cf4d",
-        border: "6px solid #fff",
+        color: theme.palette.success.main,
+        border: `6px solid ${theme.palette.common.white}`,
       },
       "&.Mui-disabled": {
         "& .MuiSwitch-thumb": {
@@ -44,7 +43,7 @@ const SwitchIosComponent = ({ label = "iOS style", ...props }) => {
     },
     "& .MuiSwitch-track": {
       borderRadius: 26 / 2,
-      backgroundColor: theme.palette.mode === "dark" ? "#39393D" : "#E9E9EA",
+      backgroundColor: theme.palette.mode === "dark" ? theme.palette.grey[800] : theme.palette.grey[300],
       opacity: 1,
       transition: theme.transitions.create(["background-color"], {
         duration: 500,

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { Autocomplete, TextField, CircularProgress } from "@mui/material";
+import { Autocomplete, Box, TextField, CircularProgress } from "@mui/material";
 
 const InfiniteSelect = ({
   // Función para cargar datos
@@ -158,9 +158,9 @@ export default InfiniteSelect;
           <li {...props} key={option.idclienteprov}>
             <div style={{ padding: "8px 0" }}>
               <div style={{ fontWeight: 500 }}>{option.razonsocial}</div>
-              <div style={{ fontSize: "0.8em", color: "rgba(0, 0, 0, 0.6)" }}>
+              <Box component="span" sx={{ fontSize: "0.8em", color: "text.secondary" }}>
                 RUC: {option.ruc}
-              </div>
+              </Box>
             </div>
           </li>
         )}

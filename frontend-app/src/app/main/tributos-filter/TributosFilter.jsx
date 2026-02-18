@@ -20,7 +20,6 @@ import {
   Stack,
   Tooltip,
   Typography,
-  useTheme,
   Zoom,
 } from "@mui/material";
 import React, { useCallback, useEffect, useState } from "react";
@@ -156,14 +155,13 @@ const tributoColumns = (
       width: 80,
       align: "right",
       renderCell: (params) => {
-        const theme = useTheme();
         const importe = params.row.importe_reg || 0;
         return (
           <Typography
             variant="body2"
             sx={{
-              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(129, 140, 248, 0.15)' : '#e3f2fd',
-              color: theme.palette.mode === 'dark' ? '#a5b4fc' : 'inherit',
+              backgroundColor: 'info.lighter',
+              color: 'info.main',
               padding: "4px 8px",
               borderRadius: "4px",
               fontWeight: "bold",
@@ -183,14 +181,13 @@ const tributoColumns = (
       width: 80,
       align: "right",
       renderCell: (params) => {
-        const theme = useTheme();
         const importe = params.row.importe_pc || 0;
         return (
           <Typography
             variant="body2"
             sx={{
-              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(52, 211, 153, 0.15)' : '#e3f2fd',
-              color: theme.palette.mode === 'dark' ? '#6ee7b7' : 'inherit',
+              backgroundColor: 'success.lighter',
+              color: 'success.main',
               padding: "4px 8px",
               borderRadius: "4px",
               fontWeight: "bold",
@@ -210,15 +207,14 @@ const tributoColumns = (
       width: 80,
       align: "right",
       renderCell: (params) => {
-        const theme = useTheme();
         const pendiente =
           (params.row.importe_reg || 0) - (params.row.importe_pc || 0);
         return (
           <Typography
             variant="body2"
             sx={{
-              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(239, 68, 68, 0.15)' : '#e3f2fd',
-              color: theme.palette.mode === 'dark' ? '#fca5a5' : 'inherit',
+              backgroundColor: 'error.lighter',
+              color: 'error.main',
               padding: "4px 8px",
               borderRadius: "4px",
               fontWeight: "bold",
@@ -258,7 +254,6 @@ const tributoColumns = (
       width: 80,
       align: "right",
       renderCell: (params) => {
-        const theme = useTheme();
         const fechaVenc = params.row.fecha_v ? new Date(params.row.fecha_v) : null;
         if (!fechaVenc) return <Typography variant="body2">0.00</Typography>;
 
@@ -272,8 +267,8 @@ const tributoColumns = (
           <Typography
             variant="body2"
             sx={{
-              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(251, 191, 36, 0.15)' : '#ffebee',
-              color: theme.palette.mode === 'dark' ? '#fcd34d' : 'inherit',
+              backgroundColor: 'warning.lighter',
+              color: 'warning.main',
               padding: "4px 8px",
               borderRadius: "4px",
               fontWeight: "bold",
@@ -293,7 +288,6 @@ const tributoColumns = (
       width: 80,
       align: "right",
       renderCell: (params) => {
-        const theme = useTheme();
         const pendiente =
           (params.row.importe_reg || 0) - (params.row.importe_pc || 0);
         const fechaVenc = params.row.fecha_v ? new Date(params.row.fecha_v) : null;
@@ -311,12 +305,12 @@ const tributoColumns = (
           <Typography
             variant="body2"
             sx={{
-              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(239, 68, 68, 0.25)' : '#ffebee',
-              color: theme.palette.mode === 'dark' ? '#f87171' : 'inherit',
+              backgroundColor: 'error.lighter',
+              color: 'error.main',
               padding: "4px 8px",
               borderRadius: "4px",
               fontWeight: "bold",
-              border: theme.palette.mode === 'dark' ? '1px solid rgba(239,68,68,0.5)' : 'none',
+              border: (t) => t.palette.mode === 'dark' ? `1px solid ${t.palette.error.main}` : 'none',
             }}
           >
             {deudaActual.toLocaleString("es-PE", {

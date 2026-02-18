@@ -122,12 +122,11 @@ const TributosDashboardPage = () => {
             spacing={2}
             sx={{
               width: "100%",
-              border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : theme.palette.divider}`,
+              border: '1px solid',
+              borderColor: 'divider',
               padding: 1.5,
               borderRadius: 3,
-              // marginLeft: 2.75, // Matching grid spacing // Remove manual margin if in Grid item
-              // marginTop: 2, // Remove manual margin if in Grid item
-              backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.02)' : 'transparent',
+              backgroundColor: 'transparent',
             }}
           >
             <Typography variant="h5" fontWeight={600}>

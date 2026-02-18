@@ -55,7 +55,7 @@ export default function MiniDrawer({ children }) {
             <IconButton 
                 onClick={handleDrawerToggle}
                 sx={{ 
-                    bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+                    bgcolor: 'action.hover',
                     p: 0.5,
                     borderRadius: '50%'
                 }}
@@ -94,7 +94,7 @@ export default function MiniDrawer({ children }) {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
           }),
-          bgcolor: (theme) => theme.palette.mode === 'dark' ? 'background.default' : '#fcfcfc',
+          bgcolor: 'background.default',
           color: "text.primary",
           overflowX: 'hidden'
         }}

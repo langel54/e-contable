@@ -14,7 +14,7 @@ export default function Table(theme) {
         MuiTableHead: {
             styleOverrides: {
                 root: {
-                    backgroundColor: theme.palette.mode === 'dark' ? '#1e293b' : '#f8fafc',
+                    backgroundColor: theme.palette.grey[50],
                     '& .MuiTableCell-root': {
                         borderBottom: `1px solid ${theme.palette.divider}`,
                         fontSize: '0.75rem',

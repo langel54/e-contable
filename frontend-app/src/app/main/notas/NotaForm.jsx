@@ -222,14 +222,9 @@ export default function NotaForm({ initialData = null, onClose, onSaved }) {
                           <div style={{ fontWeight: 500 }}>
                             {option.razonsocial}
                           </div>
-                          <div
-                            style={{
-                              fontSize: "0.8em",
-                              color: "rgba(0, 0, 0, 0.6)",
-                            }}
-                          >
+                          <Box component="span" sx={{ fontSize: "0.8em", color: "text.secondary" }}>
                             RUC: {option.ruc}
-                          </div>
+                          </Box>
                         </div>
                       </li>
                     )}

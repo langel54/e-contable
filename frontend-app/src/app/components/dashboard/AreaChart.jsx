@@ -99,7 +99,7 @@ const AreaChart = ({
       ...(theme.palette.mode === 'dark' && {
         cssClass: 'apexcharts-tooltip-dark-custom', // Opcional si queremos CSS específico
         style: {
-          color: '#f8fafc' // Slate 50
+          color: theme.palette.grey[50]
         }
       })
     },
@@ -110,11 +110,11 @@ const AreaChart = ({
           yaxis: [
             {
               y: 0,
-              borderColor: error.main || "#FF0000", // roja
+              borderColor: error.main,
               strokeDashArray: 0,
               label: {
-                borderColor: error.main || "#FF0000",
-                style: { color: "#fff", background: error.main || "#FF0000" },
+                borderColor: error.main,
+                style: { color: theme.palette.common.white, background: error.main },
                 text: "0",
               },
             },

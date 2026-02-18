@@ -77,13 +77,13 @@ const StyledModal = ({
           transform: "translate(-50%, -50%)",
           width: 400,
           bgcolor: "background.paper",
-          backgroundImage: (theme) => theme.palette.mode === 'dark' ? 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))' : 'none',
           boxShadow: (theme) => theme.customShadows.z1,
           p: 4,
           borderRadius: 3,
           maxHeight: "90vh",
           overflow: "auto",
-          border: (theme) => theme.palette.mode === 'dark' ? '1px solid rgba(255, 255, 255, 0.08)' : 'none',
+          border: '1px solid',
+          borderColor: 'divider',
         }}
       >
         <Typography id="edit-user-modal" variant="h5" color="text.primary" fontWeight={700} mb={3}>
