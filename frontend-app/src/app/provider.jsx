@@ -64,7 +64,9 @@ export function AuthProvider({ children }) {
           if (data.valid) {
             setIsAuthenticated(true);
             setUser(data.user);
-            setUserType(data.user?.tipo_usuario?.id_tipo); //  aqui esta el tipooooooooooooooo
+            const tipo = data.user?.tipo_usuario;
+            const idTipo = tipo?.id_tipo ?? (typeof tipo === "number" || typeof tipo === "string" ? tipo : null);
+            setUserType(idTipo != null ? Number(idTipo) : null);
           } else {
             setIsAuthenticated(false);
             router.push("/authentication");
@@ -117,7 +119,9 @@ export function AuthProvider({ children }) {
     Cookies.set("token", response.token, { expires: 1 }); // expiracion de token
     setIsAuthenticated(true);
     setUser(response.user);
-    setUserType(response.user?.tipo_usuario?.id_tipo); //  aqui esta el tipooooooooooooooo
+    const tipo = response.user?.tipo_usuario;
+    const idTipo = tipo?.id_tipo ?? (typeof tipo === "number" || typeof tipo === "string" ? tipo : null);
+    setUserType(idTipo != null ? Number(idTipo) : null);
 
     return response;
   };
@@ -136,7 +140,7 @@ export function AuthProvider({ children }) {
         login,
         logout,
         loadingAuth,
-        userType,
+        userType, // id_tipo del usuario (tabla usuarios / tipo_usuario)
         estadoClientesProvider,
         setEstadoClientesProvider,
         cajaMes,
