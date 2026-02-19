@@ -131,9 +131,14 @@ const ConceptoPage = () => {
   return (
     <Box>
       <Stack sx={{ pb: 2 }} direction="row" spacing={2} justifyContent="space-between">
-        <Typography variant="h4" fontWeight="100">
-          Conceptos
-        </Typography>
+        <Stack>
+          <Typography variant="h4" gutterBottom>
+            Conceptos
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Gestiona los conceptos de ingresos y egresos
+          </Typography>
+        </Stack>
       </Stack>
       <Stack
         direction="row"

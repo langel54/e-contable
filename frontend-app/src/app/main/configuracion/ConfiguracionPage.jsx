@@ -132,9 +132,14 @@ const ConfiguracionPage = () => {
   return (
     <Box>
       <Stack sx={{ pb: 2 }} direction="row" spacing={2} justifyContent="space-between">
-        <Typography variant="h4" fontWeight="100">
-          Configuración
-        </Typography>
+        <Stack>
+          <Typography variant="h4" gutterBottom>
+            Configuración
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Parámetros y opciones del sistema
+          </Typography>
+        </Stack>
       </Stack>
       <Stack
         direction="row"

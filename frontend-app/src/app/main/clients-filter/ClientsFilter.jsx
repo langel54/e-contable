@@ -504,9 +504,12 @@ const ClientsFilter = () => {
 
   return (
     <Box>
-      <Stack sx={{ pb: 2 }} direction="row" spacing={2}>
-        <Typography variant="h4" fontWeight={"100"}>
+      <Stack sx={{ pb: 2 }}>
+        <Typography variant="h4" gutterBottom>
           Clientes
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Gestiona clientes y beneficiarios
         </Typography>
       </Stack>
       <Stack

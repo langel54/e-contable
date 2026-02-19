@@ -239,9 +239,14 @@ export default function NotasList() {
         spacing={2}
         justifyContent={"space-between"}
       >
-        <Typography variant="h4" fontWeight={"100"}>
-          Notas | <small>Apuntes</small>
-        </Typography>
+        <Stack>
+          <Typography variant="h4" gutterBottom>
+            Notas
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Apuntes y notas por cliente
+          </Typography>
+        </Stack>
         <Button
           size="medium"
           color="success"

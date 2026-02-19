@@ -289,10 +289,10 @@ const BuzonDashboard = () => {
     <Box sx={{ p: 2 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
         <Box>
-          <Typography variant="h4" fontWeight="100">
+          <Typography variant="h4" gutterBottom>
             Monitoreo Buzón SOL
           </Typography>
-          <Typography variant="body2" color="textSecondary">
+          <Typography variant="body2" color="text.secondary">
             Gestión de clientes monitoreados y verificación de notificaciones
           </Typography>
         </Box>

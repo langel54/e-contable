@@ -104,7 +104,10 @@ const ConceptosPage = () => {
   return (
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="h4">Conceptos</Typography>
+        <Stack>
+          <Typography variant="h4" gutterBottom>Conceptos</Typography>
+          <Typography variant="body2" color="text.secondary">Gestiona los conceptos de ingresos y egresos</Typography>
+        </Stack>
         <Button
           variant="contained"
           startIcon={<PostAdd />}

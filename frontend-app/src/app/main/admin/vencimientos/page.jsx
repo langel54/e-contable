@@ -110,7 +110,10 @@ const VencimientosPage = () => {
   return (
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="h4">Vencimientos Tributarios</Typography>
+        <Stack>
+          <Typography variant="h4" gutterBottom>Vencimientos Tributarios</Typography>
+          <Typography variant="body2" color="text.secondary">Gestiona fechas de vencimiento tributario</Typography>
+        </Stack>
         <Button
           variant="contained"
           startIcon={<PostAdd />}

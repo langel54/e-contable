@@ -106,7 +106,10 @@ const TiposTributoPage = () => {
   return (
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="h4">Tipos de Tributo</Typography>
+        <Stack>
+          <Typography variant="h4" gutterBottom>Tipos de Tributo</Typography>
+          <Typography variant="body2" color="text.secondary">Gestiona los tipos de tributo</Typography>
+        </Stack>
         <Button
           variant="contained"
           startIcon={<PostAdd />}

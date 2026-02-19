@@ -86,7 +86,7 @@ export default function MiniDrawer({ children }) {
         component="main"
         sx={{
           flexGrow: 1,
-          p: { xs: 2, md: 4 },
+          p: { xs: 2, md: 2 },
           minHeight: "100vh",
           minWidth: 0, // CRITICAL: allows flex item to shrink below content size
           width: '100%',

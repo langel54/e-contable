@@ -114,7 +114,10 @@ const FacturadoresPage = () => {
   return (
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="h4">Facturadores</Typography>
+        <Stack>
+          <Typography variant="h4" gutterBottom>Facturadores</Typography>
+          <Typography variant="body2" color="text.secondary">Gestiona facturadores electrónicos</Typography>
+        </Stack>
         <Button
           variant="contained"
           startIcon={<PostAdd />}

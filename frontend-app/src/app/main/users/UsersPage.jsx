@@ -425,7 +425,7 @@ export default function UsersPage() {
       <Box sx={{ mb: 4 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 3 }}>
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 500, color: 'text.primary' }}>
+            <Typography variant="h4" gutterBottom>
               Usuarios
             </Typography>
             <Typography variant="body2" color="text.secondary">

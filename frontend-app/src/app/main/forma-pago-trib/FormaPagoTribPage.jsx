@@ -135,9 +135,14 @@ const FormaPagoTribPage = () => {
   return (
     <Box>
       <Stack sx={{ pb: 2 }} direction="row" spacing={2} justifyContent="space-between">
-        <Typography variant="h4" fontWeight="100">
-          Formas de Pago Tributo
-        </Typography>
+        <Stack>
+          <Typography variant="h4" gutterBottom>
+            Formas de Pago Tributo
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Gestiona las formas de pago de tributos
+          </Typography>
+        </Stack>
       </Stack>
       <Stack
         direction="row"

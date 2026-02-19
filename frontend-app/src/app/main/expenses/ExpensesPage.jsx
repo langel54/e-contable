@@ -232,9 +232,14 @@ const ExpensesPage = () => {
         spacing={2}
         justifyContent={"space-between"}
       >
-        <Typography variant="h4" fontWeight={"100"}>
-          Egresos
-        </Typography>
+        <Stack>
+          <Typography variant="h4" gutterBottom>
+            Egresos
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Registra y consulta egresos
+          </Typography>
+        </Stack>
         <Button
           size="medium"
           color="error"

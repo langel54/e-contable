@@ -106,7 +106,10 @@ const FormasPagoPage = () => {
   return (
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="h4">Formas de Pago Tributo</Typography>
+        <Stack>
+          <Typography variant="h4" gutterBottom>Formas de Pago Tributo</Typography>
+          <Typography variant="body2" color="text.secondary">Gestiona las formas de pago de tributos</Typography>
+        </Stack>
         <Button
           variant="contained"
           startIcon={<PostAdd />}
