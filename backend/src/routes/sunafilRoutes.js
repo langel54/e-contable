@@ -4,6 +4,7 @@ const sunafilController = require("../controllers/sunafilController");
 
 // Servir dashboard
 router.get("/monitored", sunafilController.getMonitoredClients);
+router.get("/verify-progress", sunafilController.getVerifyProgress);
 router.post("/toggle", sunafilController.toggleMonitoring);
 router.post("/verify-all", sunafilController.verifyAll);
 router.post("/mark-read", sunafilController.markAsRead);

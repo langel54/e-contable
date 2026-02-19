@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   Box,
   Typography,
@@ -15,6 +15,8 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Alert,
+  LinearProgress,
 } from "@mui/material";
 import { Refresh, Notifications, Add, Delete, CheckCircle, Launch } from "@mui/icons-material";
 import CustomTable from "@/app/components/CustonTable";
@@ -36,6 +38,9 @@ const SunafilDashboard = () => {
   const [selectedClientMessages, setSelectedClientMessages] = useState([]);
   const [selectedClientName, setSelectedClientName] = useState("");
   const [selectedClientId, setSelectedClientId] = useState(null);
+
+  const [verifyProgress, setVerifyProgress] = useState({ total: 0, done: 0, inProgress: false });
+  const pollIntervalRef = useRef(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -131,14 +136,37 @@ const SunafilDashboard = () => {
   const handleVerifyAll = async () => {
     try {
       setRefreshing(true);
+      setVerifyProgress({ total: 0, done: 0, inProgress: true });
       await sunafilServices.verifyAll();
       Swal.fire("Iniciado", "La verificación masiva SUNAFIL ha comenzado.", "info");
+
+      const poll = async () => {
+        try {
+          const p = await sunafilServices.getVerifyProgress();
+          setVerifyProgress(p);
+          if (p.inProgress) {
+            pollIntervalRef.current = setTimeout(poll, 1500);
+          } else {
+            setRefreshing(false);
+            fetchData();
+          }
+        } catch {
+          pollIntervalRef.current = setTimeout(poll, 1500);
+        }
+      };
+      poll();
     } catch (error) {
       Swal.fire("Error", "No se pudo iniciar la verificación", "error");
-    } finally {
       setRefreshing(false);
+      setVerifyProgress({ total: 0, done: 0, inProgress: false });
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) clearTimeout(pollIntervalRef.current);
+    };
+  }, []);
 
   const columns = [
     {
@@ -295,10 +323,31 @@ const SunafilDashboard = () => {
         </Stack>
       </Stack>
 
+      {refreshing && (
+        <Alert
+          severity="info"
+          icon={<CircularProgress size={20} />}
+          sx={{ mb: 2 }}
+        >
+          <Stack spacing={1}>
+            <Typography variant="body2" fontWeight={500}>
+              {verifyProgress.total > 0
+                ? `Verificando SUNAFIL: ${verifyProgress.done} de ${verifyProgress.total} clientes (faltan ${verifyProgress.total - verifyProgress.done})`
+                : "Verificando SUNAFIL en segundo plano…"}
+            </Typography>
+            <LinearProgress
+              color="primary"
+              value={verifyProgress.total > 0 ? (verifyProgress.done / verifyProgress.total) * 100 : 0}
+              variant={verifyProgress.total > 0 ? "determinate" : "indeterminate"}
+            />
+          </Stack>
+        </Alert>
+      )}
+
       <CustomTable
         columns={columns}
         data={monitoredClients}
-        loading={loading}
+        loading={loading || refreshing}
         getRowId={(row) => row.idclienteprov}
         paginationModel={{ page: 0, pageSize: 15 }}
         paginationMode="client"

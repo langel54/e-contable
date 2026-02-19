@@ -33,6 +33,15 @@ const buzonServices = {
         }
     },
 
+    getVerifyProgress: async () => {
+        try {
+            return await fetchWithAuth("/buzon/verify-progress");
+        } catch (error) {
+            console.error('Error obteniendo progreso de verificación:', error);
+            throw error;
+        }
+    },
+
     markAsRead: async (mensajeId) => {
         try {
             return await fetchWithAuth("/buzon/mark-read", {

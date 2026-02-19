@@ -52,6 +52,15 @@ const sunafilServices = {
     }
   },
 
+  getVerifyProgress: async () => {
+    try {
+      return await fetchWithAuth("/sunafil/verify-progress");
+    } catch (error) {
+      console.error('Error obteniendo progreso de verificación Sunafil:', error);
+      throw error;
+    }
+  },
+
   markAsRead: async (mensajeId) => {
     try {
       return await fetchWithAuth("/sunafil/mark-read", {

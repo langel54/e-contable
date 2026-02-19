@@ -45,6 +45,16 @@ const buzonController = {
         }
     },
 
+    async getVerifyProgress(req, res) {
+        try {
+            const progress = buzonService.getVerifyProgress();
+            res.json(progress);
+        } catch (error) {
+            console.error("Error obteniendo progreso:", error);
+            res.status(500).json({ error: "Error en el servidor." });
+        }
+    },
+
     async markAsRead(req, res) {
         const { mensajeId } = req.body;
         if (!mensajeId) {

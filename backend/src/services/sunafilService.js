@@ -2,6 +2,13 @@ const { chromium } = require("playwright");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
+// Estado de progreso de verificación masiva (para polling desde el frontend)
+let verifyProgress = { total: 0, done: 0, inProgress: false };
+
+function getVerifyProgress() {
+  return { ...verifyProgress };
+}
+
 async function accessSunafil({ ruc, usuario, password }) {
   const url =
     "https://api-seguridad.sunat.gob.pe/v1/clientessol/b6474e23-8a3b-4153-b301-dafcc9646250/oauth2/login?originalUrl=https://casillaelectronica.sunafil.gob.pe/si.inbox/Login/Empresa&state=s";
@@ -70,11 +77,13 @@ async function accessSunafil({ ruc, usuario, password }) {
 }
 
 async function verifyMonitoredSunafil() {
-  // console.log("Iniciando verificación masiva de Sunafil...");
   const monitoringEntries = await prisma.monitoreo_sunafil.findMany();
   const clientIds = monitoringEntries.map((e) => e.idclienteprov);
 
-  if (clientIds.length === 0) return [];
+  if (clientIds.length === 0) {
+    verifyProgress = { total: 0, done: 0, inProgress: false };
+    return [];
+  }
 
   const clients = await prisma.clienteProv.findMany({
     where: { idclienteprov: { in: clientIds } },
@@ -87,10 +96,14 @@ async function verifyMonitoredSunafil() {
     },
   });
 
+  verifyProgress = { total: clients.length, done: 0, inProgress: true };
   const results = [];
 
   for (const client of clients) {
-    if (!client.ruc || !client.c_usuario || !client.c_passw) continue;
+    if (!client.ruc || !client.c_usuario || !client.c_passw) {
+      verifyProgress.done += 1;
+      continue;
+    }
 
     try {
       const result = await accessSunafil({
@@ -134,7 +147,9 @@ async function verifyMonitoredSunafil() {
     } catch (error) {
       console.error(`Error procesando Sunafil para ${client.ruc}:`, error);
     }
+    verifyProgress.done += 1;
   }
+  verifyProgress.inProgress = false;
   return results;
 }
 
@@ -218,6 +233,7 @@ async function markAllMessagesAsRead(idclienteprov) {
 module.exports = {
   accessSunafil,
   verifyMonitoredSunafil,
+  getVerifyProgress,
   getMonitoringData,
   addClientToMonitoring,
   removeClientFromMonitoring,

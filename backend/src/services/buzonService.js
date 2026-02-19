@@ -2,6 +2,13 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const { accessSunatMenu } = require("./sunatMenuService");
 
+// Estado de progreso de verificación masiva (para polling desde el frontend)
+let verifyProgress = { total: 0, done: 0, inProgress: false };
+
+function getVerifyProgress() {
+    return { ...verifyProgress };
+}
+
 async function verifyMonitoredBuzones() {
     console.log("Iniciando verificación masiva de Buzón SOL (Decoupled)...");
 
@@ -9,7 +16,10 @@ async function verifyMonitoredBuzones() {
     const monitoringEntries = await prisma.monitoreo_buzon.findMany();
     const clientIds = monitoringEntries.map(e => e.idclienteprov);
 
-    if (clientIds.length === 0) return [];
+    if (clientIds.length === 0) {
+        verifyProgress = { total: 0, done: 0, inProgress: false };
+        return [];
+    }
 
     // 2. Obtener los datos de esos clientes desde clienteProv
     const clients = await prisma.clienteProv.findMany({
@@ -23,6 +33,7 @@ async function verifyMonitoredBuzones() {
         }
     });
 
+    verifyProgress = { total: clients.length, done: 0, inProgress: true };
     console.log(`Se procesarán ${clients.length} clientes.`);
 
     const results = [];
@@ -88,8 +99,10 @@ async function verifyMonitoredBuzones() {
             console.error(`Error procesando cliente ${client.idclienteprov}:`, error);
             results.push({ idclienteprov: client.idclienteprov, success: false, error: error.message });
         }
+        verifyProgress.done += 1;
     }
 
+    verifyProgress.inProgress = false;
     return results;
 }
 
@@ -200,6 +213,7 @@ async function markAllMessagesAsRead(idclienteprov) {
 
 module.exports = {
     verifyMonitoredBuzones,
+    getVerifyProgress,
     getMonitoringData,
     addClientToMonitoring,
     removeClientFromMonitoring,
