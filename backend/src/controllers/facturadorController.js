@@ -3,11 +3,12 @@ const facturadorService = require("../services/facturadorService");
 const facturadorController = {
   // Obtener todos los registros con paginación
   async getAll(req, res) {
-    const { skip, limit } = req.query;
+    const { skip, limit, search } = req.query;
     try {
       const { facturadores, total } = await facturadorService.getAll(
         parseInt(skip) || 0,
-        parseInt(limit) || 10
+        parseInt(limit) || 10,
+        search
       );
       res.status(200).json({ facturadores, total });
     } catch (error) {

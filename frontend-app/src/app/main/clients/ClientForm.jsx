@@ -34,6 +34,8 @@ import {
   updateClienteProv,
 } from "@/app/services/clienteProvService";
 import { clientsStore } from "@/app/store/clientsStore";
+import { useNotification } from "@/app/context/NotificationContext";
+
 const steps = [
   "Datos Generales",
   "Información Financiera",
@@ -47,6 +49,7 @@ const ClientForm = ({
   formAction = "update",
   idclienteprov = null,
 }) => {
+  const { showSuccess, showError } = useNotification();
   const initialValues = initialData || {
     razonsocial: "",
     ruc: "",
@@ -150,21 +153,21 @@ const ClientForm = ({
       }
 
       if (!result.success) {
-        setFieldError(
-          "general",
-          result.error || "Error al guardar cliente/proveedor"
-        );
+        const errorMsg = result.error || "Error al guardar cliente/proveedor";
+        setFieldError("general", errorMsg);
+        showError(errorMsg);
       } else {
-        console.log(
-          initialData ? "Actualizado correctamente" : "Creado correctamente"
+        showSuccess(
+          initialData
+            ? "Cliente/proveedor actualizado correctamente"
+            : "Cliente/proveedor creado correctamente"
         );
         handleCloseModal(); // Cierra el modal solo si todo salió bien
       }
     } catch (error) {
-      setFieldError(
-        "general",
-        `Error inesperado al ${initialData ? "actualizar" : "crear"}: ${error}`
-      );
+      const errorMsg = `Error inesperado al ${initialData ? "actualizar" : "crear"}: ${error.message || error}`;
+      setFieldError("general", errorMsg);
+      showError(errorMsg);
     } finally {
       setSubmitting(false);
     }
@@ -277,9 +280,14 @@ const ClientForm = ({
                   select
                   margin="normal"
                   onChange={(e) => setFieldValue("u_digito", e.target.value)}
-                  // helperText={<ErrorMessage name="udigito" />}
                   error={!values.u_digito && errors.u_digito}
-                  helperText={errors.u_digito}
+                  helperText={
+                    errors.u_digito ? (
+                      <Typography variant="caption" color="error">
+                        {errors.u_digito}
+                      </Typography>
+                    ) : null
+                  }
                 >
                   {digitos.map((digito) => (
                     <MenuItem key={digito} value={digito}>
@@ -300,7 +308,13 @@ const ClientForm = ({
                   margin="normal"
                   onChange={(e) => setFieldValue("nregimen", e.target.value)} // Asignar el valor del regimen
                   error={!values.nregimen && errors.nregimen}
-                  helperText={errors.nregimen} // Mostrar errores del campo
+                  helperText={
+                    errors.nregimen ? (
+                      <Typography variant="caption" color="error">
+                        {errors.nregimen}
+                      </Typography>
+                    ) : null
+                  }
                 >
                   {regimenes.map((regimen) => (
                     <MenuItem key={regimen.idregimen} value={regimen.nregimen}>
@@ -317,7 +331,13 @@ const ClientForm = ({
                   margin="normal"
                   onChange={(e) => setFieldValue("nrubro", e.target.value)} // Asignar el valor del nrubro
                   error={!values.nrubro && errors.nrubro}
-                  helperText={errors.nrubro} // Mostrar errores del campo
+                  helperText={
+                    errors.nrubro ? (
+                      <Typography variant="caption" color="error">
+                        {errors.nrubro}
+                      </Typography>
+                    ) : null
+                  }
                 >
                   {rubros.map((rubro) => (
                     <MenuItem key={rubro.idrubro} value={rubro.nrubro}>
@@ -351,7 +371,13 @@ const ClientForm = ({
                   fullWidth
                   margin="normal"
                   error={!values.razonsocial && errors.razonsocial}
-                  helperText={errors.razonsocial}
+                  helperText={
+                    errors.razonsocial ? (
+                      <Typography variant="caption" color="error">
+                        {errors.razonsocial}
+                      </Typography>
+                    ) : null
+                  }
                   sx={{
                     gridColumn: isMobile ? "span 1" : "span 2", // Si no es móvil, ocupa 2 columnas
                   }}
@@ -365,7 +391,13 @@ const ClientForm = ({
                   margin="normal"
                   value={values.estado}
                   error={!values.estado && errors.estado}
-                  helperText={errors.estado}
+                  helperText={
+                    errors.estado ? (
+                      <Typography variant="caption" color="error">
+                        {errors.estado}
+                      </Typography>
+                    ) : null
+                  }
                 >
                   {estadoCliente.map((estadoCli) => (
                     <MenuItem
@@ -385,7 +417,13 @@ const ClientForm = ({
                   value={values.fecha_ingreso}
                   margin="normal"
                   error={!values.fecha_ingreso && errors.fecha_ingreso}
-                  helperText={errors.fecha_ingreso}
+                  helperText={
+                    errors.fecha_ingreso ? (
+                      <Typography variant="caption" color="error">
+                        {errors.fecha_ingreso}
+                      </Typography>
+                    ) : null
+                  }
                   onChange={(e) =>
                     setFieldValue("fecha_ingreso", e.target.value)
                   }
@@ -412,9 +450,11 @@ const ClientForm = ({
                   margin="normal"
                   error={!values.c_usuario && errors.c_usuario}
                   helperText={
-                    <Typography variant="caption" color="error">
-                      {errors.c_usuario}
-                    </Typography>
+                    errors.c_usuario ? (
+                      <Typography variant="caption" color="error">
+                        {errors.c_usuario}
+                      </Typography>
+                    ) : null
                   }
                 />
 
@@ -426,9 +466,11 @@ const ClientForm = ({
                   margin="normal"
                   error={!values.c_passw && errors.c_passw}
                   helperText={
-                    <Typography variant="caption" color="error">
-                      {errors.c_passw}
-                    </Typography>
+                    errors.c_passw ? (
+                      <Typography variant="caption" color="error">
+                        {errors.c_passw}
+                      </Typography>
+                    ) : null
                   }
                 />
 
@@ -441,9 +483,11 @@ const ClientForm = ({
                   margin="normal"
                   error={!values.dni && errors.dni}
                   helperText={
-                    <Typography variant="caption" color="error">
-                      {errors.dni}
-                    </Typography>
+                    errors.dni ? (
+                      <Typography variant="caption" color="error">
+                        {errors.dni}
+                      </Typography>
+                    ) : null
                   }
                 />
 
@@ -493,9 +537,11 @@ const ClientForm = ({
                   margin="normal"
                   error={!values.ple_desde && errors.ple_desde}
                   helperText={
-                    <Typography variant="caption" color="error">
-                      {errors.ple_desde}
-                    </Typography>
+                    errors.ple_desde ? (
+                      <Typography variant="caption" color="error">
+                        {errors.ple_desde}
+                      </Typography>
+                    ) : null
                   }
                   InputLabelProps={{
                     shrink: true, // Esto asegura que el label no se superponga
@@ -507,7 +553,14 @@ const ClientForm = ({
                   label="Cuenta de Detracción"
                   fullWidth
                   margin="normal"
-                  helperText={<ErrorMessage name="cta_detraccion" />}
+                  error={!!errors.cta_detraccion}
+                  helperText={
+                    errors.cta_detraccion ? (
+                      <Typography variant="caption" color="error">
+                        {errors.cta_detraccion}
+                      </Typography>
+                    ) : null
+                  }
                 />
               </Box>
             )}
@@ -677,11 +730,25 @@ const ClientForm = ({
                     )}
                   </Field>
 
-                  <FormHelperText error>
-                    <ErrorMessage name="pdt_621" />
-                    <ErrorMessage name="planilla_elect" />
-                    <ErrorMessage name="libro_elect" />
-                  </FormHelperText>
+                  {(errors.pdt_621 || errors.planilla_elect || errors.libro_elect) && (
+                    <FormHelperText error>
+                      {errors.pdt_621 && (
+                        <Typography variant="caption" color="error" component="div">
+                          {errors.pdt_621}
+                        </Typography>
+                      )}
+                      {errors.planilla_elect && (
+                        <Typography variant="caption" color="error" component="div">
+                          {errors.planilla_elect}
+                        </Typography>
+                      )}
+                      {errors.libro_elect && (
+                        <Typography variant="caption" color="error" component="div">
+                          {errors.libro_elect}
+                        </Typography>
+                      )}
+                    </FormHelperText>
+                  )}
                 </Stack>
               </>
             )}
@@ -703,8 +770,14 @@ const ClientForm = ({
                   label="Nombre del contacto"
                   fullWidth
                   margin="normal"
-                  error={!!values.contacto && !values.contacto.trim()}
-                  helperText={<ErrorMessage name="contacto" />}
+                  error={!!errors.contacto}
+                  helperText={
+                    errors.contacto ? (
+                      <Typography variant="caption" color="error">
+                        {errors.contacto}
+                      </Typography>
+                    ) : null
+                  }
                 />
                 <Field
                   name="telefono"
@@ -713,8 +786,14 @@ const ClientForm = ({
                   label="Teléfono"
                   fullWidth
                   margin="normal"
-                  error={!!values.telefono && errors.telefono}
-                  helperText={<ErrorMessage name="telefono" />}
+                  error={!!errors.telefono}
+                  helperText={
+                    errors.telefono ? (
+                      <Typography variant="caption" color="error">
+                        {errors.telefono}
+                      </Typography>
+                    ) : null
+                  }
                 />
                 <Field
                   name="direccion"
@@ -722,8 +801,14 @@ const ClientForm = ({
                   label="Dirección"
                   fullWidth
                   margin="normal"
-                  error={!!values.direccion && !values.direccion.trim()}
-                  helperText={<ErrorMessage name="direccion" />}
+                  error={!!errors.direccion}
+                  helperText={
+                    errors.direccion ? (
+                      <Typography variant="caption" color="error">
+                        {errors.direccion}
+                      </Typography>
+                    ) : null
+                  }
                 />
                 <Field
                   name="responsable"
@@ -731,8 +816,14 @@ const ClientForm = ({
                   label="Responsable"
                   fullWidth
                   margin="normal"
-                  error={!!values.responsable && !values.responsable.trim()}
-                  helperText={<ErrorMessage name="responsable" />}
+                  error={!!errors.responsable}
+                  helperText={
+                    errors.responsable ? (
+                      <Typography variant="caption" color="error">
+                        {errors.responsable}
+                      </Typography>
+                    ) : null
+                  }
                 />
 
                 <Field
@@ -742,8 +833,14 @@ const ClientForm = ({
                   type="number"
                   fullWidth
                   margin="normal"
-                  error={!values.montoref && errors.montoref}
-                  helperText={<ErrorMessage name="montoref" />}
+                  error={!!errors.montoref}
+                  helperText={
+                    errors.montoref ? (
+                      <Typography variant="caption" color="error">
+                        {errors.montoref}
+                      </Typography>
+                    ) : null
+                  }
                 />
                 <Field
                   name="honorario_anual"
@@ -752,8 +849,14 @@ const ClientForm = ({
                   // type="number"
                   fullWidth
                   margin="normal"
-                  error={!values.honorario_anual && errors.honorario_anual}
-                  helperText={<ErrorMessage name="honorario_anual" />}
+                  error={!!errors.honorario_anual}
+                  helperText={
+                    errors.honorario_anual ? (
+                      <Typography variant="caption" color="error">
+                        {errors.honorario_anual}
+                      </Typography>
+                    ) : null
+                  }
                 />
                 <Divider
                   sx={{

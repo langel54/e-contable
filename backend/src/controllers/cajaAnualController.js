@@ -4,12 +4,14 @@ const cajaAnualController = {
   // Obtener todos los registros con paginación
   async getAll(req, res) {
     try {
-      const { page = 1, limit = 10 } = req.query;
-      const skip = (page - 1) * limit;
+      const { page, limit } = req.query;
+      const pageInt = parseInt(page) || 1;
+      const limitInt = parseInt(limit) || 10;
+      const skip = (pageInt - 1) * limitInt;
 
       const { cajasAnuales, total } = await cajaAnualService.getAll(
         skip,
-        Number(limit)
+        limitInt
       );
 
       res.json({
@@ -42,7 +44,31 @@ const cajaAnualController = {
   // Crear un nuevo registro
   async create(req, res) {
     try {
-      const nuevoCajaAnual = await cajaAnualService.create(req.body);
+      const prisma = require("../config/database");
+
+      // 1. Validar si ya existe una caja anual abierta
+      const openCaja = await prisma.cajaAnual.findFirst({
+        where: {
+          OR: [
+            { estado_c_a: "1" },
+            { estado_c_a: "ABIERTO" }
+          ]
+        }
+      });
+
+      if (openCaja) {
+        return res.status(400).json({
+          message: `No se puede abrir una nueva caja anual porque la caja ${openCaja.codcaja_a} aún está ABIERTA. Debe cerrarla primero.`
+        });
+      }
+
+      // 2. Normalizar código (asegurar prefijo 'S')
+      let data = req.body;
+      if (data.codcaja_a && !data.codcaja_a.startsWith("S")) {
+        data.codcaja_a = "S" + data.codcaja_a;
+      }
+
+      const nuevoCajaAnual = await cajaAnualService.create(data);
       res.status(201).json(nuevoCajaAnual);
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -79,6 +105,26 @@ const cajaAnualController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  async close(req, res) {
+    const { codcaja_a } = req.params;
+    try {
+      const result = await cajaAnualService.closeCaja(codcaja_a);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  async getLastBalance(req, res) {
+    const { year } = req.query; // Esperamos el CODIGO DEL AÑO actual para buscar el anterior
+    try {
+      const result = await cajaAnualService.getLastBalance(year);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
 };
 
 module.exports = cajaAnualController;

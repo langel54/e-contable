@@ -27,6 +27,7 @@ import { getTiposOperacion } from "@/app/services/tipoOperacionServices";
 import { useAuth } from "@/app/provider";
 import { NumericFormat } from "react-number-format";
 import { createIngreso, updateIngreso } from "@/app/services/incomesServices";
+import { useNotification } from "@/app/context/NotificationContext";
 
 const validationSchema = Yup.object({
   fecha: Yup.date().required("La fecha es obligatoria"),
@@ -48,6 +49,7 @@ const validationSchema = Yup.object({
 });
 
 const IncomeForm = ({ ingresoEdit = null, handleCloseModal }) => {
+  const { showSuccess, showError } = useNotification();
   const { cajaMes, user } = useAuth();
   const [initialValues, setInitialValues] = useState(
     ingresoEdit || {
@@ -146,25 +148,25 @@ const IncomeForm = ({ ingresoEdit = null, handleCloseModal }) => {
         response = await createIngreso(valoresProcesados);
       }
 
-      console.log(
-        ingresoEdit ? "Actualizado correctamente" : "Creado correctamente"
+      showSuccess(
+        ingresoEdit
+          ? "Ingreso actualizado correctamente"
+          : "Ingreso creado correctamente"
       );
       handleCloseModal();
     } catch (error) {
-      console.error("Error en handleSubmit:", error);
-
       // Extraer mensaje del backend si está presente
       const errorMessage =
         error.response?.data?.message || // Para respuestas tipo Axios
         error.message || // Para errores normales
         "Error desconocido en el servidor";
 
-      setFieldError(
-        "general",
-        `Error al ${
-          ingresoEdit ? "actualizar" : "agregar"
-        } Ingreso: ${errorMessage}`
-      );
+      const fullErrorMessage = `Error al ${
+        ingresoEdit ? "actualizar" : "agregar"
+      } Ingreso: ${errorMessage}`;
+      
+      setFieldError("general", fullErrorMessage);
+      showError(fullErrorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -254,14 +256,15 @@ const IncomeForm = ({ ingresoEdit = null, handleCloseModal }) => {
                           <div style={{ fontWeight: 500 }}>
                             {option.razonsocial}
                           </div>
-                          <div
-                            style={{
-                              fontSize: "0.8em",
-                              color: "rgba(0, 0, 0, 0.6)",
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: 'text.secondary',
+                              display: 'block'
                             }}
                           >
                             RUC: {option.ruc}
-                          </div>
+                          </Typography>
                         </div>
                       </li>
                     )}
@@ -319,7 +322,7 @@ const IncomeForm = ({ ingresoEdit = null, handleCloseModal }) => {
                   helperText={errors.importe ? errors.importe : ""}
                   sx={{
                     "& .MuiInputBase-input": {
-                      color: (theme) => theme.palette.info.dark,
+                      color: 'info.main',
                       fontWeight: 600,
                       textAlign: "end",
                     },

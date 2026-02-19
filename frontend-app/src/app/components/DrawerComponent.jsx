@@ -7,6 +7,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import CloseIcon from "@mui/icons-material/Close";
 
 const DrawerComponent = ({
@@ -32,13 +33,23 @@ const DrawerComponent = ({
           backdrop: {
             sx: {
               zIndex: zIndex - 1,
-              backgroundColor: `rgba(0,0,0,${backdropOpacity})`,
+              backgroundColor: (theme) => theme.palette.mode === 'dark'
+              ? alpha(theme.palette.common.black, 0.7)
+              : alpha(theme.palette.common.black, backdropOpacity),
+              backdropFilter: 'blur(2px)',
             },
           },
         },
       }}
       sx={{ zIndex }}
-      PaperProps={{ sx: { width } }}
+      PaperProps={{
+        sx: {
+          width,
+          // Use theme palette for consistency
+          backgroundColor: (theme) => theme.palette.mode === 'dark' ? theme.palette.background.paper : theme.palette.background.paper, 
+          backgroundImage: 'none', 
+        }
+      }}
     >
       <Box
         sx={{
@@ -47,7 +58,7 @@ const DrawerComponent = ({
           justifyContent: "space-between",
           px: 2,
           py: 1.5,
-          paddingTop: "72px",
+          // paddingTop: "72px",
         }}
       >
         <Stack direction="row" spacing={1.5} alignItems="center">

@@ -30,12 +30,14 @@ import FirebaseSocial from "./FirebaseSocial";
 import AnimateButton from "@/app/ui-components/@extended/AnimateButton";
 import { Box } from "@mui/material";
 import { useAuth } from "@/app/provider";
+import { useNotification } from "@/app/context/NotificationContext";
 
 // ============================|| JWT - LOGIN ||============================ //
 
 export default function AuthLogin({ isDemo = false }) {
   const router = useRouter();
   const { login } = useAuth();
+  const { showError, showSuccess } = useNotification();
   const [showPassword, setShowPassword] = useState(false);
   const [checked, setChecked] = useState(false);
 
@@ -62,9 +64,12 @@ export default function AuthLogin({ isDemo = false }) {
         onSubmit={async (values, { setErrors, setSubmitting }) => {
           try {
             await login(values.email, values.password);
+            showSuccess("Sesión iniciada correctamente");
             router.push("/main");
           } catch (err) {
-            setErrors({ submit: err.message });
+            const errorMessage = err.message || "Error al iniciar sesión. Verifica tus credenciales.";
+            setErrors({ submit: errorMessage });
+            showError(errorMessage);
           } finally {
             setSubmitting(false);
           }

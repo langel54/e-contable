@@ -4,6 +4,7 @@ const router = express.Router();
 
 // Rutas para el modelo Ingreso
 router.get("/", ingresoController.getAll);
+router.get("/report/annual", ingresoController.getAnnualReport); // Specific route before :idingreso
 router.get("/:idingreso", ingresoController.getById);
 router.post("/", ingresoController.create);
 router.put("/:idingreso", ingresoController.update);

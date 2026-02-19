@@ -162,6 +162,9 @@ const ingresoService = {
         observacion: true,
         registra: true,
         codcaja_m: true,
+        cliente_prov: {
+          select: { idclienteprov: true, razonsocial: true },
+        },
       },
     });
   },
@@ -208,17 +211,14 @@ const ingresoService = {
         observacion: true,
         registra: true,
         codcaja_m: true,
+        cliente_prov: {
+          select: { idclienteprov: true, razonsocial: true },
+        },
       },
     });
   },
 
   // Eliminar un registro
-  // async delete(idingreso) {
-  //   const ingreso = await prisma.ingreso.findUnique({ where: { idingreso } });
-  //   if (!ingreso) return null;
-
-  //   return await prisma.ingreso.delete({ where: { idingreso } });
-  // },
   async delete(idingreso) {
     const ingreso = await prisma.ingreso.findUnique({ where: { idingreso } });
     if (!ingreso) {
@@ -230,6 +230,59 @@ const ingresoService = {
       where: { idingreso },
       data: { estado: { connect: { idestado: 2 } } },
     });
+  },
+
+  // Reporte Anual
+  async getAnnualReport(year) {
+    const ingresos = await prisma.ingreso.findMany({
+      where: {
+        anio: year,
+        idestado: 1, // Strictly status 1 (CANCELADO/PAGADO)
+      },
+      select: {
+        idingreso: true,
+        idperiodo: true,
+        importe: true,
+        idclienteprov: true,
+        cliente_prov: {
+          select: { razonsocial: true },
+        },
+      },
+    });
+
+    const reportMap = new Map();
+
+    ingresos.forEach((ingreso) => {
+      const { idclienteprov, idperiodo, importe, cliente_prov } = ingreso;
+
+      if (!reportMap.has(idclienteprov)) {
+        reportMap.set(idclienteprov, {
+          id: idclienteprov,
+          razon_social: cliente_prov?.razonsocial || "Sin Nombre",
+          cant_pagos: 0,
+          ene: 0, feb: 0, mar: 0, abr: 0, may: 0, jun: 0,
+          jul: 0, ago: 0, set: 0, oct: 0, nov: 0, dic: 0,
+          anual: 0
+        });
+      }
+
+      const clientData = reportMap.get(idclienteprov);
+      clientData.cant_pagos += 1;
+      clientData.anual += importe || 0;
+
+      // Mapping idperiodo to month fields (Assuming 1-12)
+      const monthMap = {
+        1: 'ene', 2: 'feb', 3: 'mar', 4: 'abr', 5: 'may', 6: 'jun',
+        7: 'jul', 8: 'ago', 9: 'set', 10: 'oct', 11: 'nov', 12: 'dic'
+      };
+
+      const monthKey = monthMap[idperiodo];
+      if (monthKey) {
+        clientData[monthKey] += importe || 0;
+      }
+    });
+
+    return Array.from(reportMap.values());
   },
 };
 

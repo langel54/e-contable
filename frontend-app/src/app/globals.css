@@ -89,3 +89,9 @@ html {
   scrollbar-color: #999999 transparent;
   /* barra roja, fondo transparente */
 }
+
+/* Override Next.js dev portal position (persisted from browser preview) */
+nextjs-portal {
+  left: unset;
+  top: unset;
+}

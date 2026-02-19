@@ -1,122 +1,242 @@
-const puppeteer = require("puppeteer");
+const { chromium } = require("playwright");
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
+
+// Estado de progreso de verificación masiva (para polling desde el frontend)
+let verifyProgress = { total: 0, done: 0, inProgress: false };
+
+function getVerifyProgress() {
+  return { ...verifyProgress };
+}
 
 async function accessSunafil({ ruc, usuario, password }) {
-  filterList = ["Actos Administrativos", "Alertas"];
-
   const url =
     "https://api-seguridad.sunat.gob.pe/v1/clientessol/b6474e23-8a3b-4153-b301-dafcc9646250/oauth2/login?originalUrl=https://casillaelectronica.sunafil.gob.pe/si.inbox/Login/Empresa&state=s";
 
-  const browser = await puppeteer.launch({
-    headless: false,
-    defaultViewport: null,
+  const browser = await chromium.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
   const page = await browser.newPage();
 
   try {
-    await page.goto(url, { waitUntil: "networkidle2" });
+    await page.goto(url, { waitUntil: "networkidle", timeout: 30000 });
 
     await page.waitForSelector("#txtRuc", { timeout: 10000 });
-    await page.waitForSelector("#txtUsuario", { timeout: 10000 });
-    await page.waitForSelector("#txtContrasena", { timeout: 10000 });
+    await page.fill("#txtRuc", ruc);
+    await page.fill("#txtUsuario", usuario);
+    await page.fill("#txtContrasena", password);
 
-    await page.type("#txtRuc", ruc);
-    await page.type("#txtUsuario", usuario);
-    await page.type("#txtContrasena", password);
+    // Capturar logs del navegador
+    page.on("console", (msg) => console.log("BROWSER LOG:", msg.text()));
 
     await Promise.all([
       page.click("#btnAceptar"),
-      page.waitForNavigation({ waitUntil: "networkidle2" }),
+      page.waitForLoadState("networkidle", { timeout: 30000 }),
     ]);
-
     const currentUrl = page.url();
+    // console.log(`🔗 URL final tras login: ${currentUrl}`);
 
-    /******************* de notificaciones
-     ********************** */
-    // // Espera a que el modal esté visible
-    // await page.waitForSelector("#formNotificaciones\\:mdNotificaciones", {
-    //   visible: true,
-    // });
-    /**************modal de aviso ********* */
-    // // Espera a que el modal esté visible
-    // await page.waitForSelector("#formAvisoContacto\\:mdAvisoContacto", {
-    //   visible: true,
-    // });
+    // Esperar a que la tabla aparezca (si es que aparece) o un timeout corto
+    try {
+      await page.waitForSelector("#formNotificaciones\\:dtNotiAlertas", { timeout: 15000 });
+      // console.log("✅ Tabla de notificaciones encontrada.");
+    } catch (e) {
+      // console.log("⚠️ La tabla de notificaciones no apareció. Verificando si hay otros elementos...");
+      const bodyText = await page.innerText("body").catch(() => "");
+      if (bodyText.includes("No tiene notificaciones")) {
+        // console.log("ℹ️ El sistema indica que no hay notificaciones para este usuario.");
+      }
+    }
 
-    // // Cierra el modal
-    // await page.evaluate(() => {
-    //   $("#formAvisoContacto\\:mdAvisoContacto").modal("hide");
-    // });
-
-    // Cierra el modal
-    // await page.evaluate(() => {
-    //   $("#formNotificaciones\\:mdNotificaciones").modal("hide");
-    // });
-
-    // // Espera un poco para asegurarse de que el modal se cierre
-    // // await page.waitForTimeout(500); // Puedes ajustar el tiempo si es necesario
-
-    // // Ahora espera a que los elementos de la tabla estén disponibles
-    // await page.waitForSelector("#formNotificaciones\\:dtNotiAlertas tbody tr", {
-    //   visible: true,
-    // });
-
-    // Realiza las acciones necesarias con los elementos de la tabla
-    const items = await page.$$eval(
-      "#formNotificaciones\\:dtNotiAlertas tbody tr",
-      (rows) => {
+    // Extraer alertas de la tabla inicial
+    const items = await page
+      .$$eval("#formNotificaciones\\:dtNotiAlertas tbody tr", (rows) => {
         return rows.map((row) => {
-          const description = row
-            .querySelector("td:nth-child(1)")
-            ?.textContent.trim();
-          const quantity = row
-            .querySelector("td:nth-child(2)")
-            ?.textContent.trim();
+          // Buscamos el label dentro del primer td para la descripción
+          const descriptionLabel = row.querySelector("td:nth-child(1) label");
+          const description = descriptionLabel ? descriptionLabel.textContent.trim() : "";
+
+          // Buscamos el label dentro del segundo td para la cantidad
+          const quantityLabel = row.querySelector("td:nth-child(2) label");
+          const quantity = quantityLabel ? quantityLabel.textContent.trim() : "0";
           return { description, quantity };
         });
-      }
-    );
+      })
+      .catch(() => []);
 
-    console.log(items); // Muestra los items de la tabla
+    // console.log(`✅ Extracción completada para ${ruc}. Items encontrados:`, items.length);
 
-    // Extraer los menús después del login
-    await page.waitForSelector("ul.sidebar-menu");
-
-    const menuItems = await page.$$eval(
-      "ul.sidebar-menu > li.treeview",
-      (menus) => {
-        return Array.from(menus).map((menuLi) => {
-          const menuName =
-            menuLi.querySelector(":scope > a > span")?.textContent.trim() || "";
-
-          const submenus = Array.from(
-            menuLi.querySelectorAll("ul.treeview-menu > li")
-          ).map((submenuLi) => {
-            const label =
-              submenuLi.querySelector("a")?.textContent.trim() || "";
-            const danger =
-              submenuLi
-                .querySelector(".label.label-danger")
-                ?.textContent.trim() || "0";
-
-            return { label, danger };
-          });
-
-          return {
-            menu: menuName,
-            submenus,
-          };
-        });
-      }
-    );
-
-    console.log(JSON.stringify(menuItems, null, 2));
-
-
-    return { success: true, url: currentUrl, menuItems };
+    return { success: true, items, url: currentUrl };
   } catch (error) {
-    console.error("❌ Error en login:", error);
-    await browser.close();
+    // console.error("❌ Error en acceso Sunafil:", error);
     return { success: false, error: error.message };
+  } finally {
+    await browser.close();
   }
 }
-module.exports = { accessSunafil };
+
+async function verifyMonitoredSunafil() {
+  const monitoringEntries = await prisma.monitoreo_sunafil.findMany();
+  const clientIds = monitoringEntries.map((e) => e.idclienteprov);
+
+  if (clientIds.length === 0) {
+    verifyProgress = { total: 0, done: 0, inProgress: false };
+    return [];
+  }
+
+  const clients = await prisma.clienteProv.findMany({
+    where: { idclienteprov: { in: clientIds } },
+    select: {
+      idclienteprov: true,
+      ruc: true,
+      c_usuario: true,
+      c_passw: true,
+      razonsocial: true,
+    },
+  });
+
+  verifyProgress = { total: clients.length, done: 0, inProgress: true };
+  const results = [];
+
+  for (const client of clients) {
+    if (!client.ruc || !client.c_usuario || !client.c_passw) {
+      verifyProgress.done += 1;
+      continue;
+    }
+
+    try {
+      const result = await accessSunafil({
+        ruc: client.ruc,
+        usuario: client.c_usuario,
+        password: client.c_passw,
+      });
+
+      if (result.success && result.items) {
+        // Limpiar alertas anteriores para este cliente
+        await prisma.monitoreo_sunafil_alerta.deleteMany({
+          where: { idclienteprov: client.idclienteprov },
+        });
+
+        for (const item of result.items) {
+          await prisma.monitoreo_sunafil_alerta.create({
+            data: {
+              idclienteprov: client.idclienteprov,
+              descripcion: item.description,
+              cantidad: item.quantity,
+            },
+          });
+        }
+
+        // Sumar las cantidades individuales para el total de alertas pendientes
+        const totalAlerts = result.items.reduce((acc, item) => {
+          const q = parseInt(item.quantity) || 0;
+          return acc + q;
+        }, 0);
+
+        await prisma.monitoreo_sunafil.update({
+          where: { idclienteprov: client.idclienteprov },
+          data: {
+            cantidad_pendientes: totalAlerts,
+            ultima_revision: new Date(),
+          },
+        });
+
+        results.push({ idclienteprov: client.idclienteprov, success: true, count: totalAlerts });
+      }
+    } catch (error) {
+      console.error(`Error procesando Sunafil para ${client.ruc}:`, error);
+    }
+    verifyProgress.done += 1;
+  }
+  verifyProgress.inProgress = false;
+  return results;
+}
+
+async function getMonitoringData() {
+  const monitoringEntries = await prisma.monitoreo_sunafil.findMany();
+  const clientIds = monitoringEntries.map((e) => e.idclienteprov);
+
+  if (clientIds.length === 0) return [];
+
+  const clients = await prisma.clienteProv.findMany({
+    where: { idclienteprov: { in: clientIds } },
+    select: { idclienteprov: true, ruc: true, razonsocial: true, c_usuario: true, c_passw: true },
+  });
+
+  const alerts = await prisma.monitoreo_sunafil_alerta.findMany({
+    where: { idclienteprov: { in: clientIds }, leido: false },
+  });
+
+  return clients.map((client) => {
+    const entry = monitoringEntries.find((e) => e.idclienteprov === client.idclienteprov);
+    return {
+      ...client,
+      cantidad_no_leidos: entry?.cantidad_pendientes || 0,
+      ultima_revision: entry?.ultima_revision,
+      unreadMessages: alerts
+        .filter((a) => a.idclienteprov === client.idclienteprov)
+        .map((a) => ({
+          mensajeId: a.alertaId,
+          asunto: a.descripcion,
+          fecha: a.fecha_captura,
+          tag: a.cantidad,
+        })),
+    };
+  });
+}
+
+async function addClientToMonitoring(idclienteprov) {
+  return await prisma.monitoreo_sunafil.upsert({
+    where: { idclienteprov },
+    update: {},
+    create: { idclienteprov },
+  });
+}
+
+async function removeClientFromMonitoring(idclienteprov) {
+  try {
+    await prisma.monitoreo_sunafil_alerta.deleteMany({ where: { idclienteprov } });
+    return await prisma.monitoreo_sunafil.delete({ where: { idclienteprov } });
+  } catch (e) {
+    return null;
+  }
+}
+
+async function markMessageAsRead(alertaId) {
+  const alert = await prisma.monitoreo_sunafil_alerta.findUnique({ where: { alertaId } });
+  if (!alert) throw new Error("Alerta no encontrada");
+
+  await prisma.monitoreo_sunafil_alerta.delete({ where: { alertaId } });
+
+  const unreadCount = await prisma.monitoreo_sunafil_alerta.count({
+    where: { idclienteprov: alert.idclienteprov, leido: false },
+  });
+
+  await prisma.monitoreo_sunafil.update({
+    where: { idclienteprov: alert.idclienteprov },
+    data: { cantidad_pendientes: unreadCount },
+  });
+
+  return { success: true, unreadCount };
+}
+
+async function markAllMessagesAsRead(idclienteprov) {
+  await prisma.monitoreo_sunafil_alerta.deleteMany({ where: { idclienteprov } });
+  await prisma.monitoreo_sunafil.update({
+    where: { idclienteprov },
+    data: { cantidad_pendientes: 0 },
+  });
+  return { success: true, unreadCount: 0 };
+}
+
+module.exports = {
+  accessSunafil,
+  verifyMonitoredSunafil,
+  getVerifyProgress,
+  getMonitoringData,
+  addClientToMonitoring,
+  removeClientFromMonitoring,
+  markMessageAsRead,
+  markAllMessagesAsRead,
+};

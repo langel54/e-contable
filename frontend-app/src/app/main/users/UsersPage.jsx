@@ -16,6 +16,8 @@ import {
   FormControlLabel,
   Checkbox,
   Divider,
+  Chip,
+  Tooltip,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useDebounce } from "use-debounce";
@@ -31,6 +33,7 @@ import {
   AddCircleOutlineSharp,
   Clear,
   Delete,
+  KeyboardArrowDown,
   Visibility,
   VisibilityOff,
 } from "@mui/icons-material";
@@ -74,28 +77,30 @@ const StyledModal = ({
           transform: "translate(-50%, -50%)",
           width: 400,
           bgcolor: "background.paper",
-          boxShadow: 24,
+          boxShadow: (theme) => theme.customShadows.z1,
           p: 4,
-          borderRadius: 2,
+          borderRadius: 3,
           maxHeight: "90vh",
           overflow: "auto",
+          border: '1px solid',
+          borderColor: 'divider',
         }}
       >
-        <Typography id="edit-user-modal" variant="subtitle1" mb={3}>
+        <Typography id="edit-user-modal" variant="h5" color="text.primary" fontWeight={700} mb={3}>
           Editar Usuario
         </Typography>
 
-        {/* Campos de Usuario */}
-        <TextField
-          fullWidth
-          label="Usuario"
-          value={editedUser?.usuario || ""}
-          onChange={(e) =>
-            setEditedUser({ ...editedUser, usuario: e.target.value })
-          }
-          margin="normal"
-        />
-        <Divider />
+        <Stack spacing={2}>
+          {/* Campos de Usuario */}
+          <TextField
+            fullWidth
+            label="Usuario"
+            value={editedUser?.usuario || ""}
+            onChange={(e) =>
+              setEditedUser({ ...editedUser, usuario: e.target.value })
+            }
+          />
+          <Divider sx={{ '&::before, &::after': { borderColor: 'divider' } }} />
 
         {/* Campos de Personal */}
         <TextField
@@ -179,7 +184,7 @@ const StyledModal = ({
             />
           }
           label="Cambiar contraseña"
-          sx={{ mt: 1 }}
+          // sx={{ mt: 1 }}
         />
 
         {changePassword && (
@@ -203,6 +208,7 @@ const StyledModal = ({
             }}
           />
         )}
+        </Stack>
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
           <Button
@@ -311,60 +317,104 @@ export default function UsersPage() {
 
   const columns = useMemo(
     () => [
-      { field: "id_usuario", headerName: "ID" },
-      { field: "usuario", headerName: "Usuario", flex: 1 },
+      {
+        field: "id_usuario",
+        headerName: "#",
+        width: 80,
+        headerAlign: "center",
+        align: "center",
+      },
+      {
+        field: "usuario",
+        headerName: "Usuario",
+        flex: 1,
+        minWidth: 150,
+        renderCell: (params) => (
+          <span style={{ fontWeight: 500 }}>{params.value}</span>
+        ),
+      },
       {
         field: "nombres",
         headerName: "Nombre Personal",
         flex: 2,
+        minWidth: 200,
         renderCell: (params) => {
-          return `${params.row.personal.nombres} ${params.row.personal.apellidos}`;
+          const nombre = `${params.row.personal.nombres} ${params.row.personal.apellidos}`;
+          return <span>{nombre}</span>;
         },
       },
       {
         field: "tipo_usuario",
         headerName: "Tipo de Usuario",
         flex: 1,
+        minWidth: 150,
         renderCell: (params) => {
           const tipo = userTypes.find((t) => t.id_tipo === params.row.id_tipo);
-          return tipo ? tipo.descripcion : "Desconocido";
+          const descripcion = tipo ? tipo.descripcion : "Desconocido";
+
+          // 🎨 Usa colores propios de MUI
+          const colorMap = {
+            Practicante: "secondary",
+            "Asistente Contable": "primary",
+            Gerencia: "info",
+            "Asistente Administrativo": "warning",
+            Apoyo: "success",
+            "Administrador del sistema": "error",
+          };
+
+          return (
+            <Chip
+              label={descripcion}
+              color={colorMap[descripcion] || "default"}
+              variant="filled"
+              size="small"
+              sx={{
+                fontWeight: 500,
+                borderRadius: "8px",
+                textTransform: "capitalize",
+              }}
+            />
+          );
         },
       },
       {
         field: "actions",
         headerName: "Acciones",
-        flex: 1,
-        align: "right",
-        renderCell: (params) => {
-          return (
-            <Stack direction={"row"}>
+        flex: 0.8,
+        minWidth: 120,
+        align: "center",
+        headerAlign: "center",
+        sortable: false,
+        renderCell: (params) => (
+          <Stack direction="row" spacing={1} justifyContent="center">
+            <Tooltip title="Editar usuario">
               <IconButton
-                aria-label="delete"
-                size="medium"
+                size="small"
                 color="primary"
-                onClick={() => {
-                  // setSelectedUser(params.row);
-                  handleOpenModal(params.row);
-
-                  // updateUser(params.row.id_usuario, { usuario: "NuevoNombre" }); // Ejemplo
+                sx={{
+                  transition: "transform 0.2s ease-in-out",
+                  "&:hover": { transform: "scale(1.15)" },
                 }}
+                onClick={() => handleOpenModal(params.row)}
               >
-                <EditIcon fontSize="inherit" />
+                <EditIcon fontSize="small" />
               </IconButton>
+            </Tooltip>
+            <Tooltip title="Eliminar usuario">
               <IconButton
-                aria-label="delete"
-                size="medium"
-                color="primary"
-                onClick={() => {
-                  setSelectedUser(params.row.id_usuario);
-                  // setModalOpen(true);
+                size="small"
+                color="error"
+                sx={{
+                  transition: "transform 0.2s ease-in-out",
+                  "&:hover": { transform: "scale(1.15)" },
                 }}
+                onClick={() => setSelectedUser(params.row.id_usuario)}
               >
-                <Delete fontSize="inherit" />
+                <Delete fontSize="small" />
               </IconButton>
-            </Stack>
-          );
-        },
+            </Tooltip>
+          </Stack>
+        ),
       },
     ],
     [userTypes]
@@ -372,67 +422,66 @@ export default function UsersPage() {
 
   return (
     <>
-      <Box>
-        <Box sx={{ pb: 2 }}>
-          <Typography variant="h4" fontWeight={"100"}>
-            Usuarios
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            mb: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <TextField
-            size="small"
-            placeholder="Buscar usuario..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-            sx={{ width: 250 }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setSearchTerm("")}
-                    edge="end"
-                    size="small"
-                  >
-                    <Clear />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          <Button
-            aria-label="Agregar"
-            size="medium"
-            color="primary"
-            variant="contained"
-            onClick={() => {
-              setAddModalOpen(true);
-            }}
-          >
-            <AddCircleOutlineSharp fontSize="inherit" /> Agregar Usuario
-          </Button>
-        </Box>
-        <CustomTable
-          columns={columns}
-          data={users}
-          paginationModel={paginationModel}
-          setPaginationModel={setPaginationModel}
-          rowCount={total}
-          loading={loading}
-          getRowId={(row) => row.id_usuario}
-        />
+      <Box sx={{ mb: 4 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 3 }}>
+          <Box>
+            <Typography variant="h4" gutterBottom>
+              Usuarios
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {total} usuarios
+            </Typography>
+          </Box>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <TextField
+              size="small"
+              placeholder="Buscar"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              sx={{ 
+                width: 300,
+                '& .MuiOutlinedInput-root': {
+                    bgcolor: 'background.paper',
+                    borderRadius: 2
+                }
+              }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setSearchTerm("")}
+                      edge="end"
+                      size="small"
+                    >
+                      <KeyboardArrowDown fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <Button
+              aria-label="Agregar"
+              size="large"
+              color="primary"
+              variant="contained"
+              onClick={() => setAddModalOpen(true)}
+              startIcon={<Add />}
+              sx={{ borderRadius: 2, textTransform: 'none', px: 3 }}
+            >
+              Agregar Usuario
+            </Button>
+          </Stack>
+        </Stack>
       </Box>
+      <CustomTable
+        columns={columns}
+        data={users}
+        paginationModel={paginationModel}
+        setPaginationModel={setPaginationModel}
+        rowCount={total}
+        loading={loading}
+        getRowId={(row) => row.id_usuario}
+      />
       {modalOpen && (
         <StyledModal
           modalOpen={modalOpen}

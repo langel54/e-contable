@@ -1,22 +1,77 @@
-import { Grid, Typography, Divider, Paper, Box } from "@mui/material";
+import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Grid,
+  Typography,
+  Divider,
+  Paper,
+  Box,
+  useTheme,
+  Stack,
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { styled } from "@mui/material/styles";
+import PersonIcon from "@mui/icons-material/Person";
+import KeyIcon from "@mui/icons-material/Key";
+import SettingsIcon from "@mui/icons-material/Settings";
+import MiscellaneousServicesIcon from "@mui/icons-material/MiscellaneousServices";
 
-const gradientColors = [
-  { start: "#e3f2fd", end: "#fff", title: "#1565c0" }, // Azul más oscuro
-  { start: "#f3e5f5", end: "#fff", title: "#6a1b9a" }, // Morado más oscuro
-  { start: "#e8f5e9", end: "#fff", title: "#1b5e20" }, // Verde más oscuro
-  { start: "#fff3e0", end: "#fff", title: "#e65100" }, // Naranja más oscuro
-  { start: "#f5f5f5", end: "#fff", title: "#424242" }, // Gris para "Otros Datos"
-];
-
-const StyledPaper = styled(Paper)(({ theme, gradient }) => ({
-  padding: theme.spacing(2),
-  marginBottom: theme.spacing(2),
-  borderRadius: theme.shape.borderRadius * 2,
+const StyledAccordion = styled(Accordion)(({ theme, gradient }) => ({
   background: `linear-gradient(135deg, ${gradient.start}, ${gradient.end})`,
+  borderRadius: 12,
+  marginBottom: 8,
+  boxShadow: theme.customShadows?.z1 || theme.shadows[1],
+}));
+
+const Label = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  fontSize: 13,
+}));
+
+const Value = styled(Typography)(({ theme }) => ({
+  fontWeight: 500,
+  color: theme.palette.text.primary,
+  fontSize: 14,
 }));
 
 export default function ClientDetailsModal({ data }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
+  const gradientColors = [
+    {
+      start: theme.palette.info.lighter,
+      end: theme.palette.background.paper,
+      title: theme.palette.info.main,
+      icon: <PersonIcon sx={{ color: 'info.main' }} />
+    },
+    {
+      start: theme.palette.secondary.lighter || theme.palette.grey[100],
+      end: theme.palette.background.paper,
+      title: theme.palette.secondary.dark || theme.palette.grey[700],
+      icon: <KeyIcon sx={{ color: 'secondary.dark' }} />
+    },
+    {
+      start: theme.palette.success.lighter,
+      end: theme.palette.background.paper,
+      title: theme.palette.success.main,
+      icon: <SettingsIcon sx={{ color: 'success.main' }} />
+    },
+    {
+      start: theme.palette.warning.lighter,
+      end: theme.palette.background.paper,
+      title: theme.palette.warning.main,
+      icon: <MiscellaneousServicesIcon sx={{ color: 'warning.main' }} />,
+    },
+    {
+      start: theme.palette.grey[100],
+      end: theme.palette.background.paper,
+      title: theme.palette.text.secondary,
+      icon: <MiscellaneousServicesIcon sx={{ color: 'text.secondary' }} />,
+    },
+  ];
+
   const groups = [
     {
       title: "Datos Generales",
@@ -28,7 +83,6 @@ export default function ClientDetailsModal({ data }) {
         { label: "Dirección", key: "direccion" },
         { label: "Teléfono", key: "telefono" },
         { label: "Fecha Ingreso", key: "fecha_ingreso" },
-        {},
       ],
     },
     {
@@ -47,7 +101,7 @@ export default function ClientDetailsModal({ data }) {
         { label: "Rubro", key: "nrubro" },
         { label: "Factura Electrónica", key: "fact_elect" },
         { label: "Planilla Electrónica", key: "planilla_elect" },
-        { label: "Libro Electronico", key: "libro_elect" },
+        { label: "Libro Electrónico", key: "libro_elect" },
         { label: "PDT 621", key: "pdt_621" },
         { label: "Sujeta a Retención", key: "sujeta_retencion" },
         { label: "Paga Percepción", key: "paga_percepcion" },
@@ -62,77 +116,84 @@ export default function ClientDetailsModal({ data }) {
         { label: "Observaciones", key: "obs" },
       ],
     },
+    {
+      title: "Facturador Electrónico",
+      fields: [
+        { label: "Usuario/email", key: "f_usuario" },
+        { label: "Contraseña", key: "f_pass" },
+        { label: "Facturador", key: "idfacturador" },
+      ],
+    },
   ];
 
-  // Sacar las keys ya usadas
   const usedKeys = groups.flatMap((g) => g.fields.map((f) => f.key));
 
-  // Filtrar datos que no estén en los grupos
   const otherFields = Object.keys(data)
     .filter((key) => !usedKeys.includes(key))
     .map((key) => ({
-      label: key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()), // Etiqueta legible
+      label: key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
       key,
     }));
 
+  const allGroups = [...groups, { title: "Otros Datos", fields: otherFields }];
+
   return (
     <Box p={2}>
-      {groups.map((group, i) => (
-        <StyledPaper key={i} gradient={gradientColors[i]}>
-          <Typography
-            variant="h6"
+      {allGroups.map((group, i) => {
+        const colors = gradientColors[i] || gradientColors[4];
+        return (
+          <StyledAccordion
+            key={i}
+            gradient={colors}
             sx={{
-              mb: 1,
-              color: gradientColors[i].title,
-              fontWeight: "bold",
+              '&:before': { display: 'none' },
+              border: '1px solid',
+                borderColor: 'divider',
+              overflow: 'hidden'
             }}
           >
-            {group.title}
-          </Typography>
-          <Divider sx={{ mb: 2, borderColor: gradientColors[i].title }} />
-          <Grid container spacing={1}>
-            {group.fields.map((field, j) => (
-              <Grid item xs={6} key={`${i}-${field.key}`}>
-                <Typography variant="body2" color="textSecondary">
-                  {field.label}
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon sx={{ color: 'text.secondary' }} />}
+              sx={{
+                background: colors.start,
+                borderBottom: `1px solid ${theme.palette.divider}`,
+                minHeight: 56,
+                '& .MuiAccordionSummary-content': { margin: '12px 0' }
+              }}
+            >
+              <Box display="flex" alignItems="center" gap={1.5}>
+                {colors.icon}
+                <Typography
+                  variant="subtitle1"
+                  sx={{ 
+                    fontWeight: 600, 
+                    color: colors.title,
+                    letterSpacing: '0.02em'
+                  }}
+                >
+                  {group.title}
                 </Typography>
-                <Typography variant="body1">
-                  {data[field.key] || "-"}
-                </Typography>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails sx={{ backgroundColor: isDark ? 'action.hover' : 'transparent' }}>
+              <Grid container spacing={3} sx={{ p: 1 }}>
+                {group.fields.map(
+                  (field, j) =>
+                    field.key && (
+                      <Grid item xs={12} sm={6} key={`${i}-${j}`}>
+                        <Stack spacing={0.5}>
+                          <Label>{field.label}</Label>
+                          <Value>{data[field.key] || "-"}</Value>
+                        </Stack>
+                        <Divider sx={{ mt: 1, opacity: isDark ? 0.3 : 0.8 }} />
+                      </Grid>
+                    )
+                )}
               </Grid>
-            ))}
-          </Grid>
-        </StyledPaper>
-      ))}
-
-      {/* Otros datos dinámicos */}
-      {otherFields.length > 0 && (
-        <StyledPaper gradient={gradientColors[4]}>
-          <Typography
-            variant="h6"
-            sx={{
-              mb: 1,
-              color: gradientColors[4].title,
-              fontWeight: "bold",
-            }}
-          >
-            Otros Datos
-          </Typography>
-          <Divider sx={{ mb: 2, borderColor: gradientColors[4].title }} />
-          <Grid container spacing={1}>
-            {otherFields.map((field) => (
-              <Grid item xs={6} key={field.key}>
-                <Typography variant="body2" color="textSecondary">
-                  {field.label}
-                </Typography>
-                <Typography variant="body1">
-                  {data[field.key] || "-"}
-                </Typography>
-              </Grid>
-            ))}
-          </Grid>
-        </StyledPaper>
-      )}
+            </AccordionDetails>
+          </StyledAccordion>
+        );
+      })}
     </Box>
   );
 }

@@ -3,13 +3,14 @@ const estadoService = require("../services/estadoService");
 const estadoController = {
   // Obtener todos los registros con paginación
   async getAll(req, res) {
-    try {
-      const { page = 1, limit = 10 } = req.query;
-      const skip = (page - 1) * limit;
+    const { page = 1, limit = 10, search = '' } = req.query;
+    const skip = (page - 1) * limit;
 
+    try {
       const { estados, total } = await estadoService.getAll(
         skip,
-        Number(limit)
+        Number(limit),
+        search
       );
 
       res.json({
@@ -28,6 +29,7 @@ const estadoController = {
   // Obtener un registro por su ID
   async getById(req, res) {
     const { idestado } = req.params;
+
     try {
       const estado = await estadoService.getById(Number(idestado));
       if (!estado) {
@@ -52,14 +54,17 @@ const estadoController = {
   // Actualizar un registro existente
   async update(req, res) {
     const { idestado } = req.params;
+
     try {
       const estadoActualizado = await estadoService.update(
         Number(idestado),
         req.body
       );
+
       if (!estadoActualizado) {
         return res.status(404).json({ message: "Estado no encontrado" });
       }
+
       res.json(estadoActualizado);
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -69,6 +74,7 @@ const estadoController = {
   // Eliminar un registro
   async delete(req, res) {
     const { idestado } = req.params;
+
     try {
       const deleted = await estadoService.delete(Number(idestado));
       if (!deleted) {

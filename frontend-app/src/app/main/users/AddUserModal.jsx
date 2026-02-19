@@ -13,6 +13,7 @@ import {
   Stack,
   TextField,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { Check, Visibility, VisibilityOff } from "@mui/icons-material";
 import React, { useEffect, useState } from "react";
@@ -81,32 +82,37 @@ const AddUserModal = ({ modalOpen, handleCloseModal, onUserAdded }) => {
     setError("");
     setSuccess(false);
   };
+  const theme = useTheme();
 
   return (
     <Modal open={modalOpen} aria-labelledby="add-user-modal">
-      <Box
-        sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 400,
-          bgcolor: "background.paper",
-          boxShadow: 24,
-          p: 4,
-          borderRadius: 2,
-          maxHeight: "90vh",
-          overflowY: "auto",
-        }}
-      >
-        <Box component="form" onSubmit={handleSubmit}>
-          <Typography variant="h6" gutterBottom>
-            Agregar Usuario
-          </Typography>
-
-          <Stack spacing={3}>
-            {/* Credenciales */}
-            <Divider textAlign="left">Credenciales</Divider>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            boxShadow: theme.customShadows.z1,
+            p: 4,
+            borderRadius: 3,
+            maxHeight: "90vh",
+            overflowY: "auto",
+            border: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Box component="form" onSubmit={handleSubmit}>
+            <Typography variant="h5" color="text.primary" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
+              Agregar Usuario
+            </Typography>
+  
+            <Stack spacing={2}>
+              {/* Credenciales */}
+              <Divider textAlign="left" sx={{ '&::before, &::after': { borderColor: 'divider' }, '& .MuiDivider-wrapper': { color: 'text.secondary', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' } }}>
+                Credenciales
+              </Divider>
             <TextField
               label="Usuario"
               name="usuario"
@@ -136,7 +142,9 @@ const AddUserModal = ({ modalOpen, handleCloseModal, onUserAdded }) => {
             />
 
             {/* Datos Personales */}
-            <Divider textAlign="left">Datos Personales</Divider>
+            <Divider textAlign="left" sx={{ '&::before, &::after': { borderColor: 'divider' }, '& .MuiDivider-wrapper': { color: 'text.secondary', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' } }}>
+              Datos Personales
+            </Divider>
             <TextField
               label="Nombres"
               name="nombres"
@@ -170,7 +178,9 @@ const AddUserModal = ({ modalOpen, handleCloseModal, onUserAdded }) => {
             />
 
             {/* Tipo de Usuario */}
-            <Divider textAlign="left">Tipo de Usuario</Divider>
+            <Divider textAlign="left" sx={{ '&::before, &::after': { borderColor: 'divider' }, '& .MuiDivider-wrapper': { color: 'text.secondary', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' } }}>
+              Tipo de Usuario
+            </Divider>
             {loadingTypes ? (
               <CircularProgress size={24} />
             ) : (

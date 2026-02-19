@@ -1,32 +1,16 @@
-import Cookies from "js-cookie";
+import { fetchWithAuth } from "@/app/services/apiClient";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+const BULK_REQUEST_TIMEOUT_MS = 30000; // 30 s por lote
 
-// Helper function to handle API calls
-const fetchWithAuth = async (endpoint, options = {}) => {
-  const token = Cookies.get("token");
-  const defaultOptions = {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  };
-
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...defaultOptions,
-    ...options,
-    headers: {
-      ...defaultOptions.headers,
-      ...options.headers,
-    },
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || "Error en la petición");
+/** Comprueba que el endpoint de carga masiva esté disponible antes de subir (evita quedarse colgado). */
+export const checkBulkAvailable = async () => {
+  try {
+    const data = await fetchWithAuth("/clienteproveedor/bulk/status");
+    return data?.ok === true;
+  } catch (e) {
+    console.warn("checkBulkAvailable:", e);
+    return false;
   }
-
-  return response.json();
 };
 
 // Get all clients with pagination
@@ -46,10 +30,11 @@ export const getFilterClientesProvs = async (
   digito,
   regimen,
   status,
-  planilla
+  planilla,
+  search = ""
 ) => {
   return fetchWithAuth(
-    `/clienteproveedor/filter?page=${page}&limit=${limit}&digito=${digito}&regimen=${regimen}&status=${status}&planilla=${planilla}`
+    `/clienteproveedor/filter?page=${page}&limit=${limit}&digito=${digito}&regimen=${regimen}&status=${status}&planilla=${planilla}&search=${search}`
   );
 };
 
@@ -74,7 +59,48 @@ export const updateClienteProv = async (id, data) => {
   });
 };
 
-// Delete client
+// Bulk create (un lote; para pocos registros o envío por cola desde el frontend)
+export const bulkCreateClientes = async (data) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), BULK_REQUEST_TIMEOUT_MS);
+  try {
+    const result = await fetchWithAuth("/clienteproveedor/bulk", {
+      method: "POST",
+      body: JSON.stringify(Array.isArray(data) ? data : []),
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    return result;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === "AbortError") {
+      throw new Error("La petición tardó demasiado. Intente con menos registros o vuelva a intentar.");
+    }
+    throw err;
+  }
+};
+
+// Carga grande: envía todos los registros en una petición; el backend procesa en lotes internos (ideal para 100+)
+export const bulkCreateClientesLarge = async (data) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), BULK_REQUEST_TIMEOUT_MS);
+  try {
+    const result = await fetchWithAuth("/clienteproveedor/bulk-large", {
+      method: "POST",
+      body: JSON.stringify(Array.isArray(data) ? data : []),
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    return result;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === "AbortError") {
+      throw new Error("La petición tardó demasiado. Intente con menos registros o vuelva a intentar.");
+    }
+    throw err;
+  }
+};
+
 export const deleteClienteProv = async (id) => {
   return fetchWithAuth(`/clienteproveedor/${id}`, {
     method: "DELETE",
@@ -135,11 +161,11 @@ export const validateClienteProv = (data) => {
 export const getValidateRuc = async (ruc, action, idclienteprov) => {
   return fetchWithAuth(
     "/clienteproveedor/validate-ruc/" +
-      ruc +
-      "?action=" +
-      action +
-      "&idclienteprov=" +
-      idclienteprov
+    ruc +
+    "?action=" +
+    action +
+    "&idclienteprov=" +
+    idclienteprov
   );
 };
 export const updateDeclaradoTodos = async (nuevoEstado) => {

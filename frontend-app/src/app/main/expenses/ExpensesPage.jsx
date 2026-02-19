@@ -64,6 +64,7 @@ import {
   handleYearChange,
   renderYearContent,
   handleResetFilter,
+  handleGeneratePDF,
 } from "./utils/expensesUtils";
 
 const ExpensesPage = () => {
@@ -231,9 +232,14 @@ const ExpensesPage = () => {
         spacing={2}
         justifyContent={"space-between"}
       >
-        <Typography variant="h4" fontWeight={"100"}>
-          Egresos
-        </Typography>
+        <Stack>
+          <Typography variant="h4" gutterBottom>
+            Egresos
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Registra y consulta egresos
+          </Typography>
+        </Stack>
         <Button
           size="medium"
           color="error"
@@ -341,7 +347,7 @@ const ExpensesPage = () => {
           <FormControl size="medium" sx={{ width: 150 }}>
             <DatePicker
               selected={selectedAnio ? new Date(selectedAnio, 0, 1) : null}
-              onChange={handleYearChange}
+              onChange={(date) => handleYearChange(date, setSelectedAnio)}
               showYearPicker
               dateFormat="yyyy"
               renderYearContent={renderYearContent}
@@ -429,7 +435,15 @@ const ExpensesPage = () => {
                 sx={{ cursor: "pointer" }}
                 onClick={() => {
                   // Acción PDF, igual que IncomesPage
-                  handleActionOpen();
+                  handleGeneratePDF({
+                    startDate,
+                    endDate,
+                    conceptFilter,
+                    periodo,
+                    selectedAnio,
+                    selectedEstado,
+                    handleActionOpen,
+                  });
                 }}
               >
                 <ListItemIcon

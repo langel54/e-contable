@@ -8,16 +8,14 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { usePathname, useRouter } from "next/navigation";
-import HeaderContent from "./HeaderContent";
-import { AppBar } from "./CustomAppBar";
+import { useState } from "react";
+import { Stack } from "@mui/material";
 import { Drawer } from "./CustomDrawer";
 import { DrawerHeader } from "./DrawerHeader";
-// import { menuItems } from "../menu/MenuItems";
 import DrawerListItem from "../menu/DrawerListItem";
-import menuItemsByRole from "../menu/menuConfig";
-import { useState } from "react";
+import { getMenuForRole } from "../menu/menuConfig";
 import { useAuth } from "@/app/provider";
-import { Stack } from "@mui/material";
+import SidebarFooter from "./SidebarFooter";
 
 export default function MiniDrawer({ children }) {
   const [open, setOpen] = useState(true);
@@ -34,72 +32,74 @@ export default function MiniDrawer({ children }) {
     router.push(path);
   };
 
-  const currentMenuItems = userType
-    ? menuItemsByRole[userType || user?.tipo_usuario?.id_tipo]
-    : [];
+  const tipo = userType ?? user?.tipo_usuario;
+  const rawIdTipo = typeof tipo === "object" ? tipo?.id_tipo : tipo;
+  const idTipo = rawIdTipo != null && rawIdTipo !== "" ? Number(rawIdTipo) : null;
+  const currentMenuItems = idTipo != null ? getMenuForRole(idTipo) : [];
 
   return (
-    /////////////////////// plantilla ////////////////////
     <Box sx={{ display: "flex" }}>
-      <AppBar position="fixed" open={open}>
-        <Toolbar>
-          <Box display={"flex"} justifyContent="space-between" width={"100%"}>
-            <IconButton
-              color="inherit"
-              aria-label="toggle drawer"
-              onClick={handleDrawerToggle}
-              edge="start"
-              sx={{
-                marginRight: 5,
-                ...(open && { display: "none" }),
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Box
-              display={"flex"}
-              direction="row"
-              justifyContent="space-between"
-              width={"100%"}
-              alignItems={"center"}
-            >
-              <Typography variant="h6" noWrap component="div">
-                Mi Aplicación
-              </Typography>
-              <Box display={"flex"} direction="row" justifyContent="end">
-                <HeaderContent />
-              </Box>
-            </Box>
-          </Box>
-        </Toolbar>
-      </AppBar>
+      {/* Ya no usamos AppBar superior según el nuevo diseño */}
+      
       <Drawer variant="permanent" open={open}>
-        <DrawerHeader>
-          <Stack direction={"row"} justifyContent="space-between" width={"100%"} alignItems={"center"}>
-            <Typography variant="h5">Empresa SAC</Typography>
-            <IconButton onClick={handleDrawerToggle}>
-              <ChevronLeftIcon />
+        <DrawerHeader sx={{ border: 'none' }}>
+          <Stack 
+            direction={"row"} 
+            justifyContent={open ? "space-between" : "center"} 
+            width={"100%"} 
+            alignItems={"center"} 
+            sx={{ px: open ? 2 : 0 }}
+          >
+            {open && (
+              <Box component="img" src="/images/logo.png" sx={{ height: 32, maxWidth: '140px' }} />
+            )}
+            <IconButton 
+                onClick={handleDrawerToggle}
+                sx={{ 
+                    bgcolor: 'action.hover',
+                    p: 0.5,
+                    borderRadius: '50%'
+                }}
+            >
+              {open ? <ChevronLeftIcon fontSize="small" /> : <MenuIcon fontSize="small" />}
             </IconButton>
           </Stack>
         </DrawerHeader>
-        <Divider />
-        <List>
-          {currentMenuItems.map((item) => (
-            <DrawerListItem
-              key={item.path}
-              item={item}
-              open={open}
-              pathname={pathname}
-              onClick={() => handleNavigation(item.path)}
-            />
-          ))}
-        </List>
+        
+        <Box sx={{ flexGrow: 1, overflowY: "auto", overflowX: "hidden" }}>
+            <List sx={{ px: open ? 1 : 0, pt: 2 }}>
+            {currentMenuItems.map((item) => (
+                <DrawerListItem
+                key={item.path}
+                item={item}
+                open={open}
+                pathname={pathname}
+                onClick={() => handleNavigation(item.path)}
+                />
+            ))}
+            </List>
+        </Box>
+
+        <SidebarFooter open={open} />
       </Drawer>
+
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 3, height: "100vh", overflow: "auto" }}
+        sx={{
+          flexGrow: 1,
+          p: { xs: 2, md: 2 },
+          minHeight: "100vh",
+          minWidth: 0, // CRITICAL: allows flex item to shrink below content size
+          width: '100%',
+          transition: (theme) => theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
+          bgcolor: 'background.default',
+          color: "text.primary",
+          overflowX: 'hidden'
+        }}
       >
-        <DrawerHeader />
         {children}
       </Box>
     </Box>

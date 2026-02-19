@@ -1,0 +1,10 @@
+---
+description: Responder siempre en español
+alwaysApply: true
+---
+
+# Idioma de respuesta
+
+- Responde **siempre en español** en este proyecto.
+- Usa español para explicaciones, mensajes, documentación en código y comentarios dirigidos al usuario.
+- Los nombres de variables, funciones y código pueden mantenerse en inglés si ya es la convención del proyecto.

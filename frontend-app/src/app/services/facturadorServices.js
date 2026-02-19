@@ -1,36 +1,17 @@
-import Cookies from "js-cookie";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
-
-const fetchWithAuth = async (endpoint, options = {}) => {
-  const token = Cookies.get("token");
-  const defaultOptions = {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  };
-
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...defaultOptions,
-    ...options,
-    headers: {
-      ...defaultOptions.headers,
-      ...options.headers,
-    },
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || "Error en la petición");
-  }
-
-  return response.json();
-};
+import { fetchWithAuth } from "@/app/services/apiClient";
 
 // Get all Facturadores
-export const getFacturadores = async () => {
-  return fetchWithAuth("/facturador");
+export const getFacturadores = async (page = 0, limit = 10, search = "") => {
+  // El controller usa skip y limit. skip = page * limit.
+  // Pero en el Page pasamos page (0-indexed) y pageSize.
+  // Controller: const { skip, limit } = req.query; const skip = (page - 1) * limit; WAIT.
+  // Step 36: const { skip, limit } = req.query; (Directamente usa skip).
+  // En otros controllers como Concepto (Step 30): const { page = 1, limit = 10 } = req.query; const skip = (page - 1) * limit;
+  // Facturador controller (Step 36): async getAll(req, res) { const { skip, limit } = req.query; ... await facturadorService.getAll(parseInt(skip)...) }
+  // OJO: ClientPage usa page 0-indexed.
+  // Si FacturadorController usa 'skip' directo, debo calcularlo.
+  const skip = page * limit; 
+  return fetchWithAuth(`/facturador?skip=${skip}&limit=${limit}&search=${encodeURIComponent(search)}`);
 };
 
 // Create a new Facturador

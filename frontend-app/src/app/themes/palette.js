@@ -1,5 +1,6 @@
 // material-ui
 import { createTheme } from "@mui/material/styles";
+import { alpha } from "@mui/material/styles";
 
 // third-party
 import { presetPalettes } from "@ant-design/colors";
@@ -11,6 +12,18 @@ import ThemeOption from "./theme";
 
 export default function Palette(mode, presetColor) {
   const colors = presetPalettes;
+
+  // Theme configuration from environment variables with sensible fallbacks
+  // PRIMARY COLOR (Institutional)
+  const themePrimary = process.env.NEXT_PUBLIC_THEME_PRIMARY_MAIN || "#1e3a8a";
+
+  // LIGHT MODE BACKGROUNDS
+  const themeBgDefault = process.env.NEXT_PUBLIC_THEME_BG_DEFAULT || "#f8fafc";
+  const themeBgPaper = process.env.NEXT_PUBLIC_THEME_BG_PAPER || "#ffffff";
+
+  // DARK MODE BACKGROUNDS
+  const themeDarkBg = process.env.NEXT_PUBLIC_THEME_DARK_BG || "#0f172a";
+  const themeDarkPaper = process.env.NEXT_PUBLIC_THEME_DARK_PAPER || "#1e293b";
 
   let greyPrimary = [
     "#ffffff",
@@ -32,6 +45,44 @@ export default function Palette(mode, presetColor) {
 
   const paletteColor = ThemeOption(colors, presetColor, mode);
 
+  // Apply institutional primary color to BOTH modes
+  paletteColor.primary.main = themePrimary;
+  paletteColor.primary.light = themePrimary;
+  paletteColor.primary.dark = themePrimary;
+
+  if (mode === "dark") {
+    // Primary: contrast and variants for dark mode (single source for buttons/cards)
+    paletteColor.primary.contrastText = "#ffffff";
+    paletteColor.primary.light = "#818cf8";
+    paletteColor.primary.dark = "#6366f1";
+    paletteColor.primary.lighter = "rgba(15, 23, 42, 0.1)";
+
+    // Override secondary colors to be Slate-based for Dark Mode
+    paletteColor.secondary.main = "#94a3b8"; // Slate 400
+    paletteColor.secondary.light = "#cbd5e1"; // Slate 300
+    paletteColor.secondary.dark = "#64748b"; // Slate 500
+    paletteColor.secondary.lighter = themeDarkPaper; // Surface bg
+    paletteColor.secondary.darker = themeDarkBg; // Main bg
+
+    // Adjust grey palette to align with Slate/Midnight theme
+    paletteColor.grey[0] = themeDarkPaper;
+    paletteColor.grey[50] = "#1e293b"; // Same as paper for consistency
+    paletteColor.grey[100] = "#334155";
+    paletteColor.grey[200] = "#475569";
+    paletteColor.grey[300] = "#64748b";
+    paletteColor.grey[400] = "#94a3b8";
+    paletteColor.grey[500] = "#cbd5e1";
+    paletteColor.grey[600] = "#e2e8f0";
+    paletteColor.grey[700] = "#f1f5f9";
+    paletteColor.grey[800] = "#f8fafc";
+    paletteColor.grey[900] = "#ffffff";
+  } else {
+    // Light mode refinements
+    if (!paletteColor.background) paletteColor.background = {};
+    paletteColor.background.default = themeBgDefault;
+    paletteColor.background.paper = themeBgPaper;
+  }
+
   return createTheme({
     palette: {
       mode,
@@ -41,17 +92,19 @@ export default function Palette(mode, presetColor) {
       },
       ...paletteColor,
       text: {
-        primary: paletteColor.grey[700],
-        secondary: paletteColor.grey[500],
+        primary: mode === "dark" ? "#f1f5f9" : "#1e293b", // Slate 100 on dark, Slate 800 on light
+        secondary: mode === "dark" ? "#94a3b8" : "#64748b", // Slate 400 on dark, Slate 500 on light
         disabled: paletteColor.grey[400],
       },
       action: {
+        hover: alpha(paletteColor.grey[500], mode === "dark" ? 0.08 : 0.04),
+        selected: alpha(paletteColor.grey[500], mode === "dark" ? 0.12 : 0.08),
         disabled: paletteColor.grey[300],
       },
-      divider: paletteColor.grey[200],
+      divider: mode === "dark" ? "rgba(255, 255, 255, 0.08)" : paletteColor.grey[200],
       background: {
-        paper: paletteColor.grey[0],
-        default: paletteColor.grey.A50,
+        paper: mode === "dark" ? themeDarkPaper : themeBgPaper,
+        default: mode === "dark" ? themeDarkBg : themeBgDefault,
       },
     },
   });

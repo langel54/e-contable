@@ -31,18 +31,43 @@ export default function AnalyticEcommerce({
   extra,
 }) {
   return (
-    <MainCard contentSX={{ p: 2.25 }}>
+    <MainCard
+      contentSX={{ p: 2.25 }}
+      sx={{
+        position: "relative",
+        overflow: "hidden", // Crucial para que el borde no se salga de las esquinas
+        borderRadius: "12px", // Asegúrate que coincida con el radio de tu MainCard
+
+        "&::after": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          borderRadius: "inherit", // Esto hace que el borde siga la curva de la tarjeta
+          pointerEvents: "none",
+          borderBottom: (theme) => 
+            `2px solid ${theme.palette[color]?.main || theme.palette.primary.main}`,
+          transition: "all 0.25s ease",
+        },
+
+        "&:hover::after": {
+          borderBottomWidth: "4px",
+        },
+      }}
+    >
       <Stack spacing={0.5}>
-        <Typography variant="h6" color="text.secondary">
+        <Typography variant="h6" color="text.secondary" fontWeight={500}>
           {title}
         </Typography>
         <Grid container alignItems="center">
           <Grid item>
-            <Typography variant="h4" color="inherit">
+            <Typography variant="h3" fontWeight={700} color="text.primary">
               {count}
             </Typography>
           </Grid>
-          {percentage && (
+          {(percentage || percentage == "0") && (
             <Grid item>
               <Chip
                 variant="combined"
@@ -64,14 +89,12 @@ export default function AnalyticEcommerce({
       </Stack>
       <Box sx={{ pt: 2.25 }}>
         <Typography variant="caption" color="text.secondary">
-          You made an extra{" "}
           <Typography
             variant="caption"
-            sx={{ color: `${color || "primary"}.main` }}
+            // sx={{ color: `${color || "primary"}.main` }}
           >
             {extra}
           </Typography>{" "}
-          this year
         </Typography>
       </Box>
     </MainCard>

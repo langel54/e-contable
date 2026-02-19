@@ -3,13 +3,18 @@ import { getClientesProvs } from "@/app/services/clienteProvService";
 import { accessSunatTramites } from "@/app/services/sunServices";
 import AnimateButton from "@/app/ui-components/@extended/AnimateButton";
 import {
+  AccountBalance,
   AddCircleOutlineSharp,
   Clear,
   Delete,
   Edit,
+  MoreVert,
   Search,
+  Visibility,
+  CloudUpload,
 } from "@mui/icons-material";
 import {
+  Avatar,
   Badge,
   Box,
   Button,
@@ -18,6 +23,10 @@ import {
   IconButton,
   InputAdornment,
   InputBase,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
   Paper,
   Stack,
   TextField,
@@ -30,55 +39,98 @@ import { useDebounce } from "use-debounce";
 import EstadoClienteSelect from "./SelectStatusClient";
 import { useAuth } from "@/app/provider";
 import SearchComponent from "@/app/components/SearchComponent";
-import ClientForm from "./ClientForm";
+import ClientFormWrapper from "./ClientFormWrapper";
 import ModalComponent from "@/app/components/ModalComponent";
 import EstatusEditForm from "./EstatusEditForm";
 import SunatIcon from "@/app/components/SunatIcon";
 import { clientsStore } from "@/app/store/clientsStore";
 import ClientDetails from "./ClientDetails";
+import BulkUploadModal from "./BulkUploadModal";
 
 const clientColumns = (
   setEditedClient,
   setOpenAddModal,
   setOpenStatusModal,
   setOpenDetailsModal
-) => {
-  return [
+) => [
     {
-      field: "idclienteprov",
-      headerName: "Código",
-    },
-    {
-      field: "nregimen",
-      headerName: "Régimen",
+      field: "regimen",
+      headerName: "Reg.",
+      flex: 0.5,
+      sortable: false,
+      // align: "center",
       renderCell: (params) => {
+        const { idclienteprov, nregimen, razonsocial } = params.row;
         return (
-          <Chip
-            label={params.row.nregimen || "-"}
-            color="secondary"
-            size="small"
-            sx={{ fontSize: 10 }}
-            variant="outlined"
-          />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, p: 0.5 }}>
+            <Chip
+              label={nregimen || "Sin régimen"}
+              size="small"
+              variant="outlined"
+              sx={{
+                mt: 0.3,
+                fontSize: 10,
+                height: 18,
+                alignSelf: "start",
+                borderColor: 'divider',
+                color: 'text.secondary'
+              }}
+            />
+          </Box>
         );
       },
     },
     {
-      field: "razonsocial",
-      headerName: "Razón Social",
-      flex: 1,
+      field: "info",
+      headerName: "Cliente",
+      flex: 2,
+      sortable: false,
+      renderCell: (params) => {
+        const { idclienteprov, nregimen, razonsocial } = params.row;
+        return (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, p: 0.5 }}>
+            {/* <Avatar
+            sx={{
+              bgcolor: "primary.light",
+              color: "primary.contrastText",
+              width: 36,
+              height: 36,
+              fontSize: 13,
+              fontWeight: "bold",
+            }}
+          >
+            {razonsocial ? razonsocial.charAt(0).toUpperCase() : "?"}
+          </Avatar> */}
+
+            <Box sx={{ display: "flex", flexDirection: "column" }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: 500, color: "text.primary", lineHeight: 1.2 }}
+              >
+                {razonsocial || "Sin razón social"}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{ color: "text.secondary", lineHeight: 1.2 }}
+              >
+                Código: {idclienteprov}
+              </Typography>
+            </Box>
+          </Box>
+        );
+      },
     },
     {
       field: "ruc",
       headerName: "RUC",
+      // width: 120,
       valueGetter: (params) => params || "-",
     },
     {
       field: "dni",
       headerName: "DNI",
-      valueGetter: (params) => {
-        return params || "-";
-      },
+      // width: 120,
+      valueGetter: (params) => params || "-",
     },
     {
       field: "c_usuario",
@@ -96,13 +148,12 @@ const clientColumns = (
       field: "clave_rnp",
       headerName: "RNP",
     },
-
     {
       field: "estado",
       headerName: "Estado",
+      // width: 120,
       renderCell: (params) => {
         let label, color;
-
         switch (params.row.estado) {
           case "1":
             label = "Activo";
@@ -127,23 +178,20 @@ const clientColumns = (
         }
 
         return (
-          <Tooltip
-            title="Cambiar estado"
-            arrow
-            slots={{
-              transition: Zoom,
-            }}
-            placement="top"
-          >
-            <IconButton
-              sx={{ fontSize: 10, p: 1, height: 20 }}
+          <Tooltip title="Cambiar estado" arrow TransitionComponent={Zoom}>
+            <Button
+              // sx={{ fontSize: 10, p: 0.5 }}
               onClick={() => {
                 setEditedClient(params.row);
                 setOpenStatusModal();
               }}
+              color={color}
+              variant="contained"
+              size="small"
             >
-              <Badge badgeContent={label} color={color}></Badge>
-            </IconButton>
+              {label}
+              {/* <Badge badgeContent={label} color={color} /> */}
+            </Button>
           </Tooltip>
         );
       },
@@ -152,77 +200,113 @@ const clientColumns = (
       field: "actions",
       headerName: "Acciones",
       sortable: false,
-      width: 150,
+      width: 80,
       renderCell: (params) => {
+        const [anchorEl, setAnchorEl] = useState(null);
+        const open = Boolean(anchorEl);
+
+        const handleClick = (event) => {
+          setAnchorEl(event.currentTarget);
+        };
+
+        const handleClose = () => {
+          setAnchorEl(null);
+        };
+
         const data = {
           usuario: params.row.c_usuario,
           password: params.row.c_passw,
           ruc: params.row.ruc,
         };
-        return (
-          <div className="flex gap-8">
-            <IconButton
-              size="small"
-              onClick={() => {
-                setEditedClient(params.row);
-                setOpenAddModal();
-              }}
-              color="primary"
-            >
-              <Edit fontSize="small" />
-            </IconButton>
 
-            <Tooltip
-              title="Tramites y consultas"
-              arrow
-              placement="top"
-              slots={{
-                transition: Zoom,
+        // const handleSunat = async () => {
+        //   handleClose();
+        //   try {
+        //     const res = await accessSunatTramites(data);
+        //     if (res.url) {
+        //       window.open(
+        //         res.url,
+        //         "_blank",
+        //         "noopener,noreferrer,width=1200,height=800,left=100,top=100"
+        //       );
+        //     } else {
+        //       Swal.fire(
+        //         "Error",
+        //         res.error || "No se pudo generar la URL.",
+        //         "error"
+        //       );
+        //     }
+        //   } catch {
+        //     Swal.fire(
+        //       "Error",
+        //       "No se pudo conectar con el servicio SUNAT.",
+        //       "error"
+        //     );
+        //   }
+        // };
+
+        return (
+          <>
+            <IconButton onClick={handleClick}>
+              <MoreVert />
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+              }}
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              PaperProps={{
+                elevation: 3,
+                sx: { minWidth: 180, borderRadius: 2, py: 0.5 },
               }}
             >
-              <IconButton
-                onClick={async () => {
-                  try {
-                    const res = await accessSunatTramites(data);
-                    if (res.url) {
-                      window.open(
-                        res.url,
-                        "_blank",
-                        "noopener,noreferrer,width=1200,height=800,left=100,top=100"
-                      );
-                    } else {
-                      Swal.fire(
-                        "Error",
-                        res.error || "No se pudo generar la URL.",
-                        "error"
-                      );
-                    }
-                  } catch (err) {
-                    Swal.fire(
-                      "Error",
-                      "No se pudo conectar con el servicio SUNAT.",
-                      "error"
-                    );
-                  }
+              <MenuItem
+                onClick={() => {
+                  handleClose();
+                  setEditedClient(params.row);
+                  setOpenAddModal();
                 }}
               >
-                <SunatIcon />
-              </IconButton>
-            </Tooltip>
-            <IconButton
-              onClick={() => {
-                setOpenDetailsModal();
-                setEditedClient(params.row);
-              }}
-            >
-              <Badge badgeContent={"Ver"} color="secondary"></Badge>
-            </IconButton>
-          </div>
+                <ListItemIcon>
+                  <Edit fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Editar cliente" />
+              </MenuItem>
+
+              {/* <MenuItem onClick={handleSunat}>
+              <ListItemIcon>
+                <AccountBalance fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="Trámites SUNAT" />
+            </MenuItem> */}
+
+              <Divider />
+
+              <MenuItem
+                onClick={() => {
+                  handleClose();
+                  setEditedClient(params.row);
+                  setOpenDetailsModal();
+                }}
+              >
+                <ListItemIcon>
+                  <Visibility fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Ver detalles" />
+              </MenuItem>
+            </Menu>
+          </>
         );
       },
     },
   ];
-};
 const ClientPage = () => {
   const { estadoClientesProvider } = useAuth();
   const {
@@ -247,6 +331,7 @@ const ClientPage = () => {
   const [openAddModal, setOpenAddModal] = useState(false);
   const [openStatusModal, setOpenStatusModal] = useState(false);
   const [openDetailsModal, setOpenDetailsModal] = useState(false);
+  const [openBulkModal, setOpenBulkModal] = useState(false);
 
   const [editedClient, setEditedClient] = useState(null);
 
@@ -338,9 +423,12 @@ const ClientPage = () => {
   );
   return (
     <Box>
-      <Stack sx={{ pb: 2 }} direction="row" spacing={2}>
-        <Typography variant="h4" fontWeight={"100"}>
+      <Stack sx={{ pb: 2 }}>
+        <Typography variant="h4" gutterBottom>
           Clientes
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Gestiona clientes y beneficiarios
         </Typography>
       </Stack>
       <Stack
@@ -359,17 +447,30 @@ const ClientPage = () => {
           handleSearchChange={handleSearchChange}
           searchTerm={searchTerm}
         />
-        <Stack direction={"row"} justifyContent={"end"} spacing={4}>
+        <Stack direction={"row"} justifyContent={"end"} spacing={4} alignItems="center">
           <EstadoClienteSelect />
           <Button
             size="medium"
-            color="primary"
+            variant="outlined"
+            onClick={() => setOpenBulkModal(true)}
+            startIcon={<CloudUpload />}
+            sx={{ borderRadius: 2 }}
+          >
+            Carga Masiva
+          </Button>
+          <Button
+            size="medium"
             variant="contained"
             onClick={() => {
               setOpenAddModal(true);
             }}
+            startIcon={<AddCircleOutlineSharp fontSize="inherit" />}
+            sx={{
+              backgroundColor: 'primary.main',
+              '&:hover': { backgroundColor: 'primary.dark' }
+            }}
           >
-            <AddCircleOutlineSharp fontSize="inherit" /> Agregar Usuario
+            Agregar Cliente
           </Button>
         </Stack>
       </Stack>
@@ -385,7 +486,7 @@ const ClientPage = () => {
       />
       <ModalComponent
         content={
-          <ClientForm
+          <ClientFormWrapper
             handleCloseModal={handleCloseAddModal}
             initialData={editedClient}
             formAction={editedClient ? "update" : "create"}
@@ -418,7 +519,13 @@ const ClientPage = () => {
         open={openDetailsModal}
         handleClose={handleCloseDetailsModal}
         content={<ClientDetails data={editedClient} />}
-        width="600px"
+        width="800px"
+      />
+      
+      <BulkUploadModal
+        open={openBulkModal}
+        handleClose={() => setOpenBulkModal(false)}
+        refreshTable={refreshTable}
       />
     </Box>
   );

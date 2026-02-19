@@ -1,7 +1,9 @@
 "use client";
 import { useEffect } from "react";
-import { useRouter } from "next/navigation"; // Para App Router
+import { useRouter } from "next/navigation";
+import { Box, CircularProgress } from "@mui/material";
 import { useAuth } from "../provider";
+import Loader from "../ui-components/Loader";
 
 export function ProtectedRoute({ children }) {
   const router = useRouter();
@@ -14,9 +16,25 @@ export function ProtectedRoute({ children }) {
     }
   }, [isAuthenticated, loadingAuth, router]);
 
-  // Muestra un spinner o algo similar mientras se carga la autenticación
+  // Muestra un loader profesional mientras se carga la autenticación
   if (loadingAuth) {
-    return <div>Loading...</div>; // Aquí puedes mostrar un spinner de carga
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          gap: 2,
+        }}
+      >
+        <CircularProgress size={48} />
+        <Box sx={{ mt: 2 }}>
+          <Loader />
+        </Box>
+      </Box>
+    );
   }
 
   // Si está autenticado, muestra el contenido

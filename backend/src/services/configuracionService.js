@@ -1,16 +1,26 @@
 const prisma = require("../config/database");
 
 const configuracionService = {
-  async getAll(skip, limit) {
+  async getAll(skip, limit, search) {
+    const where = search
+      ? {
+          OR: [
+            { e_razonsocial: { contains: search } },
+            { e_ruc: { contains: search } },
+          ],
+        }
+      : {};
+
     const [configuraciones, total] = await Promise.all([
       prisma.configuracion.findMany({
         skip,
         take: Number(limit),
+        where,
         orderBy: {
           idconfig: "desc",
         },
       }),
-      prisma.configuracion.count(),
+      prisma.configuracion.count({ where }),
     ]);
 
     return { configuraciones, total };

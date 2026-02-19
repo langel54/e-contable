@@ -5,9 +5,24 @@ import {
   updateClienteProv,
   updateDeclaradoTodos,
 } from "@/app/services/clienteProvService";
-import { accessSunatDeclaracionesPagos, accessSunatTramites } from "@/app/services/sunServices";
-import { Edit, MoreVert } from "@mui/icons-material";
 import {
+  accessSunatDeclaracionesPagos,
+  accessSunatTramites,
+} from "@/app/services/sunServices";
+import { openSunatOrSunafilInNewTab } from "@/app/services/sunatOpenInTab";
+import {
+  AccountBalance,
+  AssignmentInd,
+  Done,
+  Edit,
+  Error,
+  Launch,
+  MoreVert,
+  MoreVertOutlined,
+  Policy,
+} from "@mui/icons-material";
+import {
+  Avatar,
   Badge,
   Box,
   Button,
@@ -18,19 +33,22 @@ import {
   IconButton,
   List,
   ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
+  Menu,
+  MenuItem,
   Popover,
   Stack,
   Switch,
   Tooltip,
   Typography,
-  useTheme,
   Zoom,
 } from "@mui/material";
 import React, { useCallback, useEffect, useState } from "react";
 import EstadoClienteSelect from "../clients/SelectStatusClient";
 import { useAuth } from "@/app/provider";
+import SearchComponent from "@/app/components/SearchComponent";
 import SunatIcon from "@/app/components/SunatIcon";
 import SelectDigito from "./SelectDigito";
 import SelectRegimen from "./SelectRegimen";
@@ -42,46 +60,70 @@ import { FileExcelFilled, FilePdfFilled } from "@ant-design/icons";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import { accessSunafil } from "@/app/services/sunafilServices";
 
-const clientColumns = (
+export const clientColumns = (
   setEditedClient,
   setOpenAddModal,
   setOpenStatusModal
 ) => {
   return [
-    // {
-    //   field: "idclienteprov",
-    //   headerName: "Código",
-    // },
     {
-      field: "nregimen",
-      headerName: "Régimen",
+      field: "idclienteprov",
+      headerName: "ID",
+      width: 60,
+    },
+
+    {
+      field: "regimen",
+      headerName: "Rég.",
+      with: 50,
+      align: "center",
       renderCell: (params) => {
+        const { nregimen } = params.row;
+
         return (
-          <Chip
-            label={params.row.nregimen || "-"}
-            color="secondary"
-            size="small"
-            sx={{ fontSize: 10 }}
-            variant="outlined"
-          />
+          <Stack
+            direction="row"
+            flexWrap="nowrap"
+            alignItems="center"
+            spacing={0.5}
+          >
+            <Chip
+              label={nregimen || "-"}
+              size="small"
+              color="secondary"
+              variant="outlined"
+              sx={{ fontSize: 8, width: "fit-content" }}
+            />
+          </Stack>
         );
       },
     },
+
     {
-      field: "razonsocial",
-      headerName: "Razón Social",
-      flex: 1,
+      field: "info",
+      headerName: "Cliente / Proveedor",
+      flex: 1.5,
       renderCell: (params) => {
+        const { razonsocial, planilla_elect } = params.row;
+
         return (
-          <Stack direction={"row"} spacing={1}>
-            {params.row.planilla_elect === "SI" ? (
-              <Tooltip title="Declara planilla" arrow placement="left">
-                <AssignmentIndIcon fontSize={"small"} color="info" />
+          <Stack
+            direction="row"
+            flexWrap="nowrap"
+            alignItems="center"
+            spacing={0.5}
+          >
+            {planilla_elect === "SI" ? (
+              <Tooltip title="Declara planilla">
+                <AssignmentIndIcon fontSize="small" color="info" />
               </Tooltip>
             ) : (
-              <AssignmentIndIcon fontSize={"small"} color="disabled" />
+              <AssignmentIndIcon fontSize="small" color="disabled" />
             )}
-            <Typography>{params.row.razonsocial}</Typography>
+
+            <Typography variant="subtitle2" sx={{ fontWeight: 500 }}>
+              {razonsocial}
+            </Typography>
           </Stack>
         );
       },
@@ -89,38 +131,35 @@ const clientColumns = (
     {
       field: "ruc",
       headerName: "RUC",
-      valueGetter: (params) => params || "-",
+      width: 100,
     },
     {
       field: "dni",
       headerName: "DNI",
-      valueGetter: (params) => {
-        return params || "-";
-      },
+      width: 80,
     },
     {
       field: "c_usuario",
       headerName: "Usuario",
+      width: 100,
     },
     {
       field: "c_passw",
       headerName: "Password",
+      width: 100,
     },
+
     {
       field: "clave_afpnet",
       headerName: "AFPNet",
+      width: 80,
     },
-    // {
-    //   field: "clave_rnp",
-    //   headerName: "RNP",
-    // },
-
     {
       field: "estado",
       headerName: "Estado",
+      width: 100,
       renderCell: (params) => {
         let label, color;
-
         switch (params.row.estado) {
           case "1":
             label = "Activo";
@@ -131,182 +170,138 @@ const clientColumns = (
             color = "warning";
             break;
           case "3":
-            label = "Baja temp";
+            label = "Baja Temp";
             color = "info";
             break;
           case "4":
-            label = "Baja def";
+            label = "Baja Def";
             color = "error";
             break;
           default:
             label = "Sin estado";
             color = "default";
-            break;
         }
-
         return (
-          <IconButton
-            sx={{ fontSize: 10, p: 1, height: 20 }}
-            onClick={() => {}}
-          >
-            <Badge badgeContent={label} color={color}></Badge>
-          </IconButton>
+          <Chip label={label} color={color} size="small" variant="outlined" />
         );
       },
     },
     {
       field: "actions",
-      headerName: "¿Declarado?",
+      headerName: "Declarado?",
+      width: 120,
       sortable: false,
-      // flex: 0.5,
-      width: 180,
-      renderCell: (params) => {
-        const data = {
-          usuario: params.row.c_usuario,
-          password: params.row.c_passw,
-          ruc: params.row.ruc,
-        };
-        const estadoInicial = params.row.declarado === "1";
-
-        const confirmDialog = ConfirmDialog({
-          title: "Registrar declaración",
-          message: `¿Estás seguro de marcar como:  ${
-            estadoInicial ? "No declarado" : "Declarado"
-          }?`,
-          onConfirm: () => {
-            const declaradoValue = !estadoInicial ? "1" : "0";
-            params.row.declarado = declaradoValue;
-            console.log(params.row);
-            try {
-              updateClienteProv(params.row.idclienteprov, params.row).then(
-                () => {
-                  params.api.updateRows([{ ...params.row }]);
-
-                  // Swal.fire(
-                  //   "Actualizado",
-                  //   `El estado se marcó como ${!estadoInicial ? "Sí" : "No"}.`,
-                  //   "success"
-                  // );
-                }
-              );
-            } catch (error) {
-              Swal.fire(
-                "Error",
-                "No se pudo actualizar el estado. Intenta nuevamente.",
-                "error"
-              );
-            }
-          },
-        });
-
-        const handleChange = () => {
-          confirmDialog.show();
-        };
-
-        return (
-          <Stack direction={"row"} justifyContent={"space-between"}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={estadoInicial}
-                  onChange={handleChange}
-                  color="primary"
-                />
-              }
-              label={estadoInicial ? "Sí" : "No"}
-            />
-            <Tooltip
-              title="Trámites y consultas"
-              arrow
-              placement="left"
-              slots={{
-                transition: Zoom,
-              }}
-            >
-              <IconButton
-                onClick={async () => {
-                  try {
-                    const res = await accessSunatTramites(data);
-                    if (res.url) {
-                      window.open(
-                        res.url,
-                        "_blank",
-                        "noopener,noreferrer,width=1200,height=800,left=100,top=100"
-                      );
-                    } else {
-                      Swal.fire(
-                        "Error",
-                        res.error || "No se pudo generar la URL.",
-                        "error"
-                      );
-                    }
-                  } catch (err) {
-                    Swal.fire(
-                      "Error",
-                      "No se pudo conectar con el servicio SUNAT.",
-                      "error"
-                    );
-                  }
-                }}
-              >
-                <SunatIcon />
-              </IconButton>
-            </Tooltip>
-            <Tooltip
-              title="Trámites y consultas"
-              arrow
-              placement="left"
-              slots={{
-                transition: Zoom,
-              }}
-            >
-              <IconButton
-                onClick={async () => {
-                  try {
-                    const res = await accessSunatDeclaracionesPagos(data);
-                    if (res.url) {
-                      window.open(
-                        res.url,
-                        "_blank",
-                        "noopener,noreferrer,width=1200,height=800,left=100,top=100"
-                      );
-                    } else {
-                      Swal.fire(
-                        "Error",
-                        res.error || "No se pudo generar la URL.",
-                        "error"
-                      );
-                    }
-                  } catch (err) {
-                    Swal.fire(
-                      "Error",
-                      "No se pudo conectar con el servicio SUNAT.",
-                      "error"
-                    );
-                  }
-                }}
-              >
-                <SunatIcon />
-              </IconButton>
-            </Tooltip>
-            <Tooltip
-              title="Sunafil"
-              arrow
-              placement="left"
-              slots={{
-                transition: Zoom,
-              }}
-            >
-              <IconButton onClick={() => accessSunafil(data)}>
-                <SunatIcon />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-        );
-      },
+      renderCell: (params) => <ActionPopover params={params} />,
     },
   ];
 };
+
+const ActionPopover = ({ params }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const data = {
+    usuario: params.row.c_usuario,
+    password: params.row.c_passw,
+    ruc: params.row.ruc,
+  };
+  const estadoInicial = params.row.declarado === "1";
+
+  const confirmDialog = ConfirmDialog({
+    title: "Registrar declaración",
+    message: `¿Estás seguro de marcar como: ${
+      estadoInicial ? "No declarado" : "Declarado"
+    }?`,
+    onConfirm: () => {
+      const declaradoValue = !estadoInicial ? "1" : "0";
+      params.row.declarado = declaradoValue;
+      updateClienteProv(params.row.idclienteprov, params.row)
+        .then(() => params.api.updateRows([{ ...params.row }]))
+        .catch(() =>
+          Swal.fire("Error", "No se pudo actualizar el estado", "error")
+        );
+    },
+  });
+
+  const handleChange = () => confirmDialog.show();
+
+  const handleClick = (event) => setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
+
+  return (
+    <>
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={estadoInicial}
+            onChange={handleChange}
+            color="primary"
+          />
+        }
+        label={estadoInicial ? "Sí" : "No"}
+      />
+      <IconButton size="small" onClick={handleClick}>
+        <MoreVertOutlined />
+      </IconButton>
+
+      <Popover
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+        sx={{ "& .MuiPaper-root": { width: 220, p: 0.5 } }}
+      >
+        <List dense>
+          {/* <ListItemButton onClick={handleChange}>
+            <ListItemIcon>
+              {estadoInicial ? (
+                <Done color="success" />
+              ) : (
+                <Error color="error" />
+              )}
+            </ListItemIcon>
+            <ListItemText
+              primary={
+                estadoInicial ? "Marcar No declarado" : "Marcar Declarado"
+              }
+            />
+          </ListItemButton>
+          <Divider /> */}
+          <ListItemButton
+            onClick={async () => {
+              const res = await accessSunatTramites(data);
+              if (res.url) openSunatOrSunafilInNewTab(res.url, "sunat");
+            }}
+          >
+            <ListItemIcon>
+              <Launch fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary="Trámites SUNAT" />
+          </ListItemButton>
+          <ListItemButton
+            onClick={async () => {
+              const res = await accessSunatDeclaracionesPagos(data);
+              if (res.url) openSunatOrSunafilInNewTab(res.url, "sunat");
+            }}
+          >
+            <ListItemIcon>
+              <SunatIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary="Declaraciones y pagos" />
+          </ListItemButton>
+          <ListItemButton onClick={() => accessSunafil(data)}>
+            <ListItemIcon>
+              <SunatIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary="Sunafil" />
+          </ListItemButton>
+        </List>
+      </Popover>
+    </>
+  );
+};
+
 const ClientsFilter = () => {
   const { estadoClientesProvider } = useAuth();
   const [clients, setClients] = useState([]);
@@ -323,8 +318,12 @@ const ClientsFilter = () => {
 
   const [filterWithPlanilla, setFilterWithPlanilla] = useState(false);
 
+  // Search state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTermValue, setSearchTermValue] = useState("");
+
   const fetchDataCliente = useCallback(
-    async (currentPage, currentPageSize, digito, regimen, estado, planilla) => {
+    async (currentPage, currentPageSize, digito, regimen, estado, planilla, search) => {
       setLoading(true);
       try {
         const data = await getFilterClientesProvs(
@@ -333,7 +332,8 @@ const ClientsFilter = () => {
           digito,
           regimen,
           estado,
-          planilla
+          planilla,
+          search
         );
         setClients(data.clientesProvs);
         setTotal(data.pagination.total);
@@ -345,6 +345,24 @@ const ClientsFilter = () => {
     },
     [] // Memoiza para evitar crear una nueva referencia en cada render
   );
+
+  // Search handlers
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    setSearchTerm(value);
+  };
+
+  const handleSearchButton = () => {
+    if (searchTerm.length >= 1) {
+      setSearchTermValue(searchTerm);
+      setPagination((prev) => ({ ...prev, page: 0 }));
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchTermValue("");
+    setSearchTerm("");
+  };
 
   useEffect(() => {
     // Si cambian los filtros, reseteamos a la primera página
@@ -358,14 +376,17 @@ const ClientsFilter = () => {
 
   useEffect(() => {
     // Hacemos la petición solo después de que pagination.page esté actualizado
-    fetchDataCliente(
-      pagination.page + 1,
-      pagination.pageSize,
-      selectedDigito,
-      selectedRegimen,
-      estadoClientesProvider,
-      filterWithPlanilla
-    );
+    if (searchTermValue.length >= 2 || searchTermValue.length === 0) {
+      fetchDataCliente(
+        pagination.page + 1,
+        pagination.pageSize,
+        selectedDigito,
+        selectedRegimen,
+        estadoClientesProvider,
+        filterWithPlanilla,
+        searchTermValue
+      );
+    }
   }, [
     pagination.page,
     pagination.pageSize,
@@ -373,6 +394,7 @@ const ClientsFilter = () => {
     selectedRegimen,
     estadoClientesProvider,
     filterWithPlanilla,
+    searchTermValue,
   ]);
 
   // Memoiza las columnas para evitar recrearlas en cada render
@@ -405,7 +427,7 @@ const ClientsFilter = () => {
   };
 
   //para eexcel
-  const fetchAllDataCliente = async (digito, regimen, estado, planilla) => {
+  const fetchAllDataCliente = async (digito, regimen, estado, planilla, search = "") => {
     let allData = [];
     let currentPage = 1;
     const pageSize = 100;
@@ -418,7 +440,8 @@ const ClientsFilter = () => {
           digito,
           regimen,
           estado,
-          planilla
+          planilla,
+          search
         );
 
         allData = [...allData, ...data.clientesProvs];
@@ -456,7 +479,8 @@ const ClientsFilter = () => {
       selectedDigito,
       selectedRegimen,
       estadoClientesProvider,
-      filterWithPlanilla
+      filterWithPlanilla,
+      searchTermValue
     );
 
     // Ahora generamos el reporte usando los datos obtenidos
@@ -478,12 +502,14 @@ const ClientsFilter = () => {
     setFilterWithPlanilla(!filterWithPlanilla);
   };
 
-  const theme = useTheme();
   return (
     <Box>
-      <Stack sx={{ pb: 2 }} direction="row" spacing={2}>
-        <Typography variant="h4" fontWeight={"100"}>
+      <Stack sx={{ pb: 2 }}>
+        <Typography variant="h4" gutterBottom>
           Clientes
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Gestiona clientes y beneficiarios
         </Typography>
       </Stack>
       <Stack
@@ -496,6 +522,12 @@ const ClientsFilter = () => {
           alignItems: "center",
         }}
       >
+        <SearchComponent
+          handleClearSearch={handleClearSearch}
+          handleSearchButton={handleSearchButton}
+          handleSearchChange={handleSearchChange}
+          searchTerm={searchTerm}
+        />
         <Stack direction={"row"} justifyContent={"end"} spacing={4}>
           <SelectDigito
             selected={selectedDigito}
@@ -511,7 +543,8 @@ const ClientsFilter = () => {
               // background: theme.palette.background.paper,
               borderRadius: 2,
               paddingRight: 2,
-              border: "1px solid" + theme.palette.grey[300],
+              border: '1px solid',
+              borderColor: 'divider',
             }}
             control={
               <Checkbox
@@ -559,7 +592,7 @@ const ClientsFilter = () => {
                 }}
               >
                 <ListItemIcon
-                  sx={(theme) => ({ color: theme.palette.success.main })}
+                  sx={{ color: 'success.main' }}
                 >
                   <FileExcelFilled />
                 </ListItemIcon>
@@ -574,7 +607,7 @@ const ClientsFilter = () => {
                 }}
               >
                 <ListItemIcon
-                  sx={(theme) => ({ color: theme.palette.error.main })}
+                  sx={{ color: 'error.main' }}
                 >
                   <FilePdfFilled />
                 </ListItemIcon>

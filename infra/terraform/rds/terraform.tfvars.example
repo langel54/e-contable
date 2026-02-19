@@ -1,0 +1,20 @@
+# Copiar a terraform.tfvars y rellenar. No subir terraform.tfvars con contraseñas a Git.
+
+aws_region   = "us-east-1"
+project_name = "cont"
+
+# Obtener vpc_id y subnet_ids con: aws ec2 describe-vpcs / describe-subnets
+# Para VPC por defecto: aws ec2 describe-vpcs --filters "Name=isDefault,Values=true" --query "Vpcs[0].VpcId" --output text
+vpc_id    = "vpc-xxxxxxxxx"
+subnet_ids = ["subnet-xxxxxxxx", "subnet-yyyyyyyy"]
+
+# Restringir en producción al CIDR del backend (App Runner usa IPs salientes; para pruebas se puede 0.0.0.0/0)
+allowed_cidr_blocks = ["0.0.0.0/0"]
+
+db_name     = "cont_db"
+db_username = "admin"
+# db_password = "PONER_CONTRASEÑA_SEGURA"  # Mejor: export TF_VAR_db_password=xxx
+
+# Opcional: solo para pruebas desde tu IP
+# publicly_accessible = true
+# skip_final_snapshot  = true

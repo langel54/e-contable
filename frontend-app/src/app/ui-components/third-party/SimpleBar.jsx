@@ -33,7 +33,7 @@ const SimpleBarStyle = styled(SimpleBar)(({ theme }) => ({
     height: 6
   },
   '& .simplebar-mask': {
-    zIndex: 'inherit'
+    // zIndex: 'inherit'
   }
 }));
 

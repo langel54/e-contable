@@ -34,10 +34,16 @@ const estadoClienteRoutes = require("./routes/estadoClienteRoutes");
 const misDeclaracionesRoutes = require("./routes/misDeclaracionesRoutes");
 const pdfIncomeRoutes = require("./routes/pdfIncomeRoutes");
 const pdfSalidaRoutes = require("./routes/pdfSalidaRoutes");
+const pdfEstadoCuentaRoutes = require("./routes/pdfEstadoCuentaRoutes");
+const pdfEgresosClienteRoutes = require("./routes/pdfEgresosClienteRoutes");
 const sunafilRoutes = require("./routes/sunafilRoutes");
+const estadoCuentaRoutes = require("./routes/estadoCuentaRoutes");
+const egresosClienteRoutes = require("./routes/egresosClienteRoutes");
 const checkOrigin = require("./middlewares/checkOrigin");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 const corsOptions = require("./config/corsConfig");
 const sunatRoutes = require("./routes/sunatRoutes");
+const buzonRoutes = require("./routes/buzonRoutes");
 
 // const clienteRoutes = require("./routes/clienteRoutes");
 
@@ -45,8 +51,9 @@ const app = express();
 
 // Middlewares
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Límite alto para carga masiva de clientes (bulk / bulk-large)
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // app.use(checkOrigin); // PARA RESTRINGIR CONEXIONES
 
@@ -87,7 +94,13 @@ app.use("/api/estado-cliente", estadoClienteRoutes);
 app.use("/api/misdeclaraciones", misDeclaracionesRoutes);
 app.use("/api/pdf-income", pdfIncomeRoutes);
 app.use("/api/pdf-salida", pdfSalidaRoutes);
+app.use("/api/pdf-estado-cuenta", pdfEstadoCuentaRoutes);
+app.use("/api/pdf-egresos-cliente", pdfEgresosClienteRoutes);
 app.use("/api/sunafil", sunafilRoutes);
+app.use("/api/estado-cuenta", estadoCuentaRoutes);
+app.use("/api/egresos-cliente", egresosClienteRoutes);
+app.use("/api/buzon", buzonRoutes);
+app.use("/api", dashboardRoutes);
 
 // Error Handler
 app.use(errorHandler);

@@ -31,8 +31,10 @@ const ModalComponent = ({
           transform: "translate(-50%, -50%)",
           width,
           bgcolor: "background.paper",
-          boxShadow: 24,
-          borderRadius: 2,
+          boxShadow: (theme) => theme.customShadows.z1,
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 3,
           display: "flex",
           flexDirection: "column",
           maxHeight: "90vh",
@@ -55,13 +57,13 @@ const ModalComponent = ({
           }}
         >
           <Stack direction="row" spacing={2} alignItems="center">
-            {icon}
-            <Typography id="modal-title" variant="h5" component="h2" noWrap>
+            {icon && React.cloneElement(icon, { sx: { color: (theme) => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.main' } })}
+            <Typography id="modal-title" variant="h5" component="h2" noWrap sx={{ color: "text.primary", fontWeight: 600 }}>
               {title}
             </Typography>
           </Stack>
 
-          <IconButton onClick={handleClose}>
+          <IconButton onClick={handleClose} sx={{ color: "text.secondary" }}>
             <CloseIcon />
           </IconButton>
         </Box>

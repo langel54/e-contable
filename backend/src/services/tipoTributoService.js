@@ -9,6 +9,9 @@ const tipoTribService = {
         idtipo_trib: true,
         descripcion_t: true,
       },
+      orderBy: {
+        idtipo_trib: "asc",
+      },
     });
 
     const total = await prisma.tipoTrib.count();

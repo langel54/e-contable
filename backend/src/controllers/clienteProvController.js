@@ -34,6 +34,7 @@ const clienteProvController = {
         regimen = "",
         status = "1",
         planilla = false,
+        search = "",
       } = req.query;
       const skip = (page - 1) * limit;
 
@@ -43,7 +44,8 @@ const clienteProvController = {
         digito,
         regimen,
         status,
-        planilla
+        planilla,
+        search
       );
 
       res.json({
@@ -141,6 +143,44 @@ const clienteProvController = {
       });
     } catch (error) {
       res.status(500).json({ message: error.message });
+    }
+  },
+  async bulkCreate(req, res) {
+    try {
+      const payload = Array.isArray(req.body) ? req.body : req.body?.data ?? [];
+      if (payload.length === 0) {
+        return res.status(400).json({ message: "Se requiere un array de registros." });
+      }
+      const MAX_PER_REQUEST = 15;
+      if (payload.length > MAX_PER_REQUEST) {
+        return res.status(400).json({
+          message: `Máximo ${MAX_PER_REQUEST} registros por petición. Envíe lotes más pequeños.`,
+        });
+      }
+      console.log("[bulk] Registros:", payload.length);
+      const result = await clienteProvService.bulkCreate(payload);
+      console.log("[bulk] Creados:", result.count);
+      res.status(201).json(result);
+    } catch (error) {
+      const msg = error?.message || String(error) || "Error interno en carga masiva";
+      console.error("[bulk] Error:", msg);
+      res.status(500).json({ message: msg });
+    }
+  },
+  async bulkCreateLarge(req, res) {
+    try {
+      const payload = Array.isArray(req.body) ? req.body : req.body?.data ?? [];
+      if (payload.length === 0) {
+        return res.status(400).json({ message: "Se requiere un array de registros." });
+      }
+      console.log("[bulk-large] Registros:", payload.length);
+      const result = await clienteProvService.bulkCreateLarge(payload);
+      console.log("[bulk-large] Creados:", result.count);
+      res.status(201).json(result);
+    } catch (error) {
+      const msg = error?.message || String(error) || "Error interno";
+      console.error("[bulk-large] Error:", msg);
+      res.status(500).json({ message: msg });
     }
   },
 };

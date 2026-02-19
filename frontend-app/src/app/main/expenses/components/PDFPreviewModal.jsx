@@ -2,7 +2,8 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
 import ModalComponent from "@/app/components/ModalComponent";
 import { ReceiptLong } from "@mui/icons-material";
-import { pdfSalidaService } from "@/app/services/pdfServices";
+// import { pdfSalidaService } from "@/app/services/pdfServices";
+import { generateReceiptPDF } from "@/app/components/receiptGenerator";
 
 const PDFPreviewModal = ({ open, handleClose, data }) => {
   const [loading, setLoading] = useState(true);
@@ -16,7 +17,8 @@ const PDFPreviewModal = ({ open, handleClose, data }) => {
       try {
         // await new Promise((resolve) => setTimeout(resolve, 1500));
 
-        const pdfBlob = await pdfSalidaService(data.idsalida);
+        // const pdfBlob = await pdfSalidaService(data.idsalida);
+        const pdfBlob = await generateReceiptPDF(data, "egreso");
         const pdfUrl = URL.createObjectURL(pdfBlob);
 
         setPdfUrl(pdfUrl);

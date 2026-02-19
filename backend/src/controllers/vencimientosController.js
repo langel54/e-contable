@@ -40,10 +40,12 @@ const getVencimientos = async (req, res) => {
 // Get all vencimientos
 const getAllVencimientos = async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
-    const offset = (page - 1) * limit;
+    const { page, limit } = req.query;
+    const pageInt = parseInt(page) || 1;
+    const limitInt = parseInt(limit) || 10;
+    const offset = (pageInt - 1) * limitInt;
 
-    const result = await vencimientosService.getAllVencimientos(limit, offset);
+    const result = await vencimientosService.getAllVencimientos(limitInt, offset);
 
     res.json({
       success: true,
@@ -118,7 +120,7 @@ const updateVencimiento = async (req, res) => {
   try {
     const { id } = req.params;
     const vencimientoData = req.body;
-    
+
     const vencimiento = await vencimientosService.updateVencimiento(id, vencimientoData);
 
     if (!vencimiento) {

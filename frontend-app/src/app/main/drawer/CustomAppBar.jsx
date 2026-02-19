@@ -1,4 +1,4 @@
-import { styled } from "@mui/material/styles";
+import { styled, alpha } from "@mui/material/styles";
 import MuiAppBar from "@mui/material/AppBar";
 import { drawerWidth } from "./mixins";
 
@@ -10,9 +10,13 @@ export const AppBar = styled(MuiAppBar, {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
-  backgroundColor: theme.palette.background.paper,
-  color: theme.palette.common.black,
-  boxShadow: `5px 0px 5px rgba(0, 0, 0, 0.2)`,
+  backgroundColor: theme.palette.mode === 'dark'
+    ? alpha(theme.palette.background.default, 0.8)
+    : alpha(theme.palette.background.paper, 0.8),
+  backdropFilter: 'blur(16px)',
+  color: theme.palette.text.primary,
+  boxShadow: 'none',
+  borderBottom: `1px solid ${theme.palette.divider}`,
   ...(open && {
     marginLeft: drawerWidth,
     width: `calc(100% - ${drawerWidth}px)`,

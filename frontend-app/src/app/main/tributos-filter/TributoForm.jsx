@@ -196,8 +196,11 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
 
       const response = await getVencimientos(anio, mes, u_digito);
       const vencimientos = response.vencimientos || response;
+      const fechaVencimiento =
+        vencimientos?.fecha_vencimiento ?? (Array.isArray(vencimientos) ? vencimientos?.[0]?.fecha_vencimiento : null);
 
-      if (!vencimientos || vencimientos.length === 0) {
+      if (!vencimientos || !fechaVencimiento) {
+        setVencimientoValidado(false);
         Swal.fire({
           title: "¡Atención!",
           text: `No existe un registro de vencimientos para el período ${anio}-${mes.padStart(
@@ -208,14 +211,12 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
           confirmButtonText: "Entendido",
         });
         return false;
-      } else {
-        setFechaVencimiento(
-          dayjs(vencimientos.fecha_vencimiento).format("YYYY-MM-DD")
-        );
       }
 
+      const fv = dayjs(fechaVencimiento).format("YYYY-MM-DD");
+      setFechaVencimiento(fv);
       setVencimientoValidado(true);
-      return true;
+      return fv;
     } catch (error) {
       console.error("Error validando vencimientos:", error);
        console.error("Error validando vencimientos:", error);
@@ -239,13 +240,12 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
   };
 
   const handleSubmit = async (values, setFieldError, setSubmitting) => {
-    // Validar vencimientos antes de proceder
-    const vencimientoValido = await validarVencimiento(
+    const resVencimiento = await validarVencimiento(
       values.anio,
       values.mes,
       selectedClient?.u_digito
     );
-    if (!vencimientoValido) {
+    if (!resVencimiento) {
       setSubmitting(false);
       return;
     }
@@ -254,7 +254,7 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
     try {
       const payload = {
         // ...values,
-        fecha_v: values.fecha_v,
+        fecha_v: typeof resVencimiento === "string" ? resVencimiento : values.fecha_v,
         idclienteprov: values.idclienteprov,
         idtipo_trib: values.idtipo_trib,
         anio: values.anio?.toString?.() || String(values.anio),
@@ -432,14 +432,15 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
                           <div style={{ fontWeight: 500 }}>
                             {option.razonsocial}
                           </div>
-                          <div
-                            style={{
-                              fontSize: "0.8em",
-                              color: "rgba(0, 0, 0, 0.6)",
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: 'text.secondary',
+                              display: 'block'
                             }}
                           >
                             RUC: {option.ruc}
-                          </div>
+                          </Typography>
                         </div>
                       </li>
                     )}

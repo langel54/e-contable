@@ -1,33 +1,4 @@
-import Cookies from "js-cookie";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
-
-// Helper function to handle API calls
-const fetchWithAuth = async (endpoint, options = {}) => {
-  const token = Cookies.get("token");
-  const defaultOptions = {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  };
-
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...defaultOptions,
-    ...options,
-    headers: {
-      ...defaultOptions.headers,
-      ...options.headers,
-    },
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || "Error en la petición");
-  }
-
-  return response.json();
-};
+import { fetchWithAuth } from "@/app/services/apiClient";
 
 // Obtener todos los ingresos con paginación
 export const getIngresos = async (
@@ -70,6 +41,11 @@ export const updateIngreso = async (idingreso, data) => {
 // Eliminar un ingreso
 export const deleteIngreso = async (idingreso) => {
   return fetchWithAuth(`/ingreso/${idingreso}`, {
-    method: "PATCH",
+    method: "DELETE",
   });
+};
+
+// Reporte Anual
+export const getAnnualReport = async (year) => {
+  return fetchWithAuth(`/ingreso/report/annual?year=${year}`);
 };

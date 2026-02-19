@@ -1,13 +1,26 @@
 const notasService = require("../services/notasService");
 
 const notasController = {
-  // Obtener todos los registros con paginación
+    // Obtener todos los registros con paginación y filtros
   async getAll(req, res) {
     try {
-      const { page = 1, limit = 10 } = req.query;
+      const { 
+        page = 1, 
+        limit = 10, 
+        cliente, 
+        fechaInicio, 
+        fechaFin,
+        search 
+      } = req.query;
       const skip = (page - 1) * limit;
+      
+      const filters = {};
+      if (cliente) filters.cliente = cliente;
+      if (fechaInicio) filters.fechaInicio = fechaInicio;
+      if (fechaFin) filters.fechaFin = fechaFin;
+      if (search) filters.search = search;
 
-      const { notas, total } = await notasService.getAll(skip, Number(limit));
+      const { notas, total } = await notasService.getAll(skip, Number(limit), filters);
 
       res.json({
         notas,
@@ -27,11 +40,11 @@ const notasController = {
     const { idnotas } = req.params;
     try {
       const nota = await notasService.getById(Number(idnotas));
-      if (!nota) {
-        return res.status(404).json({ message: "Nota no encontrada" });
-      }
       res.json(nota);
     } catch (error) {
+      if (error.type === "not_found") {
+        return res.status(404).json({ message: error.message });
+      }
       res.status(500).json({ message: error.message });
     }
   },
@@ -42,6 +55,9 @@ const notasController = {
       const nuevaNota = await notasService.create(req.body);
       res.status(201).json(nuevaNota);
     } catch (error) {
+      if (error.type === "validation") {
+        return res.status(400).json({ message: error.message });
+      }
       res.status(500).json({ message: error.message });
     }
   },
@@ -54,11 +70,14 @@ const notasController = {
         Number(idnotas),
         req.body
       );
-      if (!notaActualizada) {
-        return res.status(404).json({ message: "Nota no encontrada" });
-      }
       res.json(notaActualizada);
     } catch (error) {
+      if (error.type === "not_found") {
+        return res.status(404).json({ message: error.message });
+      }
+      if (error.type === "validation") {
+        return res.status(400).json({ message: error.message });
+      }
       res.status(500).json({ message: error.message });
     }
   },
@@ -67,12 +86,12 @@ const notasController = {
   async delete(req, res) {
     const { idnotas } = req.params;
     try {
-      const deleted = await notasService.delete(Number(idnotas));
-      if (!deleted) {
-        return res.status(404).json({ message: "Nota no encontrada" });
-      }
-      res.status(204).json();
+      await notasService.delete(Number(idnotas));
+      res.status(204).send();
     } catch (error) {
+      if (error.type === "not_found") {
+        return res.status(404).json({ message: error.message });
+      }
       res.status(500).json({ message: error.message });
     }
   },

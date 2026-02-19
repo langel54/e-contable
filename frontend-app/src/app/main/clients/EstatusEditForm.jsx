@@ -84,6 +84,7 @@ const EstatusEditForm = ({ handleCloseModal, data }) => {
             >
               {estadoCliente.map((estadoCli) => (
                 <FormControlLabel
+                  sx={{ color: "text.primary" }}
                   key={estadoCli.idestadocliente}
                   value={estadoCli.idestadocliente}
                   control={<Radio />}
