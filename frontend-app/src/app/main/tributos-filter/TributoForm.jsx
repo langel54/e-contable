@@ -196,8 +196,11 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
 
       const response = await getVencimientos(anio, mes, u_digito);
       const vencimientos = response.vencimientos || response;
+      const fechaVencimiento =
+        vencimientos?.fecha_vencimiento ?? (Array.isArray(vencimientos) ? vencimientos?.[0]?.fecha_vencimiento : null);
 
-      if (!vencimientos || vencimientos.length === 0) {
+      if (!vencimientos || !fechaVencimiento) {
+        setVencimientoValidado(false);
         Swal.fire({
           title: "¡Atención!",
           text: `No existe un registro de vencimientos para el período ${anio}-${mes.padStart(
@@ -208,15 +211,12 @@ const TributoForm = ({ tributoEdit = null, handleCloseModal, onSaved }) => {
           confirmButtonText: "Entendido",
         });
         return false;
-      } else {
-        const fv = dayjs(vencimientos.fecha_vencimiento).format("YYYY-MM-DD");
-        setFechaVencimiento(fv);
-        // Important: Update Formik state so it gets sent in the payload
-        return fv;
       }
 
+      const fv = dayjs(fechaVencimiento).format("YYYY-MM-DD");
+      setFechaVencimiento(fv);
       setVencimientoValidado(true);
-      return true;
+      return fv;
     } catch (error) {
       console.error("Error validando vencimientos:", error);
        console.error("Error validando vencimientos:", error);
