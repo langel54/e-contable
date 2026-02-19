@@ -1,5 +1,7 @@
 import { Box, Grid, Stack, Typography, useTheme } from "@mui/material";
 import AuthGuard from "../menu/AuthGuard";
+import { ROLE_IDS } from "@/app/config/roles";
+const IDS_CLIENTES = [ROLE_IDS.ADMIN, ROLE_IDS.MANAGER, ROLE_IDS.OPERADOR, ROLE_IDS.LIMITADO]; // 1, 2, 3, 6
 import AnalyticEcommerce from "@/app/ui-components/cards/statistics/AnalyticEcommerce";
 import MainCard from "@/app/ui-components/MainCard";
 import UniqueVisitorCard from "./UniqueVisitorCard";
@@ -91,7 +93,7 @@ const ClientsDashboardPage = () => {
 
   return (
     <>
-      <AuthGuard allowedRoles={[1]}>
+      <AuthGuard ids={IDS_CLIENTES}>
         <Grid container rowSpacing={4.5} columnSpacing={2.75}>
           {/* row 1 */}
           <Grid item xs={12} sx={{ mb: -2.25 }}>

@@ -112,7 +112,7 @@ const TributosDashboardPage = () => {
   );
 
   return (
-    <AuthGuard allowedRoles={[1]}>
+    <AuthGuard ids={[1, 6]}>
       <Grid container rowSpacing={4.5} columnSpacing={2.75}>
         <Grid item xs={12}>
           <Stack

@@ -1,141 +1,27 @@
-import HomeIcon from "@mui/icons-material/Home";
-import PeopleIcon from "@mui/icons-material/People";
-import PersonIcon from "@mui/icons-material/Person";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import GroupIcon from "@mui/icons-material/Group";
-import SettingsIcon from "@mui/icons-material/Settings";
-import ReceiptIcon from "@mui/icons-material/Receipt";
-import { AccountBalance, AccountBalanceWallet, Description } from "@mui/icons-material";
+/**
+ * Menú: se construye desde routePermissions. Solo se muestran rutas cuyo ids incluye al usuario.
+ */
+import { idTipoInList } from "@/app/config/roles";
+import { ROUTE_ITEMS } from "@/app/config/routePermissions";
+import { ALL_ROLE_IDS } from "@/app/config/roles";
 
-const menuItemsByRole = {
-  1: [
-    {
-      text: "Inicio",
-      path: "/main",
-      icon: <HomeIcon />,
-      allowedRoles: [1, 2, 3],
-    },
+function filterItem(item, idTipo) {
+  if (!idTipoInList(idTipo, item.ids)) return null;
+  const filtered = { text: item.text, path: item.path, icon: item.icon };
+  if (item.children?.length) {
+    const children = item.children.map((c) => filterItem(c, idTipo)).filter(Boolean);
+    if (children.length) filtered.children = children;
+  }
+  return filtered;
+}
 
-    {
-      text: "Usuarios",
-      path: "/main/users",
-      icon: <PeopleIcon />,
-      allowedRoles: [1],
-      // children: [
-      //   { text: "Lista", path: "/main/users/list" },
-      //   { text: "Crear", path: "/main/users/create" },
-      // ],
-    },
-    // {
-    //   text: "Personal",
-    //   path: "/main/users",
-    //   icon: <GroupIcon />,
-    //   allowedRoles: [1, 2],
-    // },
-    {
-      text: "Clientes",
-      path: "/main/clients",
-      icon: <PersonIcon />,
-      allowedRoles: [1, 2, 3],
-      children: [
-        { text: "Filtro avanzado", path: "/main/clients-filter" },
-        { text: "Gestión de Directorio", path: "/main/clients" },
-      ],
-    },
-    {
-      text: "Tributos",
-      path: "/main/tributos-filter",
-      icon: <AccountBalanceWallet />,
-      allowedRoles: [1, 2, 3],
-    },
-    // {
-    //   text: "Reportes",
-    //   path: "/main",
-    //   icon: <ReceiptIcon />,
-    //   allowedRoles: [1, 2],
-    // },
-    // {
-    //   text: "Configuración",
-    //   path: "/main/settings",
-    //   icon: <SettingsIcon />,
-    //   allowedRoles: [1],
-    //   children: [
-    //     { text: "General", path: "/main/settings/general" },
-    //     { text: "Seguridad", path: "/main/settings/security" },
-    //   ],
-    // },
-    {
-      text: "Caja",
-      path: "/main/incomes",
-      icon: <AccountBalance />,
-      allowedRoles: [1],
-      children: [
-        { text: "Ingresos", path: "/main/incomes" },
-        { text: "Egresos", path: "/main/expenses" },
-      ],
-    },
-    {
-      text: "Reportes",
-      path: "/main/estado-cuenta",
-      icon: <Description />,
-      allowedRoles: [1, 2, 3],
-      children: [
-        { text: "Estado Cta por cliente", path: "/main/estado-cuenta" },
-        { text: "Ingresos Anuales", path: "/main/incomes/annual-report" },
-        { text: "Egresos Anuales", path: "/main/expenses/annual-report" },
+/** Ítems del menú que puede ver este id_tipo (tabla usuarios). */
+export function getMenuForRole(idTipo) {
+  if (idTipo == null || idTipo === "") return [];
+  const num = Number(idTipo);
+  if (Number.isNaN(num)) return [];
+  return ROUTE_ITEMS.map((item) => filterItem(item, num)).filter(Boolean);
+}
 
-      ],
-    },
-    {
-      text: "Notas",
-      path: "/main/notas",
-      icon: <ReceiptIcon />,
-      allowedRoles: [1, 2, 3],
-    },
-    {
-      text: "Administración",
-      path: "/main/admin",
-      icon: <SettingsIcon />,
-      allowedRoles: [1],
-      children: [
-        { text: "Facturadores", path: "/main/admin/facturadores" },
-        { text: "Conceptos", path: "/main/admin/conceptos" },
-        { text: "Tipos de Tributo", path: "/main/admin/tipos-tributo" },
-        { text: "Formas de Pago", path: "/main/admin/formas-pago" },
-        { text: "Vencimientos", path: "/main/admin/vencimientos" },
-        { text: "Buzón SOL", path: "/main/admin/buzon" },
-        { text: "Buzón SUNAFIL", path: "/main/admin/sunafil" },
-      ],
-    },
-    {
-      text: "Gestión Cajas",
-      icon: <AccountBalance />,
-      path: "/main/admin/caja",
-      allowedRoles: [1],
-    },
-  ],
-  2: [
-    { text: "Inicio", path: "/main", icon: <HomeIcon /> },
-    // { text: "Personal", path: "/main/staff", icon: <GroupIcon /> },
-    // { text: "Clientes", path: "/main/clients", icon: <PersonIcon /> },
-    // { text: "Reportes", path: "/main/reports", icon: <ReceiptIcon /> },
-    { text: "Notas", path: "/main/notas", icon: <ReceiptIcon /> },
-  ],
-  3: [
-    { text: "Inicio", path: "/main", icon: <HomeIcon /> },
-    { text: "Clientes", path: "/main/clients", icon: <PersonIcon /> },
-    { text: "Notas", path: "/main/notas", icon: <ReceiptIcon /> },
-  ],
-  4: [
-    { text: "Inicio", path: "/main", icon: <HomeIcon /> },
-    { text: "Clientes", path: "/main/clients", icon: <PersonIcon /> },
-    { text: "Notas", path: "/main/notas", icon: <ReceiptIcon /> },
-  ],
-  5: [
-    { text: "Inicio", path: "/main", icon: <HomeIcon /> },
-    { text: "Clientes", path: "/main/clients", icon: <PersonIcon /> },
-    { text: "Notas", path: "/main/notas", icon: <ReceiptIcon /> },
-  ],
-};
-
+const menuItemsByRole = Object.fromEntries(ALL_ROLE_IDS.map((id) => [id, getMenuForRole(id)]));
 export default menuItemsByRole;

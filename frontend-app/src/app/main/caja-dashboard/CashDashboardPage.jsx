@@ -13,6 +13,8 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import AuthGuard from "../menu/AuthGuard";
+import ShowForIdTipo from "../menu/ShowForIdTipo";
+import { ROLE_IDS } from "@/app/config/roles";
 import AnalyticEcommerce from "@/app/ui-components/cards/statistics/AnalyticEcommerce";
 import MainCard from "@/app/ui-components/MainCard";
 import AreaChart from "@/app/components/dashboard/AreaChart";
@@ -129,7 +131,7 @@ const CashDashboardPage = () => {
 
 
   return (
-    <AuthGuard allowedRoles={[1]}>
+    <AuthGuard ids={[ROLE_IDS.ADMIN, ROLE_IDS.LIMITADO]}>
       <Grid container rowSpacing={2} columnSpacing={2} marginTop={1}>
         <Stack
           direction="row"
@@ -259,22 +261,24 @@ const CashDashboardPage = () => {
           />
         </Grid>
 
-        <Grid item xs={12} sm={4} md={4} lg={4}>
-          <AnalyticEcommerce
-            title="Saldo Anual"
-            count={formatCurrency(kpis.totalesAnio?.saldo || 0)}
-            percentage={
-              kpis.totalesAnio?.ingresos !== 0
-                ? round(
-                    (kpis.totalesAnio?.saldo / kpis.totalesAnio?.ingresos) * 100
-                  )
-                : 0
-            }
-            color={kpis.totalesAnio?.saldo <= 0 ? "error" : "success"}
-            isLoss={kpis.totalesAnio?.saldo <= 0}
-            extra={`Total de saldo del año ${selectedAnio}`}
-          />
-        </Grid>
+        <ShowForIdTipo ids={[1, 2, 3, 4, 5, 6]}>
+          <Grid item xs={12} sm={4} md={4} lg={4}>
+            <AnalyticEcommerce
+              title="Saldo Anual"
+              count={formatCurrency(kpis.totalesAnio?.saldo || 0)}
+              percentage={
+                kpis.totalesAnio?.ingresos !== 0
+                  ? round(
+                      (kpis.totalesAnio?.saldo / kpis.totalesAnio?.ingresos) * 100
+                    )
+                  : 0
+              }
+              color={kpis.totalesAnio?.saldo <= 0 ? "error" : "success"}
+              isLoss={kpis.totalesAnio?.saldo <= 0}
+              extra={`Total de saldo del año ${selectedAnio}`}
+            />
+          </Grid>
+        </ShowForIdTipo>
 
         {(seriesMes && seriesMes.length > 0 && categoriesMes && categoriesMes.length > 0) && (
           <Grid item xs={12} md={12}>

@@ -13,7 +13,7 @@ import { Stack } from "@mui/material";
 import { Drawer } from "./CustomDrawer";
 import { DrawerHeader } from "./DrawerHeader";
 import DrawerListItem from "../menu/DrawerListItem";
-import menuItemsByRole from "../menu/menuConfig";
+import { getMenuForRole } from "../menu/menuConfig";
 import { useAuth } from "@/app/provider";
 import SidebarFooter from "./SidebarFooter";
 
@@ -32,9 +32,10 @@ export default function MiniDrawer({ children }) {
     router.push(path);
   };
 
-  const currentMenuItems = userType
-    ? menuItemsByRole[userType || user?.tipo_usuario?.id_tipo]
-    : [];
+  const tipo = userType ?? user?.tipo_usuario;
+  const rawIdTipo = typeof tipo === "object" ? tipo?.id_tipo : tipo;
+  const idTipo = rawIdTipo != null && rawIdTipo !== "" ? Number(rawIdTipo) : null;
+  const currentMenuItems = idTipo != null ? getMenuForRole(idTipo) : [];
 
   return (
     <Box sx={{ display: "flex" }}>
