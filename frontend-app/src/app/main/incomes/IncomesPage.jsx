@@ -97,6 +97,7 @@ const IncomesPage = () => {
   const [openFormModal, setOpenFormModal] = useState(false);
   const [editIncomeData, setEditIncomeData] = useState(null);
   const [periodosList, setPeriodosList] = useState([]);
+  const [clienteFilter, setClienteFilter] = useState("");
   const [conceptFilter, setConceptFilter] = useState("");
   const [conceptos, setConceptos] = useState([]);
   const [periodo, setPeriodo] = useState("");
@@ -144,7 +145,8 @@ const IncomesPage = () => {
         conceptFilter,
         periodo,
         selectedAnio,
-        selectedEstado
+        selectedEstado,
+        clienteFilter
       );
     }
   }, [
@@ -156,6 +158,7 @@ const IncomesPage = () => {
     periodo,
     selectedAnio,
     selectedEstado,
+    clienteFilter,
   ]);
 
   useEffect(() => {
@@ -167,6 +170,7 @@ const IncomesPage = () => {
     periodo,
     selectedAnio,
     selectedEstado,
+    clienteFilter,
   ]);
 
   const refreshTable = () => {
@@ -182,7 +186,8 @@ const IncomesPage = () => {
       conceptFilter,
       periodo,
       selectedAnio,
-      selectedEstado
+      selectedEstado,
+      clienteFilter
     );
   };
 
@@ -197,6 +202,7 @@ const IncomesPage = () => {
   };
   const handleResetFilter = () => {
     setDateRange([null, null]);
+    setClienteFilter("");
     setConceptFilter("");
     setPeriodo("");
     setSelectedAnio("");
@@ -248,6 +254,8 @@ const IncomesPage = () => {
       </Stack>
       <Divider></Divider>
       <IncomesFilters
+        clienteFilter={clienteFilter}
+        setClienteFilter={setClienteFilter}
         conceptos={conceptos}
         conceptFilter={conceptFilter}
         setConceptFilter={setConceptFilter}

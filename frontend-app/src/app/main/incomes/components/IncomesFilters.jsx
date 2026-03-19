@@ -15,8 +15,11 @@ import {
 } from "@mui/material";
 import { Clear, RestartAlt, MoreVert } from "@mui/icons-material";
 import DatePicker from "react-datepicker";
+import NotasClienteAutocomplete from "../../notas/components/NotasClienteAutocomplete";
 
 const IncomesFilters = ({
+  clienteFilter,
+  setClienteFilter,
   conceptos,
   conceptFilter,
   setConceptFilter,
@@ -38,6 +41,11 @@ const IncomesFilters = ({
 }) => (
   <Stack direction="row" spacing={2} sx={{ mb: 1, mt: 1, display: "flex", justifyContent: "space-between", alignItems: "center" }} width={"100%"}>
     <Stack direction={"row"} justifyContent={"start"} spacing={2}>
+      <NotasClienteAutocomplete
+        value={clienteFilter}
+        onChange={(val) => setClienteFilter(val)}
+        sx={{ minWidth: 250 }}
+      />
       <FormControl sx={{ width: 250 }}>
         <InputLabel>Concepto</InputLabel>
         <Select

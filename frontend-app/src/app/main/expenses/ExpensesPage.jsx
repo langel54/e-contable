@@ -37,6 +37,7 @@ import ModalComponent from "@/app/components/ModalComponent";
 import PDFPreviewModal from "./components/PDFPreviewModal";
 import "../../components/date-picker/date-picker.css";
 import DatePicker from "react-datepicker";
+import NotasClienteAutocomplete from "../notas/components/NotasClienteAutocomplete";
 import { getConceptos } from "@/app/services/conceptoServices";
 import { getPeriodos } from "@/app/services/periodoServices";
 import EstadoChip from "@/app/components/EstadoChip";
@@ -117,6 +118,7 @@ const ExpensesPage = () => {
   const [openFormModal, setOpenFormModal] = useState(false);
   const [editSalidaData, setEditSalidaData] = useState(null);
   const [periodosList, setPeriodosList] = useState([]);
+  const [clienteFilter, setClienteFilter] = useState("");
   const [conceptFilter, setConceptFilter] = useState("");
   const [conceptos, setConceptos] = useState([]);
   const [periodo, setPeriodo] = useState("");
@@ -165,7 +167,8 @@ const ExpensesPage = () => {
         conceptFilter,
         periodo,
         selectedAnio,
-        selectedEstado
+        selectedEstado,
+        clienteFilter
       );
     }
   }, [
@@ -177,6 +180,7 @@ const ExpensesPage = () => {
     periodo,
     selectedAnio,
     selectedEstado,
+    clienteFilter,
   ]);
 
   useEffect(() => {
@@ -188,6 +192,7 @@ const ExpensesPage = () => {
     periodo,
     selectedAnio,
     selectedEstado,
+    clienteFilter,
   ]);
 
   // Handlers
@@ -205,7 +210,8 @@ const ExpensesPage = () => {
       conceptFilter,
       periodo,
       selectedAnio,
-      selectedEstado
+      selectedEstado,
+      clienteFilter
     );
   };
   const handleClickPop = (event) => setAnchorElPop(event.currentTarget);
@@ -264,6 +270,11 @@ const ExpensesPage = () => {
         width={"100%"}
       >
         <Stack direction={"row"} justifyContent={"start"} spacing={2}>
+          <NotasClienteAutocomplete
+            value={clienteFilter}
+            onChange={(val) => setClienteFilter(val)}
+            sx={{ minWidth: 250 }}
+          />
           <FormControl sx={{ width: 250 }}>
             <InputLabel>Concepto</InputLabel>
             <Select
@@ -376,17 +387,18 @@ const ExpensesPage = () => {
           </FormControl>
         </Stack>
         <Stack direction={"row"} spacing={1}>
-          <Tooltip arrow title="Quitar FIltros" placement="left">
+          <Tooltip arrow title="Quitar Filtros" placement="left">
             <IconButton
-              onClick={() =>
+              onClick={() => {
                 handleResetFilter({
                   setDateRange,
                   setConceptFilter,
                   setPeriodo,
                   setSelectedAnio,
                   setSelectedEstado,
-                })
-              }
+                });
+                setClienteFilter("");
+              }}
             >
               <RestartAlt />
             </IconButton>
