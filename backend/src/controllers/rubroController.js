@@ -4,10 +4,10 @@ const rubroController = {
   // Obtener todos los registros con paginación
   async getAll(req, res) {
     try {
-      const { page = 1, limit = 10 } = req.query;
+      const { page = 1, limit = 10, search = "" } = req.query;
       const skip = (page - 1) * limit;
 
-      const { rubros, total } = await rubroService.getAll(skip, Number(limit));
+      const { rubros, total } = await rubroService.getAll(skip, Number(limit), search);
 
       res.json({
         rubros,

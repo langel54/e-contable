@@ -59,6 +59,7 @@ export const ROUTE_ITEMS = [
     children: [
       { text: "Facturadores", path: "/main/admin/facturadores", ids: SOLO_ADMIN },
       { text: "Conceptos", path: "/main/admin/conceptos", ids: SOLO_ADMIN },
+      { text: "Rubros", path: "/main/admin/rubros", ids: SOLO_ADMIN },
       { text: "Tipos de Tributo", path: "/main/admin/tipos-tributo", ids: SOLO_ADMIN },
       { text: "Formas de Pago", path: "/main/admin/formas-pago", ids: SOLO_ADMIN },
       { text: "Vencimientos", path: "/main/admin/vencimientos", ids: SOLO_ADMIN },

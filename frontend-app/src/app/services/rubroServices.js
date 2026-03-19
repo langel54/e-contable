@@ -1,8 +1,8 @@
 import { fetchWithAuth } from "@/app/services/apiClient";
 
 // Get all Rubros
-export const getRubros = async () => {
-  return fetchWithAuth("/rubro");
+export const getRubros = async (page = 1, limit = 100, search = "") => {
+  return fetchWithAuth(`/rubro?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`);
 };
 
 // Create a new Rubro
