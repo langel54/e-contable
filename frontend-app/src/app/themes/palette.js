@@ -8,6 +8,25 @@ import { presetPalettes } from "@ant-design/colors";
 // project import
 import ThemeOption from "./theme";
 
+// ==============================|| HELPERS - Misma tonalidad ||============================== //
+// Aclara u oscurece un hex manteniendo la tonalidad (evita morados/descuadres en hover)
+
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : [0, 0, 0];
+}
+function rgbToHex(r, g, b) {
+  return "#" + [r, g, b].map((x) => Math.round(Math.max(0, Math.min(255, x))).toString(16).padStart(2, "0")).join("");
+}
+function lightenHex(hex, amount = 35) {
+  const [r, g, b] = hexToRgb(hex);
+  return rgbToHex(r + amount, g + amount, b + amount);
+}
+function darkenHex(hex, amount = 25) {
+  const [r, g, b] = hexToRgb(hex);
+  return rgbToHex(r - amount, g - amount, b - amount);
+}
+
 // ==============================|| DEFAULT THEME - PALETTE ||============================== //
 
 export default function Palette(mode, presetColor) {
@@ -45,17 +64,21 @@ export default function Palette(mode, presetColor) {
 
   const paletteColor = ThemeOption(colors, presetColor, mode);
 
-  // Apply institutional primary color to BOTH modes
+  // Variantes del primario en la misma tonalidad (evita morados en hover)
   paletteColor.primary.main = themePrimary;
-  paletteColor.primary.light = themePrimary;
-  paletteColor.primary.dark = themePrimary;
+  paletteColor.primary.light = lightenHex(themePrimary, 40);
+  paletteColor.primary.dark = darkenHex(themePrimary, 20);
+  paletteColor.primary.darker = darkenHex(themePrimary, 45);
+  paletteColor.primary.lighter = alpha(themePrimary, 0.08);
 
   if (mode === "dark") {
-    // Primary: contrast and variants for dark mode (single source for buttons/cards)
+    // Mismo color primario que en modo claro; variantes más claras para contraste sobre fondos oscuros
+    paletteColor.primary.main = themePrimary;
     paletteColor.primary.contrastText = "#ffffff";
-    paletteColor.primary.light = "#818cf8";
-    paletteColor.primary.dark = "#6366f1";
-    paletteColor.primary.lighter = "rgba(15, 23, 42, 0.1)";
+    paletteColor.primary.light = lightenHex(themePrimary, 55);
+    paletteColor.primary.dark = darkenHex(themePrimary, 15);
+    paletteColor.primary.darker = darkenHex(themePrimary, 35);
+    paletteColor.primary.lighter = alpha(themePrimary, 0.2);
 
     // Override secondary colors to be Slate-based for Dark Mode
     paletteColor.secondary.main = "#94a3b8"; // Slate 400

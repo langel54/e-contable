@@ -8,8 +8,9 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Stack } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { Drawer } from "./CustomDrawer";
 import { DrawerHeader } from "./DrawerHeader";
 import DrawerListItem from "../menu/DrawerListItem";
@@ -19,7 +20,16 @@ import SidebarFooter from "./SidebarFooter";
 
 export default function MiniDrawer({ children }) {
   const [open, setOpen] = useState(true);
+  const theme = useTheme();
   const { userType, user } = useAuth();
+  const isDark = theme.palette.mode === "dark";
+  // Logo: en oscuro intentamos logo-dark.png; si no existe, fallback a logo.png con filtro para contraste
+  const [logoFallback, setLogoFallback] = useState(false);
+  const logoSrc = isDark && !logoFallback ? "/images/logo-dark.png" : "/images/logo.png";
+  const useInvert = isDark && (logoFallback || logoSrc === "/images/logo.png");
+  useEffect(() => {
+    if (!isDark) setLogoFallback(false);
+  }, [isDark]);
 
   const pathname = usePathname();
   const router = useRouter();
@@ -51,7 +61,23 @@ export default function MiniDrawer({ children }) {
             sx={{ px: open ? 2 : 0 }}
           >
             {open && (
-              <Box component="img" src="/images/logo.png" sx={{ height: 32, maxWidth: '140px' }} />
+              <Box
+                component="img"
+                src={logoSrc}
+                alt="Logo"
+                sx={{
+                  height: 32,
+                  maxWidth: "140px",
+                  objectFit: "contain",
+                  // Solo invertir cuando en modo oscuro se usa logo.png (fallback)
+                  ...(useInvert && {
+                    filter: "brightness(0) invert(1)",
+                  }),
+                }}
+                onError={() => {
+                  if (isDark) setLogoFallback(true);
+                }}
+              />
             )}
             <IconButton 
                 onClick={handleDrawerToggle}

@@ -9,7 +9,7 @@ import { alpha } from "@mui/material/styles";
 
 function getColorStyle({ variant, color, theme }) {
   const colors = getColors(theme, color);
-  const { lighter, main, dark, darker, contrastText } = colors;
+  const { lighter, light, main, dark, darker, contrastText } = colors;
 
   const buttonShadow = `${color}Button`;
   const shadows = getShadow(theme, buttonShadow);
@@ -27,11 +27,15 @@ function getColorStyle({ variant, color, theme }) {
     },
   };
 
+  // Hover = variante un poco más clara del mismo color (evita morados/descuadres)
+  const isDarkPrimary = theme.palette.mode === "dark" && color === "primary";
   switch (variant) {
     case "contained":
       return {
+        ...(isDarkPrimary && { border: `1px solid ${light}` }),
         "&:hover": {
-          backgroundColor: dark,
+          backgroundColor: light,
+          ...(isDarkPrimary && { borderColor: light }),
         },
         ...commonShadow,
       };
@@ -40,9 +44,11 @@ function getColorStyle({ variant, color, theme }) {
         color: contrastText,
         backgroundColor: main,
         boxShadow: shadows,
+        ...(isDarkPrimary && { border: `1px solid ${light}` }),
         "&:hover": {
           boxShadow: "none",
-          backgroundColor: dark,
+          backgroundColor: light,
+          ...(isDarkPrimary && { borderColor: light }),
         },
         ...commonShadow,
       };
@@ -51,8 +57,8 @@ function getColorStyle({ variant, color, theme }) {
         borderColor: main,
         "&:hover": {
           color: dark,
-          backgroundColor: "transparent",
-          borderColor: dark,
+          backgroundColor: lighter,
+          borderColor: light,
         },
         ...commonShadow,
       };
@@ -63,7 +69,8 @@ function getColorStyle({ variant, color, theme }) {
         backgroundColor: lighter,
         "&:hover": {
           color: dark,
-          borderColor: dark,
+          borderColor: light,
+          backgroundColor: lighter,
         },
         ...commonShadow,
       };
@@ -72,7 +79,7 @@ function getColorStyle({ variant, color, theme }) {
       return {
         color: dark,
         "&:hover": {
-          color: darker,
+          color: main,
           backgroundColor: lighter,
         },
         ...commonShadow,
