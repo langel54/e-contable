@@ -228,15 +228,15 @@ const AnnualReportPage = () => {
                     <Table stickyHeader size="small">
                         <TableHead>
                             <TableRow>
-                                <TableCell sx={{ backgroundColor: 'primary.main', color: 'primary.contrastText', fontWeight: 'bold' }}>ID</TableCell>
-                                <TableCell sx={{ backgroundColor: 'primary.main', color: 'primary.contrastText', fontWeight: 'bold', minWidth: 200 }}>Razon Social</TableCell>
-                                <TableCell sx={{ backgroundColor: 'primary.main', color: 'primary.contrastText', fontWeight: 'bold', whiteSpace: 'nowrap', textAlign: 'center' }}>Cant. Pagos</TableCell>
+                                <TableCell sx={{ backgroundColor: 'primary.main', color: (theme) => theme.palette.primary.contrastText, fontWeight: 700, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 0.5, borderBottom: 'none' }}>ID</TableCell>
+                                <TableCell sx={{ backgroundColor: 'primary.main', color: (theme) => theme.palette.primary.contrastText, fontWeight: 700, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 0.5, minWidth: 200, borderBottom: 'none' }}>Razon Social</TableCell>
+                                <TableCell sx={{ backgroundColor: 'primary.main', color: (theme) => theme.palette.primary.contrastText, fontWeight: 700, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 0.5, whiteSpace: 'nowrap', textAlign: 'center', borderBottom: 'none' }}>Cant. Pagos</TableCell>
                                 {months.map((m) => (
-                                    <TableCell key={m} sx={{ backgroundColor: 'primary.dark', color: 'primary.contrastText', textAlign: 'center', fontWeight: '600', minWidth: 60 }}>
+                                    <TableCell key={m} sx={{ backgroundColor: 'primary.main', color: (theme) => theme.palette.primary.contrastText, fontWeight: 700, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 0.5, textAlign: 'center', minWidth: 60, borderBottom: 'none' }}>
                                         {m}
                                     </TableCell>
                                 ))}
-                                <TableCell sx={{ backgroundColor: 'primary.darker', color: 'primary.contrastText', textAlign: 'center', fontWeight: 'bold', minWidth: 100 }}>TOTAL</TableCell>
+                                <TableCell sx={{ backgroundColor: 'primary.main', color: (theme) => theme.palette.primary.contrastText, fontWeight: 700, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 0.5, textAlign: 'center', minWidth: 100, borderBottom: 'none' }}>TOTAL</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>

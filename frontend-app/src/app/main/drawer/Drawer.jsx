@@ -24,10 +24,9 @@ export default function MiniDrawer({ children }) {
   const theme = useTheme();
   const { userType, user } = useAuth();
   const isDark = theme.palette.mode === "dark";
-  // Logo: en oscuro intentamos logo-dark.png; si no existe, fallback a logo.png con filtro para contraste
+  // Logo: en oscuro intentamos logo-dark.png; si no existe, fallback a logo.png
   const [logoFallback, setLogoFallback] = useState(false);
   const logoSrc = isDark && !logoFallback ? "/images/logo-dark.png" : "/images/logo.png";
-  const useInvert = isDark && (logoFallback || logoSrc === "/images/logo.png");
   useEffect(() => {
     if (!isDark) setLogoFallback(false);
   }, [isDark]);
@@ -70,10 +69,6 @@ export default function MiniDrawer({ children }) {
                   height: 32,
                   maxWidth: "140px",
                   objectFit: "contain",
-                  // Solo invertir cuando en modo oscuro se usa logo.png (fallback)
-                  ...(useInvert && {
-                    filter: "brightness(0) invert(1)",
-                  }),
                 }}
                 onError={() => {
                   if (isDark) setLogoFallback(true);
