@@ -246,15 +246,23 @@ const ExpensesPage = () => {
             Registra y consulta egresos
           </Typography>
         </Stack>
-        <Button
-          size="medium"
-          color="error"
-          variant="contained"
-          onClick={() => setOpenFormModal(true)}
-          startIcon={<PostAdd fontSize="inherit" />}
-        >
-          Registrar Egreso
-        </Button>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <NotasClienteAutocomplete
+            size="small"
+            value={clienteFilter}
+            onChange={(val) => setClienteFilter(val)}
+            sx={{ minWidth: 250 }}
+          />
+          <Button
+            size="medium"
+            color="error"
+            variant="contained"
+            onClick={() => setOpenFormModal(true)}
+            startIcon={<PostAdd fontSize="inherit" />}
+          >
+            Registrar Egreso
+          </Button>
+        </Stack>
       </Stack>
       <Divider></Divider>
       <Stack
@@ -270,11 +278,6 @@ const ExpensesPage = () => {
         width={"100%"}
       >
         <Stack direction={"row"} justifyContent={"start"} spacing={2}>
-          <NotasClienteAutocomplete
-            value={clienteFilter}
-            onChange={(val) => setClienteFilter(val)}
-            sx={{ minWidth: 250 }}
-          />
           <FormControl sx={{ width: 250 }}>
             <InputLabel>Concepto</InputLabel>
             <Select

@@ -3,7 +3,7 @@ import { Box } from "@mui/material";
 import InfiniteSelect from "@/app/components/AutocompleteComponent";
 import { getClientesProvs, getClienteProvById } from "@/app/services/clienteProvService";
 
-const NotasClienteAutocomplete = ({ value, onChange, sx }) => {
+const NotasClienteAutocomplete = ({ value, onChange, sx, size }) => {
   const [selectedClient, setSelectedClient] = useState(null);
 
   useEffect(() => {
@@ -41,6 +41,7 @@ const NotasClienteAutocomplete = ({ value, onChange, sx }) => {
       placeholder="Buscar cliente..."
       value={selectedClient}
       onChange={handleClientChange}
+      size={size}
       renderOption={(props, option) => (
         <li {...props} key={option.idclienteprov}>
           <div style={{ padding: "8px 0" }}>

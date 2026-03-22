@@ -26,6 +26,7 @@ import { getEstados } from "@/app/services/estadoDocServices";
 // import excelExport from "@/app/components/excelReport";
 import { getColumns } from "./components/TableColumns";
 import IncomesFilters from "./components/IncomesFilters";
+import NotasClienteAutocomplete from "../notas/components/NotasClienteAutocomplete";
 import IncomesActionsPopover from "./components/IncomesActionsPopover";
 import { handleGenerateExcel, handleGeneratePDF } from "./utils";
 import { useIncomesData } from "./hooks/useIncomesData";
@@ -240,17 +241,25 @@ const IncomesPage = () => {
             Registra y consulta ingresos
           </Typography>
         </Stack>
-        <Button
-          size="medium"
-          color="success"
-          variant="contained"
-          onClick={() => {
-            setOpenFormModal(true);
-          }}
-          startIcon={<PostAdd fontSize="inherit" />}
-        >
-          Registrar Ingreso
-        </Button>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <NotasClienteAutocomplete
+            size="small"
+            value={clienteFilter}
+            onChange={(val) => setClienteFilter(val)}
+            sx={{ minWidth: 250 }}
+          />
+          <Button
+            size="medium"
+            color="success"
+            variant="contained"
+            onClick={() => {
+              setOpenFormModal(true);
+            }}
+            startIcon={<PostAdd fontSize="inherit" />}
+          >
+            Registrar Ingreso
+          </Button>
+        </Stack>
       </Stack>
       <Divider></Divider>
       <IncomesFilters

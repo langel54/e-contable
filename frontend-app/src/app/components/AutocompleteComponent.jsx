@@ -21,6 +21,7 @@ const InfiniteSelect = ({
   pageSize = 10,
   value = null, // Changed from initialValue
   onChange,
+  size = "small", // "large", "medium" o "small"
   // Props adicionales
   noOptionsText = "No hay resultados",
   loadingText = "Cargando...",
@@ -87,6 +88,7 @@ const InfiniteSelect = ({
 
   return (
     <Autocomplete
+      size={size === "small" ? "small" : "medium"}
       sx={{ width: "100%" }}
       options={options}
       value={value} // Changed from initialValue
