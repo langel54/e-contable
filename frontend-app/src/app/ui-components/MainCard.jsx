@@ -51,7 +51,6 @@ function MainCard(
         ':hover': {
           boxShadow: boxShadow ? shadow || theme.customShadows.z2 : 'none',
           // transform: 'translateY(-4px)',
-          background: theme.palette.mode === 'dark' ? theme.palette.primary.lighter : theme.palette.background.paper,
         },
         '& pre': {
           m: 0,
