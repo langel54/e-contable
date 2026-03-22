@@ -121,6 +121,10 @@ export default function Button(theme) {
         root: {
           fontWeight: 600,
           borderRadius: "12px",
+          transition: "all 0.2s ease-in-out",
+          "&:active": {
+            transform: "scale(0.96)",
+          },
           "&::after": {
             content: '""',
             display: "block",

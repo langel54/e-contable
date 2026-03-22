@@ -1,3 +1,5 @@
+import { alpha } from '@mui/material/styles';
+
 // ==============================|| OVERRIDES - CARD ||============================== //
 
 export default function Card(theme) {
@@ -8,10 +10,14 @@ export default function Card(theme) {
                     borderRadius: 16,
                     backgroundImage: 'none',
                     color: theme.palette.text.primary,
-                    boxShadow: theme.customShadows?.z1 ?? theme.shadows[1],
-                    transition: 'box-shadow 0.3s ease-in-out',
+                    backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                    backdropFilter: "blur(12px)",
+                    border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                    boxShadow: theme.customShadows?.z1 ?? `0 4px 24px 0 ${alpha('#000', 0.04)}`,
+                    transition: 'all 0.3s ease-in-out',
                     '&:hover': {
-                        boxShadow: theme.customShadows?.z2 ?? theme.shadows[2],
+                        transform: 'translateY(-2px)',
+                        boxShadow: theme.customShadows?.z2 ?? `0 12px 32px -4px ${alpha('#000', 0.08)}`,
                     }
                 }
             }
