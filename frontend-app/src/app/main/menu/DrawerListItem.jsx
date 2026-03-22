@@ -20,12 +20,13 @@ import MenuItem from "@mui/material/MenuItem";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import { alpha, useTheme } from "@mui/material/styles";
 
-const DrawerListItem = ({ item, open }) => {
+const DrawerListItem = ({ item, open, isSubmenuOpen, onSetSubmenuOpen }) => {
   const theme = useTheme();
   const pathname = usePathname();
 
   // --- Drawer ABIERTO (Collapse por clic)
-  const [submenuOpen, setSubmenuOpen] = useState(false);
+  const submenuOpen = isSubmenuOpen;
+  const setSubmenuOpen = onSetSubmenuOpen;
 
   // --- Drawer CERRADO (Popper por hover)
   const anchorRef = useRef(null);
@@ -42,13 +43,15 @@ const DrawerListItem = ({ item, open }) => {
   // Auto-expand if child is active and drawer is open
   useEffect(() => {
     if (open && isChildActive) {
-      setSubmenuOpen(true);
+      if (typeof setSubmenuOpen === 'function') setSubmenuOpen(true);
     }
   }, [open, isChildActive]);
 
   // Collapse toggle
   const handleToggleSubmenu = () => {
-    if (hasChildren && open) setSubmenuOpen((v) => !v);
+    if (hasChildren && open && typeof setSubmenuOpen === 'function') {
+      setSubmenuOpen(!submenuOpen);
+    }
   };
 
   // Hover handlers (drawer cerrado)

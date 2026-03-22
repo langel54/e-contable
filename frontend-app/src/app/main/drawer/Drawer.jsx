@@ -20,6 +20,7 @@ import SidebarFooter from "./SidebarFooter";
 
 export default function MiniDrawer({ children }) {
   const [open, setOpen] = useState(true);
+  const [openedMenuItem, setOpenedMenuItem] = useState("");
   const theme = useTheme();
   const { userType, user } = useAuth();
   const isDark = theme.palette.mode === "dark";
@@ -101,6 +102,8 @@ export default function MiniDrawer({ children }) {
                 open={open}
                 pathname={pathname}
                 onClick={() => handleNavigation(item.path)}
+                isSubmenuOpen={openedMenuItem === item.path}
+                onSetSubmenuOpen={(isOpen) => setOpenedMenuItem(isOpen ? item.path : "")}
                 />
             ))}
             </List>
