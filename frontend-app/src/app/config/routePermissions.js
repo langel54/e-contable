@@ -15,6 +15,8 @@ const ADMIN_Y_MANAGER_OPERADOR = [ROLE_IDS.ADMIN, ROLE_IDS.MANAGER, ROLE_IDS.OPE
 const SOLO_ADMIN = [ROLE_IDS.ADMIN]; // 1
 
 /** Cada ítem: ids = id_tipo que pueden ver esta ruta (uno o varios) */
+import MailIcon from "@mui/icons-material/Mail";
+
 export const ROUTE_ITEMS = [
   { text: "Inicio", path: "/main", icon: <HomeIcon />, ids: TODOS },
   { text: "Usuarios", path: "/main/users", icon: <PeopleIcon />, ids: SOLO_ADMIN },
@@ -52,6 +54,16 @@ export const ROUTE_ITEMS = [
   },
   { text: "Notas", path: "/main/notas", icon: <ReceiptIcon />, ids: ADMIN_Y_MANAGER_OPERADOR },
   {
+    text: "Buzones",
+    path: "/main/buzones",
+    icon: <MailIcon />,
+    ids: SOLO_ADMIN,
+    children: [
+      { text: "Buzón SOL", path: "/main/buzon", ids: SOLO_ADMIN },
+      { text: "Buzón SUNAFIL", path: "/main/sunafil", ids: SOLO_ADMIN },
+    ],
+  },
+  {
     text: "Administración",
     path: "/main/admin",
     icon: <SettingsIcon />,
@@ -63,8 +75,6 @@ export const ROUTE_ITEMS = [
       { text: "Tipos de Tributo", path: "/main/admin/tipos-tributo", ids: SOLO_ADMIN },
       { text: "Formas de Pago", path: "/main/admin/formas-pago", ids: SOLO_ADMIN },
       { text: "Vencimientos", path: "/main/admin/vencimientos", ids: SOLO_ADMIN },
-      { text: "Buzón SOL", path: "/main/admin/buzon", ids: SOLO_ADMIN },
-      { text: "Buzón SUNAFIL", path: "/main/admin/sunafil", ids: SOLO_ADMIN },
     ],
   },
   { text: "Gestión Cajas", path: "/main/admin/caja", icon: <AccountBalance />, ids: SOLO_ADMIN },
