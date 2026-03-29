@@ -42,6 +42,9 @@ export default function ThemeCustomization({ children }) {
           paddingBottom: 8,
         },
       },
+      shape: {
+        borderRadius: 6,
+      },
       palette: theme.palette,
       customShadows: themeCustomShadows,
       typography: themeTypography,

@@ -39,7 +39,7 @@ const pdfEgresosClienteRoutes = require("./routes/pdfEgresosClienteRoutes");
 const sunafilRoutes = require("./routes/sunafilRoutes");
 const estadoCuentaRoutes = require("./routes/estadoCuentaRoutes");
 const egresosClienteRoutes = require("./routes/egresosClienteRoutes");
-const checkOrigin = require("./middlewares/checkOrigin");
+// const checkOrigin = require("./middlewares/checkOrigin"); // middleware redundante de CORS (usamos cors global)
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const corsOptions = require("./config/corsConfig");
 const sunatRoutes = require("./routes/sunatRoutes");
@@ -50,12 +50,13 @@ const buzonRoutes = require("./routes/buzonRoutes");
 const app = express();
 
 // Middlewares
-app.use(cors());
+app.use(cors(corsOptions));
 // Límite alto para carga masiva de clientes (bulk / bulk-large)
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// app.use(checkOrigin); // PARA RESTRINGIR CONEXIONES
+// Nota: Se usa CORS global via corsOptions. No se necesita checkOrigin a nivel ruta.
+// app.use(checkOrigin); // PARA RESTRINGIR CONEXIONES solo desde origen confiable
 
 // Routes
 app.use("/api/auth", authRoutes);

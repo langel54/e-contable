@@ -34,7 +34,7 @@ export default function Palette(mode, presetColor) {
 
   // Theme configuration from environment variables with sensible fallbacks
   // PRIMARY COLOR (Institutional)
-  const themePrimary = process.env.NEXT_PUBLIC_THEME_PRIMARY_MAIN || "#1e3a8a";
+  const themePrimary = process.env.NEXT_PUBLIC_THEME_PRIMARY_MAIN || "#2496ed";
 
   // LIGHT MODE BACKGROUNDS
   const themeBgDefault = process.env.NEXT_PUBLIC_THEME_BG_DEFAULT || "#f8fafc";

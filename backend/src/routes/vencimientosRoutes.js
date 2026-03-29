@@ -2,11 +2,10 @@ const express = require("express");
 const router = express.Router();
 const vencimientosController = require("../controllers/vencimientosController");
 const authMiddleware = require("../middlewares/authMiddleware");
-const checkOrigin = require("../middlewares/checkOrigin");
 
-// Aplicar middleware de autenticación y CORS a todas las rutas
+// Aplicar middleware de autenticación a todas las rutas
 router.use(authMiddleware);
-router.use(checkOrigin);
+// CORS se controla globalmente en app.js con cors(corsOptions); checkOrigin no es necesario aquí.
 
 // GET /api/vencimientos - Obtener vencimientos con filtros
 router.get("/", vencimientosController.getVencimientos);

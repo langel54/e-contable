@@ -11,13 +11,11 @@ const {
   getCajaTablas,
 } = require("../controllers/dashboardController.js");
 const { checkAuth } = require("../middlewares/authMiddleware.js");
-const { checkOrigin } = require("../middlewares/checkOrigin.js");
 
 const router = Router();
 
 // // Middleware para todas las rutas
 // router.use(checkAuth);
-// router.use(checkOrigin);
 
 // Rutas de Clientes
 router.get("/dashboard/clientes/kpis", getClientesKPIs);

@@ -120,10 +120,10 @@ export default function Button(theme) {
       styleOverrides: {
         root: {
           fontWeight: 600,
-          borderRadius: "12px",
+          borderRadius: "6px",
           transition: "all 0.2s ease-in-out",
           "&:active": {
-            transform: "scale(0.96)",
+            // transform: "scale(0.96)",
           },
           "&::after": {
             content: '""',
@@ -133,14 +133,14 @@ export default function Button(theme) {
             top: 0,
             width: "100%",
             height: "100%",
-            borderRadius: "12px",
+            borderRadius: "6px",
             opacity: 0,
             transition: "all 0.5s",
           },
 
           "&:active::after": {
             position: "absolute",
-            borderRadius: "12px",
+            borderRadius: "6px",
             left: 0,
             top: 0,
             opacity: 1,

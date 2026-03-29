@@ -7,14 +7,14 @@ export default function Table(theme) {
                 root: {
                     backgroundImage: 'none',
                     boxShadow: 'none',
-                    borderRadius: 8,
+                    borderRadius: 6,
                 }
             }
         },
         MuiTableHead: {
             styleOverrides: {
                 root: {
-                    backgroundColor: theme.palette.grey[50],
+                    backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[50],
                     '& .MuiTableCell-root': {
                         borderBottom: `1px solid ${theme.palette.divider}`,
                         fontSize: '0.75rem',
