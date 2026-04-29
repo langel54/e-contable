@@ -63,8 +63,8 @@ app.use("/api/auth", authRoutes);
 // Ruta para acceso a SUNAT
 app.use("/api/sunat", sunatRoutes);
 
-// Aplicar middleware de autenticación a todas las rutas
-// app.use(authMiddleware);
+// Aplicar middleware de autenticación a todas las rutas que no son /api/auth
+app.use(authMiddleware);
 
 app.use("/api/users", userRoutes);
 app.use("/api/personal", personalRoutes);

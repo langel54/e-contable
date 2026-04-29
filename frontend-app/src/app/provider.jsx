@@ -4,8 +4,7 @@ import { authService } from "./services/authService";
 import { useRouter } from "next/navigation";
 import { getCajasMes } from "./services/cajaMesServices";
 import { notifyNetworkError, NETWORK_ERROR_MESSAGE } from "./services/networkErrorHandler";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+import { API_BASE } from "./services/apiConfig";
 
 const AuthContext = createContext({
   isAuthenticated: false,
@@ -52,7 +51,7 @@ export function AuthProvider({ children }) {
       if (token) {
         try {
           // Validar el token
-          const response = await fetch(`${API_URL}/validate-token/`, {
+          const response = await fetch(`${API_BASE}/validate-token/`, {
             headers: { Authorization: `Bearer ${token}` },
           });
 
@@ -85,26 +84,32 @@ export function AuthProvider({ children }) {
         router.push("/authentication");
       }
 
-      // Obtener la caja con mayor nro
-      try {
-        const cajaResponse = await getCajasMes(); // Ajusta la URL de tu API
-        const cajas = cajaResponse.cajasMensuales;
-        if (cajas && cajas.length > 0) {
-          const ultimaCaja = cajas.reduce(
-            (max, obj) => (obj.nro > max.nro ? obj : max),
-            cajas[0]
-          );
-          setCajaMes(ultimaCaja);
-        }
-      } catch (error) {
-        const isNetworkError =
-          (error instanceof TypeError && error.message === "Failed to fetch") ||
-          error?.message === NETWORK_ERROR_MESSAGE;
-        if (isNetworkError && error?.message !== NETWORK_ERROR_MESSAGE) {
-          notifyNetworkError();
-        }
-        if (!isNetworkError) {
-          console.error("Error al obtener las cajas:", error);
+      // Obtener la caja con mayor nro solo si la validación de token fue exitosa
+      if (token) {
+        try {
+          const cajaResponse = await getCajasMes(); // Ajusta la URL de tu API
+          const cajas = cajaResponse.cajasMensuales;
+          if (cajas && cajas.length > 0) {
+            const ultimaCaja = cajas.reduce(
+              (max, obj) => (obj.nro > max.nro ? obj : max),
+              cajas[0]
+            );
+            setCajaMes(ultimaCaja);
+          }
+        } catch (error) {
+          const isAuthError = error?.status === 401 || error?.status === 403;
+          const isNetworkError =
+            (error instanceof TypeError && error.message === "Failed to fetch") ||
+            error?.message === NETWORK_ERROR_MESSAGE;
+
+          if (isAuthError) {
+            // token inválido/expirado, no intentar recuperar caja.
+            console.warn("token inválido o expirado, no se cargan cajas:", error.message);
+          } else if (isNetworkError) {
+            notifyNetworkError();
+          } else {
+            console.error("Error al obtener las cajas:", error);
+          }
         }
       }
 

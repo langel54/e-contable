@@ -390,7 +390,7 @@ const BulkUploadModal = ({ open, handleClose, refreshTable }) => {
         {slowWarning && (
           <Alert severity="warning" sx={{ width: "100%", mb: 1 }}>
             La petición está tardando. Compruebe que el servidor backend esté en ejecución y que la variable{" "}
-            <strong>NEXT_PUBLIC_API_URL</strong> apunte a la URL correcta (p. ej. http://localhost:3001/api). Si sigue sin responder, revise la consola del servidor.
+            <strong>NEXT_PUBLIC_API_URL=/api</strong> y que el backend responda (Docker: puerto 3001 publicado o proxy Next con BACKEND_URL). Revise la consola del servidor.
           </Alert>
         )}
         {uploading && uploadProgress.total > 0 && (
