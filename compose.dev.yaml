@@ -11,7 +11,24 @@ services:
       - cont_backend_node_modules:/app/node_modules
     environment:
       NODE_ENV: development
+      SCRAPER_WORKER_URL: http://backend-worker:3101
     command: ["npm", "run", "dev"]
+
+  backend-worker:
+    env_file:
+      - ./backend/.env.development
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: cont_backend_worker
+    restart: unless-stopped
+    volumes:
+      - ./backend:/app
+      - cont_backend_node_modules:/app/node_modules
+    environment:
+      NODE_ENV: development
+      SCRAPER_WORKER_PORT: "3101"
+    command: ["npm", "run", "worker:dev"]
 
   frontend:
     build:

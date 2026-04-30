@@ -1,5 +1,6 @@
 # Stack común: app en contenedores, MySQL en el host (p. ej. puerto 3307).
 # Uso: `make dev` o `make prod` (ver Makefile).
+# Verificaciones Playwright: servicio backend-worker (HTTP interno, sin Redis).
 
 name: cont
 
@@ -13,13 +14,31 @@ services:
     ports:
       - "3001:3001"
     environment:
-      # En contenedor el host es host.docker.internal (Linux: host-gateway).
       DATABASE_URL: ${DATABASE_URL:-mysql://root:root@host.docker.internal:3307/db_cont}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost,http://127.0.0.1,http://localhost:80,http://127.0.0.1:80,http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001}
+      SCRAPER_WORKER_URL: http://backend-worker:3101
+      SCRAPER_WORKER_SECRET: ${SCRAPER_WORKER_SECRET:-}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     expose:
       - "3001"
+
+  backend-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cont_backend_worker
+    restart: unless-stopped
+    command: ["node", "src/workers/browserWorker.js"]
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-mysql://root:root@host.docker.internal:3307/db_cont}
+      SCRAPER_WORKER_PORT: "3101"
+      SCRAPER_WORKER_SECRET: ${SCRAPER_WORKER_SECRET:-}
+      NODE_ENV: production
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    expose:
+      - "3101"
 
   frontend:
     build:

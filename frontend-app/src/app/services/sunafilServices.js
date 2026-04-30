@@ -52,9 +52,11 @@ const sunafilServices = {
     }
   },
 
-  getVerifyProgress: async () => {
+  /** @param {string} jobId - Id devuelto por verifyAll (worker HTTP). */
+  getVerifyProgress: async (jobId) => {
     try {
-      return await fetchWithAuth("/sunafil/verify-progress");
+      const q = jobId ? `?jobId=${encodeURIComponent(jobId)}` : "";
+      return await fetchWithAuth(`/sunafil/verify-progress${q}`);
     } catch (error) {
       console.error('Error obteniendo progreso de verificación Sunafil:', error);
       throw error;

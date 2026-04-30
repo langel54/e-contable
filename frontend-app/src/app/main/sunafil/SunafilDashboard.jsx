@@ -137,13 +137,22 @@ const SunafilDashboard = () => {
     try {
       setRefreshing(true);
       setVerifyProgress({ total: 0, done: 0, inProgress: true });
-      await sunafilServices.verifyAll();
-      Swal.fire("Iniciado", "La verificación masiva SUNAFIL ha comenzado.", "info");
+      const started = await sunafilServices.verifyAll();
+      const jobId = started?.jobId;
+      if (!jobId) {
+        throw new Error("Respuesta sin jobId");
+      }
+      Swal.fire("Iniciado", "La verificación masiva SUNAFIL está en cola (worker).", "info");
 
       const poll = async () => {
         try {
-          const p = await sunafilServices.getVerifyProgress();
+          const p = await sunafilServices.getVerifyProgress(String(jobId));
           setVerifyProgress(p);
+          if (p.error) {
+            Swal.fire("Error en verificación", p.error, "error");
+            setRefreshing(false);
+            return;
+          }
           if (p.inProgress) {
             pollIntervalRef.current = setTimeout(poll, 1500);
           } else {
@@ -156,7 +165,7 @@ const SunafilDashboard = () => {
       };
       poll();
     } catch (error) {
-      Swal.fire("Error", "No se pudo iniciar la verificación", "error");
+      Swal.fire("Error", "No se pudo iniciar la verificación (¿worker activo y SCRAPER_WORKER_URL?)", "error");
       setRefreshing(false);
       setVerifyProgress({ total: 0, done: 0, inProgress: false });
     }

@@ -76,12 +76,19 @@ async function accessSunafil({ ruc, usuario, password }) {
   }
 }
 
-async function verifyMonitoredSunafil() {
+/**
+ * Verificación masiva SUNAFIL (Playwright).
+ * @param {function(object): void} [reportProgress] - Opcional; recibe { total, done, inProgress } (p. ej. worker).
+ */
+async function verifyMonitoredSunafil(reportProgress) {
+  const notify = () => reportProgress?.({ ...verifyProgress });
+
   const monitoringEntries = await prisma.monitoreo_sunafil.findMany();
   const clientIds = monitoringEntries.map((e) => e.idclienteprov);
 
   if (clientIds.length === 0) {
     verifyProgress = { total: 0, done: 0, inProgress: false };
+    notify();
     return [];
   }
 
@@ -97,11 +104,13 @@ async function verifyMonitoredSunafil() {
   });
 
   verifyProgress = { total: clients.length, done: 0, inProgress: true };
+  notify();
   const results = [];
 
   for (const client of clients) {
     if (!client.ruc || !client.c_usuario || !client.c_passw) {
       verifyProgress.done += 1;
+      notify();
       continue;
     }
 
@@ -148,8 +157,10 @@ async function verifyMonitoredSunafil() {
       console.error(`Error procesando Sunafil para ${client.ruc}:`, error);
     }
     verifyProgress.done += 1;
+    notify();
   }
   verifyProgress.inProgress = false;
+  notify();
   return results;
 }
 

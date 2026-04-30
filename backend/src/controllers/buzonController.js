@@ -1,4 +1,5 @@
 const buzonService = require("../services/buzonService");
+const scraperWorkerClient = require("../services/scraperWorkerClient");
 
 const buzonController = {
     async getMonitoredClients(req, res) {
@@ -32,22 +33,40 @@ const buzonController = {
 
     async verifyAll(req, res) {
         try {
-            buzonService.verifyMonitoredBuzones().then(results => {
-                console.log("Verificación masiva completada:", results);
-            }).catch(err => {
-                console.error("Error en verificación masiva:", err);
+            const data = await scraperWorkerClient.startBuzonVerify();
+            res.status(202).json({
+                message:
+                    data.message ||
+                    "Verificación encolada; el worker la ejecutará con Playwright.",
+                jobId: data.jobId,
             });
-
-            res.status(202).json({ message: "Verificación iniciada en segundo plano." });
         } catch (error) {
-            console.error("Error iniciando verificación:", error);
+            console.error("Error llamando al worker buzón:", error);
+            const msg = String(error.message || error);
+            if (
+                msg.includes("ECONNREFUSED") ||
+                msg.includes("fetch failed") ||
+                msg.includes("No autorizado")
+            ) {
+                return res.status(503).json({
+                    error:
+                        "Worker de scraping no disponible o token incorrecto. Inicie `npm run worker` o el servicio backend-worker y revise SCRAPER_WORKER_URL / SCRAPER_WORKER_SECRET.",
+                    detail: msg,
+                });
+            }
             res.status(500).json({ error: "Error en el servidor." });
         }
     },
 
     async getVerifyProgress(req, res) {
         try {
-            const progress = buzonService.getVerifyProgress();
+            const jobId = req.query.jobId;
+            if (!jobId) {
+                return res.status(400).json({
+                    error: "Falta jobId. Debe venir de la respuesta de POST /verify-all.",
+                });
+            }
+            const progress = await scraperWorkerClient.getJobProgress(jobId);
             res.json(progress);
         } catch (error) {
             console.error("Error obteniendo progreso:", error);

@@ -1,6 +1,15 @@
 # Producción: imágenes multi-stage del compose base, rotación de logs.
 
 services:
+  backend-worker:
+    env_file:
+      - ./backend/.env.production
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   backend:
     env_file:
       - ./backend/.env.production

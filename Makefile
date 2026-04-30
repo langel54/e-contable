@@ -20,7 +20,8 @@ help:
 	@echo ""
 	@echo "  make ps           Estado de los servicios del proyecto"
 	@echo ""
-	@echo "Variables opcionales: HTTP_PORT (default 80), DATABASE_URL, ALLOWED_ORIGINS"
+	@echo "Variables opcionales: HTTP_PORT (default 80), DATABASE_URL, ALLOWED_ORIGINS, SCRAPER_WORKER_SECRET"
+	@echo "  Incluye backend-worker (Playwright en proceso aparte, sin Redis)."
 
 dev:
 	docker compose $(COMPOSE_DEV_FILES) up --build
