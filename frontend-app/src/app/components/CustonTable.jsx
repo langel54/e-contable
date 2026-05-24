@@ -1,80 +1,62 @@
-import React, { useEffect } from "react";
+import React from "react";
+import PropTypes from "prop-types";
 import { DataGrid } from "@mui/x-data-grid";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material";
 import { esLocaleText } from "./esLocate";
 import InboxOutlined from "@ant-design/icons/InboxOutlined";
+import { VIEW_LAYOUT } from "@/app/ui-components/layout/layoutConstants";
 
-// Estilos con styled de MUI
-const TableContainer = styled(Box)(({ theme }) => ({
+const TableContainer = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "fill",
+})(({ theme, fill }) => ({
   backgroundColor: theme.palette.background.paper,
-  borderRadius: theme.spacing(2),
-  boxShadow: theme.customShadows.z1,
-  padding: theme.spacing(2),
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: theme.customShadows?.z1,
+  padding: theme.spacing(1.5),
   border: `1px solid ${theme.palette.divider}`,
-  transition: 'all 0.3s ease-in-out',
-  '&:hover': {
-    boxShadow: theme.customShadows.z2,
+  overflow: "hidden",
+  transition: "box-shadow 0.2s ease",
+  width: "100%",
+  ...(fill
+    ? {
+        flex: 1,
+        minHeight: 0,
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+      }
+    : {}),
+  "&:hover": {
+    boxShadow: theme.customShadows?.z2,
   },
 }));
 
-const LoadingContainer = styled(Box)({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  minHeight: "650px",
-});
-
-const DataGridStyled = styled(DataGrid)(({ theme }) => ({
-  minHeight: "650px",
+const DataGridStyled = styled(DataGrid, {
+  shouldForwardProp: (prop) => prop !== "gridHeight",
+})(({ gridHeight }) => ({
   border: "none",
-  fontFamily: theme.typography.fontFamily,
-  '& .MuiDataGrid-main': {
-    borderRadius: theme.spacing(2),
-  },
-  "& .MuiDataGrid-cell": {
-    padding: "8px 16px",
-    display: "flex",
-    alignItems: "center",
-    borderColor: theme.palette.divider,
-    color: theme.palette.text.primary,
-  },
-  "& .MuiDataGrid-columnHeaders": {
-    backgroundColor: theme.palette.grey[50],
-    color: theme.palette.text.primary,
-    fontWeight: "700 !important",
-    borderBottom: `2px solid ${theme.palette.divider}`,
-    backdropFilter: 'blur(8px)',
-  },
-  "& .MuiDataGrid-row:hover": {
-    backgroundColor: theme.palette.action.hover,
-  },
-  "& .MuiDataGrid-footerContainer": {
-    backgroundColor: theme.palette.grey[50],
-    color: theme.palette.text.secondary,
-    borderTop: `1px solid ${theme.palette.divider}`,
-  },
-  "& .MuiDataGrid-row": {
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    transition: 'background-color 0.2s ease',
-  },
-  '& .MuiTablePagination-root': {
-    color: theme.palette.text.primary,
-  },
-  '& .MuiIconButton-root': {
-    color: theme.palette.text.secondary,
-  },
-  '& .MuiDataGrid-scrollbar': {
-    zIndex: 1, // Reducir de 6 a 1 para evitar que se superponga a otros elementos
-  },
+  width: "100%",
+  ...(gridHeight != null
+    ? {
+        height: gridHeight,
+        minHeight:
+          gridHeight === "100%"
+            ? VIEW_LAYOUT.tableMinHeight
+            : typeof gridHeight === "number"
+              ? gridHeight
+              : gridHeight,
+      }
+    : { minHeight: 400 }),
 }));
 
-const EmptyStateContainer = styled(Box)(({ theme }) => ({
+const EmptyStateContainer = styled(Box)(({ theme, minH }) => ({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  minHeight: "400px",
+  minHeight: minH || 280,
+  flex: 1,
   gap: theme.spacing(2),
   padding: theme.spacing(4),
   color: theme.palette.text.secondary,
@@ -91,15 +73,26 @@ const CustomTable = React.memo(
     getRowId,
     paginationMode = "server",
     emptyMessage = "No se encontraron registros",
+    height,
+    fill = false,
+    minHeight,
   }) => {
-    // Si no está cargando y no hay datos, mostrar estado vacío
     const hasData = data && data.length > 0;
     const showEmptyState = !loading && !hasData;
 
+    const gridHeight = height ?? (fill ? "100%" : undefined);
+    const emptyMinH =
+      minHeight ??
+      (fill
+        ? VIEW_LAYOUT.halfViewportTable.xs
+        : height && typeof height === "number"
+          ? height
+          : 280);
+
     if (showEmptyState) {
       return (
-        <TableContainer>
-          <EmptyStateContainer>
+        <TableContainer fill={fill}>
+          <EmptyStateContainer minH={emptyMinH}>
             <InboxOutlined style={{ fontSize: 64, opacity: 0.3 }} />
             <Typography variant="h6" color="text.secondary">
               {emptyMessage}
@@ -113,8 +106,9 @@ const CustomTable = React.memo(
     }
 
     return (
-      <TableContainer>
+      <TableContainer fill={fill}>
         <DataGridStyled
+          gridHeight={gridHeight}
           rows={data || []}
           columns={columns}
           paginationModel={paginationModel}
@@ -124,12 +118,12 @@ const CustomTable = React.memo(
           paginationMode={paginationMode}
           loading={loading}
           getRowId={getRowId}
-          rowHeight={54}
-          disableColumnMenu={true}
+          rowHeight={48}
+          disableColumnMenu
           localeText={esLocaleText}
           slots={{
             noRowsOverlay: () => (
-              <EmptyStateContainer>
+              <EmptyStateContainer minH={emptyMinH}>
                 <InboxOutlined style={{ fontSize: 64, opacity: 0.3 }} />
                 <Typography variant="h6" color="text.secondary">
                   {emptyMessage}
@@ -142,5 +136,20 @@ const CustomTable = React.memo(
     );
   }
 );
+
+CustomTable.propTypes = {
+  columns: PropTypes.array.isRequired,
+  data: PropTypes.array,
+  paginationModel: PropTypes.object,
+  setPaginationModel: PropTypes.func,
+  rowCount: PropTypes.number,
+  loading: PropTypes.bool,
+  getRowId: PropTypes.func,
+  paginationMode: PropTypes.string,
+  emptyMessage: PropTypes.string,
+  height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  fill: PropTypes.bool,
+  minHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+};
 
 export default CustomTable;

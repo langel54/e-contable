@@ -14,7 +14,7 @@ export default function OutlinedInput(theme) {
           borderColor: theme.palette.grey[300]
         },
         root: {
-          borderRadius: "12px",
+          borderRadius: 8,
           transition: "all 0.2s ease-in-out",
           backgroundColor: alpha(theme.palette.background.paper, 0.4),
           '&:hover': {

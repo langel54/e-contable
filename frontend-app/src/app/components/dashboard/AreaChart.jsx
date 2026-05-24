@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { useTheme } from "@mui/material/styles";
 import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
+import { getApexThemeOptions, getChartSeriesColors } from "@/app/themes/chartPalette";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -17,7 +18,9 @@ const AreaChart = ({
   horizontalLineAtZero = false, // ✅ nueva propiedad
 }) => {
   const theme = useTheme();
-  const { text, divider, info, warning, error } = theme.palette;
+  const { text, divider, error } = theme.palette;
+  const apexTheme = getApexThemeOptions(theme);
+  const defaultColors = getChartSeriesColors(theme);
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -26,9 +29,10 @@ const AreaChart = ({
   const safeCategories = Array.isArray(categories) ? categories : [];
 
   const options = {
+    ...apexTheme,
     chart: {
+      ...apexTheme.chart,
       type,
-      toolbar: { show: true },
     },
 
     // ⭐ DATA LABELS ACTIVADOS PARA TODOS LOS TIPOS
@@ -55,16 +59,17 @@ const AreaChart = ({
     ...(type === "bar" && {
       plotOptions: {
         bar: {
-          borderRadius: 4,
+          borderRadius: 3,
           dataLabels: { position: "top" },
           columnWidth: "45%",
         },
       },
     }),
 
-    colors: colors || [info.light, warning.main],
+    colors: colors?.length ? colors : defaultColors.slice(0, 3),
 
     xaxis: {
+      ...apexTheme.xaxis,
       categories: safeCategories,
       labels: {
         style: { colors: safeCategories.map(() => text.secondary) },
@@ -74,34 +79,13 @@ const AreaChart = ({
     },
 
     yaxis: {
+      ...apexTheme.yaxis,
       labels: { style: { colors: [text.secondary] } },
     },
 
     grid: {
+      ...apexTheme.grid,
       borderColor: divider,
-    },
-    
-    // ⭐ CONFIGURACIÓN DEL TOOLTIP
-    tooltip: {
-      theme: theme.palette.mode, // 'dark' o 'light'
-      style: {
-        fontSize: '12px',
-        fontFamily: theme.typography.fontFamily,
-      },
-      background: {
-       enabled: true,
-       foreColor: theme.palette.text.primary,
-      },
-      marker: {
-        show: true,
-      },
-      // Aseguramos contraste fix si el automode falla
-      ...(theme.palette.mode === 'dark' && {
-        cssClass: 'apexcharts-tooltip-dark-custom', // Opcional si queremos CSS específico
-        style: {
-          color: theme.palette.grey[50]
-        }
-      })
     },
 
     // ✅ Agregar línea horizontal en 0 si la propiedad está activada

@@ -2,6 +2,7 @@
 import PropTypes from "prop-types";
 import { useTheme } from "@mui/material/styles";
 import dynamic from "next/dynamic";
+import { getApexThemeOptions, getChartSeriesColors } from "@/app/themes/chartPalette";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -16,26 +17,33 @@ const CircleChart = ({
   colors = [],
 }) => {
   const theme = useTheme();
-
-  const defaultColors = [
-    theme.palette.primary.main,
-    theme.palette.primary.light,
-    theme.palette.success.main,
-    theme.palette.success.light,
-    theme.palette.warning.main,
-    theme.palette.info.main,
-    theme.palette.error.main,
-    theme.palette.error.light,
-  ];
-
-  const finalColors = colors.length > 0 ? colors : defaultColors;
+  const apexTheme = getApexThemeOptions(theme);
+  const finalColors = colors.length > 0 ? colors : getChartSeriesColors(theme, labels.length || series.length);
 
   const options = {
-    chart: { type },
+    ...apexTheme,
+    chart: { ...apexTheme.chart, type },
     labels,
     colors: finalColors,
-    legend: { position: legendPosition },
-    dataLabels: { enabled: true },
+    legend: { ...apexTheme.legend, position: legendPosition },
+    dataLabels: { ...apexTheme.dataLabels, enabled: true },
+    stroke: { width: 0 },
+    plotOptions: {
+      pie: {
+        donut: {
+          size: type === "donut" ? "68%" : undefined,
+          labels: {
+            show: type === "donut",
+            total: {
+              show: type === "donut",
+              label: "Total",
+              fontWeight: 600,
+              color: theme.palette.text.secondary,
+            },
+          },
+        },
+      },
+    },
   };
 
   return (

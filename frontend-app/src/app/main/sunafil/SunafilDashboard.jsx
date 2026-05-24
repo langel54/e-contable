@@ -18,6 +18,8 @@ import {
   Alert,
   LinearProgress,
 } from "@mui/material";
+import PageLayout from "@/app/ui-components/layout/PageLayout";
+import { VIEW_LAYOUT } from "@/app/ui-components/layout/layoutConstants";
 import { Refresh, Notifications, Add, Delete, CheckCircle, Launch } from "@mui/icons-material";
 import CustomTable from "@/app/components/CustonTable";
 import sunafilServices from "@/app/services/sunafilServices";
@@ -298,22 +300,17 @@ const SunafilDashboard = () => {
   ];
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-        <Box>
-          <Typography variant="h4" gutterBottom>
-            Monitoreo SUNAFIL
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Gestión de clientes monitoreados y verificación de alertas de Sunafil
-          </Typography>
-        </Box>
-        <Stack direction="row" spacing={2}>
+    <PageLayout
+      title="Monitoreo SUNAFIL"
+      subtitle="Gestión de clientes monitoreados y verificación de alertas"
+      action={
+        <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
           <Button
             startIcon={<Add />}
             onClick={() => setOpenModal(true)}
             variant="outlined"
             color="primary"
+            size="small"
           >
             Añadir Cliente
           </Button>
@@ -323,20 +320,21 @@ const SunafilDashboard = () => {
             variant="contained"
             color="primary"
             disabled={refreshing || loading}
+            size="small"
           >
             Verificar Todos
           </Button>
-          <IconButton onClick={fetchData} disabled={loading}>
+          <IconButton onClick={fetchData} disabled={loading} size="small">
             <Refresh />
           </IconButton>
         </Stack>
-      </Stack>
-
+      }
+    >
       {refreshing && (
         <Alert
           severity="info"
           icon={<CircularProgress size={20} />}
-          sx={{ mb: 2 }}
+          sx={{ mb: VIEW_LAYOUT.gridSpacing }}
         >
           <Stack spacing={1}>
             <Typography variant="body2" fontWeight={500}>
@@ -353,14 +351,17 @@ const SunafilDashboard = () => {
         </Alert>
       )}
 
-      <CustomTable
-        columns={columns}
-        data={monitoredClients}
-        loading={loading || refreshing}
-        getRowId={(row) => row.idclienteprov}
-        paginationModel={{ page: 0, pageSize: 15 }}
-        paginationMode="client"
-      />
+      <Box sx={{ minHeight: VIEW_LAYOUT.fullTableMinHeight, display: "flex", flexDirection: "column" }}>
+        <CustomTable
+          fill
+          columns={columns}
+          data={monitoredClients}
+          loading={loading || refreshing}
+          getRowId={(row) => row.idclienteprov}
+          paginationModel={{ page: 0, pageSize: 15 }}
+          paginationMode="client"
+        />
+      </Box>
 
       <ModalComponent
         open={openModal}
@@ -491,7 +492,7 @@ const SunafilDashboard = () => {
           </Stack>
         }
       />
-    </Box>
+    </PageLayout>
   );
 };
 

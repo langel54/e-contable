@@ -24,8 +24,8 @@
 ### Color primario
 
 1. **No usar el mismo `primary.main` en ambos modos**  
-   - En claro: un azul más oscuro (#1e3a8a) se ve bien.  
-   - En oscuro: el mismo color se pierde; se suele usar un tono más claro (ej. #818cf8) como `primary.main` para mantener contraste (WCAG ~4.5:1 sobre fondo oscuro).
+   - En claro: el primario por defecto es indigo (`#6366f1`).  
+   - En oscuro: se mantiene el mismo tono con variantes `light`/`dark` generadas en `palette.js` para contraste sobre fondos Slate.
 
 2. **Paleta completa por modo**  
    - Definir `primary.lighter`, `primary.light`, `primary.main`, `primary.dark`, `primary.darker` (y `contrastText`) tanto para `light` como para `dark`.  
@@ -41,9 +41,9 @@
   - Si no existe, se usa `/images/logo.png` con `filter: brightness(0) invert(1)` para mantener contraste.  
   - Puedes añadir `public/images/logo-dark.png` (versión clara del logo) para mejor resultado.
 
-- **Color primario en modo oscuro** (`themes/palette.js`)  
-  - `primary.main` en dark pasa a `#818cf8` para que botones y acentos destaquen sobre fondo oscuro.  
-  - Se mantienen `primary.light` y `primary.dark` para variantes.
+- **Color primario** (`themes/palette.js`)  
+  - Mismo `primary.main` en claro y oscuro (configurable con `NEXT_PUBLIC_THEME_PRIMARY_MAIN`).  
+  - Variantes `light`/`dark`/`lighter` se calculan automáticamente por modo.
 
 - **Logo SVG (login)**  
   - El texto del logo en `LogoMain.jsx` usa `theme.palette.text.primary` en lugar de `common.black` para que sea legible en ambos modos.

@@ -32,33 +32,31 @@ function darkenHex(hex, amount = 25) {
 export default function Palette(mode, presetColor) {
   const colors = presetPalettes;
 
-  // Theme configuration from environment variables with sensible fallbacks
-  // PRIMARY COLOR (Institutional)
-  const themePrimary = process.env.NEXT_PUBLIC_THEME_PRIMARY_MAIN || "#0058d3";
+  // Tema moderno: indigo + escala Slate (configurable por .env)
+  const themePrimary = process.env.NEXT_PUBLIC_THEME_PRIMARY_MAIN || "#7c3aed";
 
-  // LIGHT MODE BACKGROUNDS
-  const themeBgDefault = process.env.NEXT_PUBLIC_THEME_BG_DEFAULT || "#f8fafc";
+  const themeBgDefault = process.env.NEXT_PUBLIC_THEME_BG_DEFAULT || "#f4f4f5";
   const themeBgPaper = process.env.NEXT_PUBLIC_THEME_BG_PAPER || "#ffffff";
 
-  // DARK MODE BACKGROUNDS
-  const themeDarkBg = process.env.NEXT_PUBLIC_THEME_DARK_BG || "#0f172a";
-  const themeDarkPaper = process.env.NEXT_PUBLIC_THEME_DARK_PAPER || "#1e293b";
+  const themeDarkBg = process.env.NEXT_PUBLIC_THEME_DARK_BG || "#09090b";
+  const themeDarkPaper = process.env.NEXT_PUBLIC_THEME_DARK_PAPER || "#18181b";
 
+  // Escala Slate (coherente con texto y superficies)
   let greyPrimary = [
     "#ffffff",
-    "#fafafa",
-    "#f5f5f5",
-    "#f0f0f0",
-    "#d9d9d9",
-    "#bfbfbf",
-    "#8c8c8c",
-    "#595959",
-    "#262626",
-    "#141414",
-    "#000000",
+    "#f8fafc",
+    "#f1f5f9",
+    "#e2e8f0",
+    "#cbd5e1",
+    "#94a3b8",
+    "#64748b",
+    "#475569",
+    "#334155",
+    "#1e293b",
+    "#0f172a",
   ];
-  let greyAscent = ["#fafafa", "#bfbfbf", "#434343", "#1f1f1f"];
-  let greyConstant = ["#fafafb", "#e6ebf1"];
+  let greyAscent = ["#f8fafc", "#94a3b8", "#475569", "#1e293b"];
+  let greyConstant = ["#f8fafc", "#e2e8f0"];
 
   colors.grey = [...greyPrimary, ...greyAscent, ...greyConstant];
 
@@ -70,6 +68,37 @@ export default function Palette(mode, presetColor) {
   paletteColor.primary.dark = darkenHex(themePrimary, 20);
   paletteColor.primary.darker = darkenHex(themePrimary, 45);
   paletteColor.primary.lighter = alpha(themePrimary, 0.08);
+
+  // Semánticos modernos (emerald, rose, amber, teal)
+  const semantic = {
+    success: { main: "#10b981", light: "#34d399", dark: "#059669" },
+    error: { main: "#f43f5e", light: "#fb7185", dark: "#e11d48" },
+    warning: { main: "#f59e0b", light: "#fbbf24", dark: "#d97706" },
+    info: { main: "#14b8a6", light: "#2dd4bf", dark: "#0d9488" },
+  };
+  Object.entries(semantic).forEach(([key, tones]) => {
+    paletteColor[key].main = tones.main;
+    paletteColor[key].light = tones.light;
+    paletteColor[key].dark = tones.dark;
+    paletteColor[key].lighter = alpha(tones.main, mode === "dark" ? 0.18 : 0.1);
+  });
+
+  if (mode === "light") {
+    paletteColor.grey[0] = "#ffffff";
+    paletteColor.grey[50] = "#f8fafc";
+    paletteColor.grey[100] = "#f1f5f9";
+    paletteColor.grey[200] = "#e2e8f0";
+    paletteColor.grey[300] = "#cbd5e1";
+    paletteColor.grey[400] = "#94a3b8";
+    paletteColor.grey[500] = "#64748b";
+    paletteColor.grey[600] = "#475569";
+    paletteColor.grey[700] = "#334155";
+    paletteColor.grey[800] = "#1e293b";
+    paletteColor.grey[900] = "#0f172a";
+    paletteColor.secondary.main = "#64748b";
+    paletteColor.secondary.light = "#94a3b8";
+    paletteColor.secondary.dark = "#475569";
+  }
 
   if (mode === "dark") {
     // Mismo color primario que en modo claro; variantes más claras para contraste sobre fondos oscuros
@@ -124,7 +153,7 @@ export default function Palette(mode, presetColor) {
         selected: alpha(paletteColor.grey[500], mode === "dark" ? 0.12 : 0.08),
         disabled: paletteColor.grey[300],
       },
-      divider: mode === "dark" ? "rgba(255, 255, 255, 0.08)" : paletteColor.grey[200],
+      divider: mode === "dark" ? "rgba(148, 163, 184, 0.12)" : paletteColor.grey[200],
       background: {
         paper: mode === "dark" ? themeDarkPaper : themeBgPaper,
         default: mode === "dark" ? themeDarkBg : themeBgDefault,

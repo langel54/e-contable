@@ -9,7 +9,7 @@ export default function Tooltip(theme) {
                     color: theme.palette.background.paper,
                     fontSize: '0.75rem',
                     fontWeight: 600,
-                    borderRadius: 4,
+                    borderRadius: 6,
                     boxShadow: theme.shadows[1]
                 },
                 arrow: {

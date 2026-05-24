@@ -1,15 +1,11 @@
 import PropTypes from 'prop-types';
 import { forwardRef } from 'react';
-
-// material-ui
-import { useTheme } from '@mui/material/styles';
+import { useTheme, alpha } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
-import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 
-// header style
 const headerSX = {
   p: 2.5,
   '& .MuiCardHeader-action': { m: '0px auto', alignSelf: 'center' }
@@ -33,7 +29,8 @@ function MainCard(
   ref
 ) {
   const theme = useTheme();
-  boxShadow = theme.palette.mode === 'dark' ? boxShadow || true : boxShadow;
+  const useShadow = theme.palette.mode === 'dark' ? boxShadow ?? true : boxShadow ?? true;
+  const cardGlow = theme.app?.surface?.cardGlow;
 
   return (
     <Card
@@ -42,15 +39,14 @@ function MainCard(
       {...others}
       sx={{
         border: border ? '1px solid' : 'none',
-        borderRadius: 3, // Increased for a more modern look
-        borderColor: 'divider',
-        boxShadow: boxShadow ? shadow || theme.customShadows.z1 : 'none',
-        transition: 'all 0.3s ease-in-out',
-        background: theme.palette.mode === 'dark' ? theme.palette.background.paper : theme.palette.background.paper,
-        backdropFilter: 'none',
+        borderRadius: 1.5,
+        borderColor: alpha(theme.palette.divider, theme.palette.mode === 'dark' ? 0.6 : 1),
+        boxShadow: useShadow ? shadow || cardGlow || theme.customShadows.z1 : 'none',
+        transition: 'box-shadow 0.25s ease, border-color 0.25s ease',
+        backgroundColor: theme.palette.background.paper,
+        backgroundImage: 'none',
         ':hover': {
-          boxShadow: boxShadow ? shadow || theme.customShadows.z2 : 'none',
-          // transform: 'translateY(-4px)',
+          boxShadow: useShadow ? shadow || theme.customShadows.z2 : 'none',
         },
         '& pre': {
           m: 0,
@@ -61,11 +57,12 @@ function MainCard(
         ...sx
       }}
     >
-      {/* card header and action */}
-      {!darkTitle && title && <CardHeader sx={headerSX} titleTypographyProps={{ variant: 'subtitle1' }} title={title} action={secondary} />}
-      {darkTitle && title && <CardHeader sx={headerSX} title={<Typography variant="h3">{title}</Typography>} action={secondary} />}
-
-      {/* card content */}
+      {!darkTitle && title && (
+        <CardHeader sx={headerSX} titleTypographyProps={{ variant: 'subtitle1', fontWeight: 700 }} title={title} action={secondary} />
+      )}
+      {darkTitle && title && (
+        <CardHeader sx={headerSX} title={<Typography variant="h4" fontWeight={800}>{title}</Typography>} action={secondary} />
+      )}
       {content && <CardContent sx={contentSX}>{children}</CardContent>}
       {!content && children}
     </Card>
@@ -78,16 +75,12 @@ MainCard.propTypes = {
   border: PropTypes.bool,
   boxShadow: PropTypes.bool,
   children: PropTypes.node,
-  subheader: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
   content: PropTypes.bool,
   contentSX: PropTypes.object,
   darkTitle: PropTypes.bool,
-  divider: PropTypes.bool,
   elevation: PropTypes.number,
   secondary: PropTypes.any,
   shadow: PropTypes.string,
   sx: PropTypes.object,
   title: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
-  modal: PropTypes.bool,
-  others: PropTypes.any
 };

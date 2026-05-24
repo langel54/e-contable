@@ -4,6 +4,8 @@ import { merge } from 'lodash';
 // project import
 import Badge from './Badge';
 import Button from './Button';
+import ButtonBase from './ButtonBase';
+import CssBaseline from './CssBaseline';
 import Card from './Card';
 import CardContent from './CardContent';
 import Checkbox from './Checkbox';
@@ -14,7 +16,9 @@ import IconButton from './IconButton';
 import InputLabel from './InputLabel';
 import LinearProgress from './LinearProgress';
 import Link from './Link';
+import ListItemButton from './ListItemButton';
 import ListItemIcon from './ListItemIcon';
+import Menu from './Menu';
 import OutlinedInput from './OutlinedInput';
 import Paper from './Paper';
 import Tab from './Tab';
@@ -28,7 +32,9 @@ import Typography from './Typography';
 
 export default function ComponentsOverrides(theme) {
   return merge(
+    CssBaseline(theme),
     Button(theme),
+    ButtonBase(theme),
     Badge(theme),
     Card(theme),
     CardContent(),
@@ -39,14 +45,16 @@ export default function ComponentsOverrides(theme) {
     IconButton(theme),
     InputLabel(theme),
     LinearProgress(),
-    Link(),
+    Link(theme),
+    ListItemButton(),
     ListItemIcon(),
+    Menu(theme),
     OutlinedInput(theme),
     Paper(theme),
     Tab(theme),
     Table(theme),
     TableCell(theme),
-    Tabs(),
+    Tabs(theme),
     Tooltip(theme),
     Typography()
   );

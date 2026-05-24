@@ -34,7 +34,7 @@ const ModalComponent = ({
           boxShadow: (theme) => theme.customShadows.z1,
           border: '1px solid',
           borderColor: 'divider',
-          borderRadius: 3,
+          borderRadius: 1.5,
           display: "flex",
           flexDirection: "column",
           maxHeight: "90vh",

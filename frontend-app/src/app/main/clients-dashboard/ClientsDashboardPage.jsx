@@ -1,4 +1,8 @@
-import { Box, Grid, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Grid, Stack, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import PageHeader from "@/app/ui-components/PageHeader";
+import SectionTitle from "@/app/ui-components/SectionTitle";
+import { VIEW_LAYOUT } from "@/app/ui-components/layout/layoutConstants";
 import AuthGuard from "../menu/AuthGuard";
 import { ROLE_IDS } from "@/app/config/roles";
 const IDS_CLIENTES = [ROLE_IDS.ADMIN, ROLE_IDS.MANAGER, ROLE_IDS.OPERADOR, ROLE_IDS.LIMITADO]; // 1, 2, 3, 6
@@ -15,7 +19,6 @@ import IncomeAreaChart from "./IncomeAreaChart";
 
 const ClientsDashboardPage = () => {
   const theme = useTheme();
-  const { info } = theme.palette;
   const [totalClients, setTotalClients] = useState(0);
   const [activeClients, setActiveClients] = useState(0);
   const [suspendClients, setSuspendClients] = useState(0);
@@ -94,12 +97,13 @@ const ClientsDashboardPage = () => {
   return (
     <>
       <AuthGuard ids={IDS_CLIENTES}>
-        <Grid container rowSpacing={4.5} columnSpacing={2.75}>
+        <Grid container rowSpacing={VIEW_LAYOUT.gridSpacing} columnSpacing={VIEW_LAYOUT.gridSpacing}>
           {/* row 1 */}
-          <Grid item xs={12} sx={{ mb: -2.25 }}>
-            <Typography variant="h5" fontWeight={600}>
-              Dashboard - Información de Clientes
-            </Typography>
+          <Grid item xs={12}>
+            <PageHeader
+              title="Clientes"
+              subtitle="Indicadores operativos, régimen tributario y evolución mensual"
+            />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={4}>
             <AnalyticEcommerce
@@ -152,7 +156,7 @@ const ClientsDashboardPage = () => {
               count={tempDownClients.total || 0}
               percentage={tempDownClients.porcentaje || 0}
               extra="Baja temporal registrados"
-              color="INFO"
+              color="info"
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
@@ -179,13 +183,8 @@ const ClientsDashboardPage = () => {
             />
           </Grid>
           <Grid item xs={12} md={5} lg={4}>
-            <Grid container alignItems="center" justifyContent="space-between">
-              <Grid item>
-                <Typography variant="h5">Clientes según estado</Typography>
-              </Grid>
-              <Grid item />
-            </Grid>
-            <MainCard sx={{ mt: 2 }} content={false}>
+            <SectionTitle>Clientes según estado</SectionTitle>
+            <MainCard content={false}>
               <Box sx={{ p: 3, pb: 0 }}>
                 <Stack spacing={2}>
                   <Typography variant="h6" color="text.secondary">
@@ -213,13 +212,8 @@ const ClientsDashboardPage = () => {
             </MainCard>
           </Grid>
           <Grid item xs={12} md={12} lg={12}>
-            <Grid container alignItems="center" justifyContent="space-between">
-              <Grid item>
-                <Typography variant="h5">Clientes nuevos por mes</Typography>
-              </Grid>
-              <Grid item />
-            </Grid>
-            <MainCard sx={{ mt: 2 }} content={false}>
+            <SectionTitle>Clientes nuevos por mes</SectionTitle>
+            <MainCard content={false}>
               {/* <Box sx={{ p: 3, pb: 0 }}>
                 <Stack spacing={2}>
                   <Typography variant="h6" color="text.secondary">
@@ -233,7 +227,7 @@ const ClientsDashboardPage = () => {
               <IncomeAreaChart
                 seriesData={graficosDataMes.seriesData || []}
                 categories={graficosDataMes.categories || []}
-                colors={[info.main, info.dark]}
+                colors={[theme.palette.info.main, theme.palette.info.dark]}
               />
             </MainCard>
           </Grid>

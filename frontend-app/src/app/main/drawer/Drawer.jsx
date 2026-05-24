@@ -48,9 +48,15 @@ export default function MiniDrawer({ children }) {
   const currentMenuItems = idTipo != null ? getMenuForRole(idTipo) : [];
 
   return (
-    <Box sx={{ display: "flex" }}>
-      {/* Ya no usamos AppBar superior según el nuevo diseño */}
-      
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        bgcolor: "background.default",
+        background: (t) =>
+          t.app?.surface?.mainBackground || t.palette.background.default,
+      }}
+    >
       <Drawer variant="permanent" open={open}>
         <DrawerHeader sx={{ border: 'none' }}>
           <Stack 
@@ -75,12 +81,16 @@ export default function MiniDrawer({ children }) {
                 }}
               />
             )}
-            <IconButton 
+            <IconButton
                 onClick={handleDrawerToggle}
-                sx={{ 
-                    bgcolor: 'action.hover',
-                    p: 0.5,
-                    borderRadius: '50%'
+                size="small"
+                sx={{
+                  bgcolor: (t) => t.palette.action.hover,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  p: 0.75,
+                  borderRadius: 2,
+                  "&:hover": { bgcolor: "action.selected" },
                 }}
             >
               {open ? <ChevronLeftIcon fontSize="small" /> : <MenuIcon fontSize="small" />}
@@ -111,17 +121,23 @@ export default function MiniDrawer({ children }) {
         component="main"
         sx={{
           flexGrow: 1,
-          p: { xs: 2, md: 2 },
+          p: { xs: 2, sm: 2.5, md: 3 },
           minHeight: "100vh",
-          minWidth: 0, // CRITICAL: allows flex item to shrink below content size
-          width: '100%',
-          transition: (theme) => theme.transitions.create(['width', 'margin'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
-          bgcolor: 'background.default',
+          minWidth: 0,
+          width: "100%",
+          border: "none",
+          borderRadius: 0,
+          boxShadow: "none",
+          outline: "none",
+          bgcolor: "transparent",
+          background: "none",
           color: "text.primary",
-          overflowX: 'hidden'
+          overflowX: "hidden",
+          transition: (t) =>
+            t.transitions.create(["width", "margin"], {
+              easing: t.transitions.easing.easeInOut,
+              duration: t.transitions.duration.enteringScreen,
+            }),
         }}
       >
         {children}

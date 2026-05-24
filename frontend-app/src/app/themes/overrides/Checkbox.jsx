@@ -1,33 +1,10 @@
 import PropTypes from "prop-types";
 
-// project import
-// import getColors from 'utils/getColors';
-
 // assets
 import { BorderOutlined } from "@ant-design/icons";
 import { CheckSquareFilled } from "@ant-design/icons";
 import { MinusSquareFilled } from "@ant-design/icons";
-import getColors from "@/app/utils/getColors";
-
-// ==============================|| RADIO - COLORS ||============================== //
-
-function getColorStyle({ color, theme }) {
-  const colors = getColors(theme, color);
-  const { lighter, main, dark } = colors;
-
-  return {
-    "&:hover": {
-      backgroundColor: lighter,
-      "& .icon": {
-        borderColor: main,
-      },
-    },
-    "&.Mui-focusVisible": {
-      outline: `2px solid ${dark}`,
-      outlineOffset: -4,
-    },
-  };
-}
+import { getInteractionTransition, getSubtleHover, getInteractionFocusRing } from "../appTokens";
 
 function getSizeStyle(size) {
   switch (size) {
@@ -41,8 +18,6 @@ function getSizeStyle(size) {
   }
 }
 
-// ==============================|| CHECKBOX - STYLE ||============================== //
-
 function checkboxStyle(size) {
   const sizes = getSizeStyle(size);
 
@@ -53,7 +28,7 @@ function checkboxStyle(size) {
   };
 }
 
-// ==============================|| OVERRIDES - CHECKBOX ||============================== //
+// ==============================|| OVERRIDES - CHECKBOX (MUI por defecto) ||============================== //
 
 export default function Checkbox(theme) {
   const { palette } = theme;
@@ -68,8 +43,11 @@ export default function Checkbox(theme) {
       },
       styleOverrides: {
         root: {
-          borderRadius: 0,
+          borderRadius: 6,
           color: palette.secondary[300],
+          ...getInteractionTransition(),
+          ...getInteractionFocusRing(theme, "primary"),
+          "&:hover": getSubtleHover(theme, "primary"),
           "&.size-small": {
             ...checkboxStyle("small"),
           },
@@ -80,15 +58,9 @@ export default function Checkbox(theme) {
             ...checkboxStyle("large"),
           },
         },
-        colorPrimary: getColorStyle({ color: "primary", theme }),
-        colorSecondary: getColorStyle({ color: "secondary", theme }),
-        colorSuccess: getColorStyle({ color: "success", theme }),
-        colorWarning: getColorStyle({ color: "warning", theme }),
-        colorInfo: getColorStyle({ color: "info", theme }),
-        colorError: getColorStyle({ color: "error", theme }),
       },
     },
   };
 }
 
-getColorStyle.propTypes = { color: PropTypes.any, theme: PropTypes.any };
+getSizeStyle.propTypes = { size: PropTypes.string };
