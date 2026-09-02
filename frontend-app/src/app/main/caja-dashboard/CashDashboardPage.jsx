@@ -6,9 +6,6 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  Stack,
-  TextField,
-  Typography,
   useTheme,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -17,11 +14,14 @@ import ShowForIdTipo from "../menu/ShowForIdTipo";
 import { ROLE_IDS } from "@/app/config/roles";
 import AnalyticEcommerce from "@/app/ui-components/cards/statistics/AnalyticEcommerce";
 import MainCard from "@/app/ui-components/MainCard";
+import PageHeader from "@/app/ui-components/PageHeader";
+import SectionTitle from "@/app/ui-components/SectionTitle";
+import FilterToolbar, { FilterField } from "@/app/ui-components/layout/FilterToolbar";
+import { FILTER_LAYOUT, VIEW_LAYOUT } from "@/app/ui-components/layout/layoutConstants";
 import AreaChart from "@/app/components/dashboard/AreaChart";
 import CircleChart from "@/app/components/dashboard/CircleChart";
 import dayjs from "dayjs";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import YearPickerField from "@/app/components/YearPickerField";
 import MonthPicker from "./MonthPicker";
 import {
   getDashboardCajaGraficos,
@@ -39,7 +39,7 @@ const CashDashboardPage = () => {
   const theme = useTheme();
   const [mode, setMode] = useState("fecha");
   const [selectedAnio, setSelectedAnio] = useState(dayjs().year());
-  const [selectedMonth, setSelectedMonth] = useState("10");
+  const [selectedMonth, setSelectedMonth] = useState(10);
   const [kpis, setKpis] = useState({});
 
   const [chartData, setChartData] = useState({});
@@ -132,59 +132,47 @@ const CashDashboardPage = () => {
 
   return (
     <AuthGuard ids={[ROLE_IDS.ADMIN, ROLE_IDS.LIMITADO]}>
-      <Grid container rowSpacing={2} columnSpacing={2} marginTop={1}>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          spacing={2}
-          sx={{
-            width: "100%",
-            border: '1px solid',
-            borderColor: 'divider',
-            padding: 1.5,
-            borderRadius: 3,
-            marginLeft: 2,
-            backgroundColor: 'transparent',
-          }}
-        >
-          <Typography variant="h5" fontWeight={600}>
-            Dashboard - Información de Caja
-          </Typography>
-          <FormControl fullWidth size="small" sx={{ maxWidth: 200 }}>
-            <InputLabel>Según:</InputLabel>
-            <Select
-              value={mode}
-              label="Modo"
-              onChange={(e) => setMode(e.target.value)}
-            >
-              <MenuItem value="fecha">Fecha</MenuItem>
-              <MenuItem value="periodo">Periodo</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl size="medium" sx={{ width: 150 }}>
-            <DatePicker
-              selected={selectedAnio ? new Date(selectedAnio, 0, 1) : null}
-              onChange={handleYearChange}
-              showYearPicker
-              dateFormat="yyyy"
-              renderYearContent={renderYearContent}
-              customInput={
-                <TextField
-                  label="Año"
-                  value={selectedAnio || ""}
-                  InputProps={{ readOnly: true }}
+      <Grid container rowSpacing={VIEW_LAYOUT.gridSpacing} columnSpacing={VIEW_LAYOUT.gridSpacing}>
+        <Grid item xs={12}>
+          <PageHeader
+            title="Caja"
+            subtitle="Ingresos, egresos y saldos en tiempo real"
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <MainCard contentSX={FILTER_LAYOUT.cardContent}>
+            <FilterToolbar>
+              <FilterField>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="caja-mode-label">Según</InputLabel>
+                  <Select
+                    labelId="caja-mode-label"
+                    value={mode}
+                    label="Según"
+                    onChange={(e) => setMode(e.target.value)}
+                  >
+                    <MenuItem value="fecha">Fecha</MenuItem>
+                    <MenuItem value="periodo">Periodo</MenuItem>
+                  </Select>
+                </FormControl>
+              </FilterField>
+              <FilterField>
+                <YearPickerField
+                  selected={selectedAnio}
+                  onChange={handleYearChange}
+                  renderYearContent={renderYearContent}
                 />
-              }
-            />
-          </FormControl>
-          <FormControl fullWidth size="small" sx={{ maxWidth: 200 }}>
-            <MonthPicker
-              value={selectedMonth}
-              onChange={(value) => setSelectedMonth(value)}
-            />
-          </FormControl>
-        </Stack>
+              </FilterField>
+              <FilterField>
+                <MonthPicker
+                  value={selectedMonth}
+                  onChange={(value) => setSelectedMonth(value)}
+                />
+              </FilterField>
+            </FilterToolbar>
+          </MainCard>
+        </Grid>
         {selectedMonth && kpis?.totalesMes && (
           <>
             <Grid item xs={12} sm={4} md={4} lg={4}>
@@ -282,8 +270,8 @@ const CashDashboardPage = () => {
 
         {(seriesMes && seriesMes.length > 0 && categoriesMes && categoriesMes.length > 0) && (
           <Grid item xs={12} md={12}>
-            <MainCard>
-              <Typography variant="h5">Movimientos</Typography>
+            <MainCard content={false} sx={{ p: 2.5 }}>
+              <SectionTitle>Movimientos</SectionTitle>
               <AreaChart
                 seriesData={seriesMes || []}
                 categories={categoriesMes || []}
@@ -296,22 +284,22 @@ const CashDashboardPage = () => {
         )}
         {(seriesDataMesSaldo && seriesDataMesSaldo.length > 0 && categoriesMesSaldo && categoriesMesSaldo.length > 0) && (
           <Grid item xs={12} md={12}>
-            <MainCard>
-              <Typography variant="h5">Saldos</Typography>
+            <MainCard content={false} sx={{ p: 2.5 }}>
+              <SectionTitle>Saldos</SectionTitle>
               <AreaChart
                 seriesData={seriesDataMesSaldo || []}
                 categories={categoriesMesSaldo || []}
                 height={350}
                 type="line"
-                colors={["red"]}
+                colors={[theme.palette.primary.main]}
                 horizontalLineAtZero={true}
               />
             </MainCard>
           </Grid>
         )}
         <Grid item xs={12} md={4}>
-          <MainCard>
-            <Typography variant="h5">Distribución del Mes</Typography>
+          <MainCard content={false} sx={{ p: 2.5 }}>
+            <SectionTitle>Distribución del mes</SectionTitle>
             <CircleChart
               series={[
                 kpis.ingresosMes?.total || 0,

@@ -16,14 +16,15 @@ export const useExpensesData = () => {
       conceptFilter,
       periodo,
       selectedAnio,
-      selectedEstado
+      selectedEstado,
+      clienteFilter
     ) => {
       setLoading(true);
       try {
         const data = await getExpenses(
           page,
           pageSize,
-          "",
+          clienteFilter || "",
           selectedEstado,
           startDate,
           endDate,

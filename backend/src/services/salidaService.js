@@ -2,7 +2,7 @@ const prisma = require("../config/database");
 
 const salidaService = {
   // Obtener todos los registros con paginación y filtros
-  async getAll(skip, limit, startDate, endDate, concept, period, year, status) {
+  async getAll(skip, limit, startDate, endDate, concept, period, year, status, cliente) {
     const whereConditions = {
       AND: [],
     };
@@ -25,6 +25,9 @@ const salidaService = {
     }
     if (status) {
       whereConditions.AND.push({ idestado: status });
+    }
+    if (cliente) {
+      whereConditions.AND.push({ idclienteprov: cliente });
     }
     const salidas = await prisma.salida.findMany({
       skip,

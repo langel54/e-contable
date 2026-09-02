@@ -2,17 +2,25 @@ const prisma = require("../config/database");
 
 const rubroService = {
   // Obtener todos los registros con paginación
-  async getAll(skip, limit) {
+  async getAll(skip, limit, search) {
+    const whereClause = search
+      ? {
+          nrubro: { contains: search },
+        }
+      : {};
+
     const rubros = await prisma.rubro.findMany({
-      // skip,
-      // take: limit,
+      skip,
+      take: limit,
+      where: whereClause,
       select: {
         nrubro: true,
         idrubro: true,
       },
+      orderBy: { nrubro: "asc" },
     });
 
-    const total = await prisma.rubro.count();
+    const total = await prisma.rubro.count({ where: whereClause });
     return { rubros, total };
   },
 

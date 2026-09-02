@@ -1,3 +1,5 @@
+import { alpha } from '@mui/material/styles';
+
 // ==============================|| OVERRIDES - CARD ||============================== //
 
 export default function Card(theme) {
@@ -5,14 +7,13 @@ export default function Card(theme) {
         MuiCard: {
             styleOverrides: {
                 root: {
-                    borderRadius: 16,
+                    borderRadius: theme.shape.borderRadius,
                     backgroundImage: 'none',
                     color: theme.palette.text.primary,
-                    boxShadow: theme.customShadows?.z1 ?? theme.shadows[1],
-                    transition: 'box-shadow 0.3s ease-in-out',
-                    '&:hover': {
-                        boxShadow: theme.customShadows?.z2 ?? theme.shadows[2],
-                    }
+                    backgroundColor: theme.palette.background.paper,
+                    border: `1px solid ${alpha(theme.palette.divider, theme.palette.mode === 'dark' ? 0.5 : 1)}`,
+                    boxShadow: theme.app?.surface?.cardGlow || theme.customShadows?.z1,
+                    transition: 'border-color 0.2s ease',
                 }
             }
         },

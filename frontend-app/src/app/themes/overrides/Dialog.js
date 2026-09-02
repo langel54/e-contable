@@ -5,9 +5,10 @@ export default function Dialog(theme) {
         MuiDialog: {
             styleOverrides: {
                 paper: {
-                    borderRadius: 16,
+                    borderRadius: 12,
                     backgroundImage: 'none',
-                    boxShadow: theme.customShadows?.z2 ?? theme.shadows[4]
+                    border: `1px solid ${theme.palette.divider}`,
+                    boxShadow: theme.app?.surface?.cardGlow || theme.customShadows?.z2,
                 },
                 container: {
                     backdropFilter: 'blur(3px)' // Modern glass morphism effect for backdrop

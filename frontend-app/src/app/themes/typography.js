@@ -10,28 +10,32 @@ export default function Typography(fontFamily) {
     fontWeightBold: 600,
     h1: {
       fontWeight: 700,
-      fontSize: '2.5rem',
-      lineHeight: 1.2
+      fontSize: '2.375rem',
+      lineHeight: 1.15,
+      letterSpacing: '-0.02em',
     },
     h2: {
       fontWeight: 700,
-      fontSize: '2rem',
-      lineHeight: 1.25
+      fontSize: '1.875rem',
+      lineHeight: 1.2,
+      letterSpacing: '-0.02em',
     },
     h3: {
-      fontWeight: 700,
-      fontSize: '1.625rem',
-      lineHeight: 1.3
+      fontWeight: 600,
+      fontSize: '1.5rem',
+      lineHeight: 1.3,
+      letterSpacing: '-0.01em',
     },
     h4: {
       fontWeight: 600,
       fontSize: '1.25rem',
-      lineHeight: 1.4
+      lineHeight: 1.35,
+      letterSpacing: '-0.01em',
     },
     h5: {
       fontWeight: 600,
-      fontSize: '1rem',
-      lineHeight: 1.5
+      fontSize: '1.0625rem',
+      lineHeight: 1.45,
     },
     h6: {
       fontWeight: 500,

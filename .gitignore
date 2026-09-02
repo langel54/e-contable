@@ -2,6 +2,10 @@ frontend-app/node_modules/
 backend/node_modules/
 frontend-app/.env
 backend/.env
+backend/.env.development
+backend/.env.production
+# Variables opcionales en la raíz (p. ej. HTTP_PORT para docker compose)
+/.env
 *.log
 logs/
 npm-debug.log*

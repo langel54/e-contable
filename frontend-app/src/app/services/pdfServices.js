@@ -1,7 +1,6 @@
 import Cookies from "js-cookie";
 import { notifyNetworkError, NETWORK_ERROR_MESSAGE } from "./networkErrorHandler";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+import { API_BASE } from "./apiConfig";
 
 async function fetchPdf(url, options) {
   try {
@@ -23,7 +22,7 @@ async function fetchPdf(url, options) {
 // Servicio para PDF de salida
 export const pdfSalidaService = async (idsalida) => {
   const token = Cookies.get("token");
-  const response = await fetchPdf(`${API_URL}/pdf-salida/${idsalida}`, {
+  const response = await fetchPdf(`${API_BASE}/pdf-salida/${idsalida}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.blob();
@@ -31,7 +30,7 @@ export const pdfSalidaService = async (idsalida) => {
 
 export const pdfIncomeService = async (idingreso) => {
   const token = Cookies.get("token");
-  const response = await fetchPdf(`${API_URL}/pdf-income/${idingreso}`, {
+  const response = await fetchPdf(`${API_BASE}/pdf-income/${idingreso}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.blob();
@@ -40,7 +39,7 @@ export const pdfIncomeService = async (idingreso) => {
 export const pdfEstadoCuentaService = async (idclienteprov, year) => {
   const token = Cookies.get("token");
   const response = await fetchPdf(
-    `${API_URL}/pdf-estado-cuenta?idclienteprov=${idclienteprov}&year=${year}`,
+    `${API_BASE}/pdf-estado-cuenta?idclienteprov=${idclienteprov}&year=${year}`,
     { headers: { Authorization: `Bearer ${token}` } }
   );
   return response.blob();
@@ -49,7 +48,7 @@ export const pdfEstadoCuentaService = async (idclienteprov, year) => {
 export const pdfEgresosClienteService = async (idclienteprov, year) => {
   const token = Cookies.get("token");
   const response = await fetchPdf(
-    `${API_URL}/pdf-egresos-cliente?idclienteprov=${idclienteprov}&year=${year}`,
+    `${API_BASE}/pdf-egresos-cliente?idclienteprov=${idclienteprov}&year=${year}`,
     { headers: { Authorization: `Bearer ${token}` } }
   );
   return response.blob();

@@ -147,13 +147,22 @@ const BuzonDashboard = () => {
     try {
       setRefreshing(true);
       setVerifyProgress({ total: 0, done: 0, inProgress: true });
-      await buzonServices.verifyAll();
-      Swal.fire("Iniciado", "La verificación masiva ha comenzado en segundo plano.", "info");
+      const started = await buzonServices.verifyAll();
+      const jobId = started?.jobId;
+      if (!jobId) {
+        throw new Error("Respuesta sin jobId");
+      }
+      Swal.fire("Iniciado", "La verificación masiva está en cola (worker).", "info");
 
       const poll = async () => {
         try {
-          const p = await buzonServices.getVerifyProgress();
+          const p = await buzonServices.getVerifyProgress(String(jobId));
           setVerifyProgress(p);
+          if (p.error) {
+            Swal.fire("Error en verificación", p.error, "error");
+            setRefreshing(false);
+            return;
+          }
           if (p.inProgress) {
             pollIntervalRef.current = setTimeout(poll, 1500);
           } else {
@@ -166,7 +175,7 @@ const BuzonDashboard = () => {
       };
       poll();
     } catch (error) {
-      Swal.fire("Error", "No se pudo iniciar la verificación", "error");
+      Swal.fire("Error", "No se pudo iniciar la verificación (¿worker activo y SCRAPER_WORKER_URL?)", "error");
       setRefreshing(false);
       setVerifyProgress({ total: 0, done: 0, inProgress: false });
     }

@@ -7,21 +7,9 @@ import {
   Card,
   CardContent,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
   Typography,
-  Paper,
   CircularProgress,
   Alert,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   ToggleButtonGroup,
   ToggleButton,
 } from "@mui/material";
@@ -31,17 +19,19 @@ import {
   TrendingUp as TrendingUpIcon,
   TrendingDown as TrendingDownIcon,
 } from "@mui/icons-material";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import YearPickerField from "@/app/components/YearPickerField";
 import { getEstadoCuenta } from "@/app/services/estadoCuentaService";
 import { getEgresosCliente } from "@/app/services/egresosClienteService";
 import { pdfEstadoCuentaService, pdfEgresosClienteService } from "@/app/services/pdfServices";
 import InfiniteSelect from "@/app/components/AutocompleteComponent";
 import { getClientesProvs } from "@/app/services/clienteProvService";
 import dayjs from "dayjs";
+import PageLayout from "@/app/ui-components/layout/PageLayout";
+import MainCard from "@/app/ui-components/MainCard";
+import FilterToolbar, { FilterField } from "@/app/ui-components/layout/FilterToolbar";
+import { FILTER_LAYOUT, VIEW_LAYOUT } from "@/app/ui-components/layout/layoutConstants";
 
-// Componente de autocompletado de cliente reutilizable
-const ClienteAutocomplete = ({ value, onChange, sx }) => {
+const ClienteAutocomplete = ({ value, onChange }) => {
   const transformResponse = (response) => ({
     items: response.clientesProvs || [],
     total: response.pagination?.total || 0,
@@ -71,13 +61,13 @@ const ClienteAutocomplete = ({ value, onChange, sx }) => {
           </div>
         </li>
       )}
-      sx={sx || { minWidth: 280 }}
+      sx={{ width: "100%" }}
     />
   );
 };
 
 const EstadoCuentaPage = () => {
-  const [viewMode, setViewMode] = useState("INGRESOS"); // "INGRESOS" or "EGRESOS"
+  const [viewMode, setViewMode] = useState("INGRESOS");
   const [selectedClient, setSelectedClient] = useState(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(false);
@@ -90,6 +80,9 @@ const EstadoCuentaPage = () => {
     pageSize: 10,
   });
 
+  const isIngresos = viewMode === "INGRESOS";
+  const accentColor = isIngresos ? "primary" : "error";
+
   const handleYearChange = useCallback((date) => {
     if (date) {
       setSelectedYear(date.getFullYear());
@@ -99,7 +92,6 @@ const EstadoCuentaPage = () => {
   const handleModeChange = useCallback((event, newMode) => {
     if (newMode !== null) {
       setViewMode(newMode);
-      // Clear previous results when changing mode
       setTransacciones([]);
       setTotalAmount(0);
       setHasSearched(false);
@@ -119,12 +111,13 @@ const EstadoCuentaPage = () => {
 
     try {
       let result;
-      if (viewMode === "INGRESOS") {
+      if (isIngresos) {
         result = await getEstadoCuenta(
           selectedClient.idclienteprov,
-          selectedYear
+          selectedYear,
+          "INGRESO"
         );
-        setTotalAmount(result.totalAnual || 0);
+        setTotalAmount(result.totalIngresos ?? result.totalAnual ?? 0);
       } else {
         result = await getEgresosCliente(
           selectedClient.idclienteprov,
@@ -134,7 +127,7 @@ const EstadoCuentaPage = () => {
       }
       const transaccionesWithIndex = (result.transacciones || []).map((t, index) => ({
         ...t,
-        nro: index + 1
+        nro: index + 1,
       }));
       setTransacciones(transaccionesWithIndex);
     } catch (err) {
@@ -145,7 +138,7 @@ const EstadoCuentaPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedClient, selectedYear, viewMode]);
+  }, [selectedClient, selectedYear, viewMode, isIngresos]);
 
   const handlePrint = useCallback(async () => {
     if (!selectedClient) {
@@ -157,8 +150,8 @@ const EstadoCuentaPage = () => {
       setLoading(true);
       let pdfBlob;
       let filename;
-      
-      if (viewMode === "INGRESOS") {
+
+      if (isIngresos) {
         pdfBlob = await pdfEstadoCuentaService(
           selectedClient.idclienteprov,
           selectedYear
@@ -171,8 +164,7 @@ const EstadoCuentaPage = () => {
         );
         filename = `Egresos-Cliente-${selectedClient.idclienteprov}-${selectedYear}.pdf`;
       }
-      
-      // Crear URL del blob y descargar
+
       const url = window.URL.createObjectURL(pdfBlob);
       const link = document.createElement("a");
       link.href = url;
@@ -187,7 +179,7 @@ const EstadoCuentaPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedClient, selectedYear, viewMode]);
+  }, [selectedClient, selectedYear, isIngresos]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("es-PE", {
@@ -202,24 +194,16 @@ const EstadoCuentaPage = () => {
     return dayjs(date).format("DD-MM-YYYY");
   };
 
-  // Dynamic styles based on view mode
-  const titleText = viewMode === "INGRESOS" ? "INGRESOS POR CLIENTE" : "EGRESOS POR CLIENTE";
-  const totalLabel = viewMode === "INGRESOS" ? "Total Anual de Ingresos:" : "Total Anual de Egresos:";
-  const cardBorderColor = viewMode === "INGRESOS" ? "primary.light" : "error.light";
-  const totalColor = viewMode === "INGRESOS" ? "primary" : "error";
+  const totalLabel = isIngresos ? "Total Anual de Ingresos:" : "Total Anual de Egresos:";
 
   const columns = useMemo(() => {
     const baseColumns = [
-      { 
-        field: "nro", 
-        headerName: "Nro", 
-        width: 70,
-      },
-      { 
-        field: "fecha", 
-        headerName: "Fecha", 
+      { field: "nro", headerName: "Nro", width: 70 },
+      {
+        field: "fecha",
+        headerName: "Fecha",
         width: 120,
-        valueFormatter: (value) => formatDate(value)
+        valueFormatter: (value) => formatDate(value),
       },
       { field: "tipo_pago", headerName: "Tipo de pago", width: 130 },
       { field: "id_cliente", headerName: "ID cliente", width: 120 },
@@ -227,18 +211,14 @@ const EstadoCuentaPage = () => {
       { field: "concepto", headerName: "Por Concepto", width: 200 },
       { field: "periodo", headerName: "Periodo", width: 100 },
       { field: "anio", headerName: "Año", width: 80 },
-      { 
-        field: "importe", 
-        headerName: "Importe (S/.)", 
+      {
+        field: "importe",
+        headerName: "Importe (S/.)",
         width: 130,
         type: "number",
         align: "right",
         headerAlign: "right",
-        valueGetter: (value, row) => {
-           if (viewMode === "INGRESOS" && row.tipo === "SALIDA") return -value;
-           return value;
-        },
-        valueFormatter: (value) => formatCurrency(Math.abs(value))
+        valueFormatter: (value) => formatCurrency(value),
       },
       { field: "estado", headerName: "Estado", width: 120 },
       { field: "observacion", headerName: "Observacion", width: 200 },
@@ -246,151 +226,146 @@ const EstadoCuentaPage = () => {
       { field: "caja", headerName: "CAJA", width: 100 },
     ];
 
-    if (viewMode === "EGRESOS") {
-        baseColumns.splice(1, 0, { field: "id", headerName: "Egreso", width: 90 });
+    if (!isIngresos) {
+      baseColumns.splice(1, 0, { field: "id", headerName: "Egreso", width: 90 });
     }
 
     return baseColumns;
-  }, [viewMode]);
+  }, [isIngresos]);
 
-  const getRowId = useCallback((row) => {
-    return viewMode === "EGRESOS" ? row.id : `${row.tipo}-${row.id}`;
-  }, [viewMode]);
+  const getRowId = useCallback(
+    (row) => (isIngresos ? `${row.tipo}-${row.id}` : row.id),
+    [isIngresos]
+  );
 
   return (
-    <Box sx={{ p: { xs: 2, md: 3 }, minHeight: "100vh" }}>
-      {/* Header Section */}
-      <Paper elevation={0} sx={{ mb: 3, borderRadius: 2 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-          <Typography variant="h5" fontWeight="700" color={viewMode === "INGRESOS" ? "primary.main" : "error.main"}>
-            {titleText}
-          </Typography>
-          
-          {/* Mode Selector */}
-          <ToggleButtonGroup
-            value={viewMode}
-            exclusive
-            onChange={handleModeChange}
-            aria-label="modo de vista"
-            size="small"
-          >
-            <ToggleButton value="INGRESOS" aria-label="ingresos">
-              <TrendingUpIcon sx={{ mr: 1 }} />
-              Ingresos
-            </ToggleButton>
-            <ToggleButton value="EGRESOS" aria-label="egresos">
-              <TrendingDownIcon sx={{ mr: 1 }} />
-              Egresos
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </Stack>
-
-        {/* Search Filters */}
-        <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems="flex-start">
-          <Box sx={{ flex: 1, minWidth: { xs: "100%", md: "400px" } }}>
-            <ClienteAutocomplete
-              value={selectedClient}
-              onChange={setSelectedClient}
-              sx={{ width: "100%" }}
-            />
-          </Box>
-
-          <Box sx={{ minWidth: { xs: "100%", md: "150px" } }}>
-            <DatePicker
-              selected={new Date(selectedYear, 0, 1)}
+    <PageLayout
+      title={isIngresos ? "Ingresos por cliente" : "Egresos por cliente"}
+      subtitle="Consulta de cuenta corriente por cliente y año"
+      action={
+        <ToggleButtonGroup
+          value={viewMode}
+          exclusive
+          onChange={handleModeChange}
+          aria-label="modo de vista"
+          size="small"
+          sx={{
+            width: { xs: "100%", sm: "auto" },
+            display: "flex",
+            "& .MuiToggleButton-root": {
+              flex: { xs: 1, sm: "none" },
+              py: 0.75,
+            },
+          }}
+        >
+          <ToggleButton value="INGRESOS" aria-label="ingresos">
+            <TrendingUpIcon sx={{ mr: 0.75, fontSize: 20 }} />
+            Ingresos
+          </ToggleButton>
+          <ToggleButton value="EGRESOS" aria-label="egresos">
+            <TrendingDownIcon sx={{ mr: 0.75, fontSize: 20 }} />
+            Egresos
+          </ToggleButton>
+        </ToggleButtonGroup>
+      }
+    >
+      <MainCard contentSX={FILTER_LAYOUT.cardContent}>
+        <FilterToolbar>
+          <FilterField grow>
+            <ClienteAutocomplete value={selectedClient} onChange={setSelectedClient} />
+          </FilterField>
+          <FilterField>
+            <YearPickerField
+              selected={selectedYear}
               onChange={handleYearChange}
-              showYearPicker
-              dateFormat="yyyy"
-              customInput={
-                <TextField
-                  fullWidth
-                  size="large"
-                  label="Año"
-
-                  // sx={{ height: "52px" }}
-                  InputProps={{
-                    startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />,
-                  }}
-                />
-              }
             />
-          </Box>
-
-          <Button
-            variant="contained"
-            color={viewMode === "INGRESOS" ? "primary" : "error"}
-            startIcon={<SearchIcon />}
-            onClick={handleSearch}
-            disabled={loading || !selectedClient}
-            sx={{ minWidth: { xs: "100%", md: "150px" }, height: "40px" }}
-          >
-            Consultar
-          </Button>
-        </Stack>
+          </FilterField>
+          <FilterField>
+            <Button
+              fullWidth
+              variant="contained"
+              color={accentColor}
+              startIcon={<SearchIcon />}
+              onClick={handleSearch}
+              disabled={loading || !selectedClient}
+            >
+              Consultar
+            </Button>
+          </FilterField>
+        </FilterToolbar>
 
         {error && (
           <Alert severity="error" sx={{ mt: 2 }}>
             {error}
           </Alert>
         )}
-      </Paper>
+      </MainCard>
 
-      {/* Results Section */}
       {hasSearched && (
-        <Paper elevation={0} sx={{ borderRadius: 2 }}>
+        <MainCard
+          contentSX={FILTER_LAYOUT.cardContent}
+          sx={{ mt: VIEW_LAYOUT.sectionGap }}
+        >
           <Stack
-            direction={{ xs: "column", md: "row" }}
+            direction={{ xs: "column", sm: "row" }}
             justifyContent="space-between"
-            alignItems="center"
+            alignItems={{ xs: "stretch", sm: "center" }}
             spacing={2}
             sx={{ mb: 2 }}
           >
-            <Typography variant="h6" fontWeight="600">
-              Resultados para: {selectedYear}
+            <Typography variant="subtitle1" fontWeight={700}>
+              Resultados — {selectedYear}
             </Typography>
             <Button
               variant="contained"
-              color={viewMode === "INGRESOS" ? "primary" : "error"}
+              color={accentColor}
               startIcon={<PrintIcon />}
               onClick={handlePrint}
-              disabled={transacciones.length === 0}
+              disabled={transacciones.length === 0 || loading}
+              sx={{ width: { xs: "100%", sm: "auto" }, flexShrink: 0 }}
             >
-              IMPRIMIR
+              Imprimir
             </Button>
           </Stack>
 
           {loading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-              <CircularProgress color={viewMode === "INGRESOS" ? "primary" : "error"} />
+            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+              <CircularProgress color={accentColor} />
             </Box>
           ) : transacciones.length > 0 ? (
             <>
-              <CustomTable
-                columns={columns}
-                data={transacciones}
-                paginationModel={paginationModel}
-                setPaginationModel={setPaginationModel}
-                loading={loading}
-                getRowId={getRowId}
-                paginationMode="client"
-              />
+              <Box sx={{ minHeight: VIEW_LAYOUT.tableMinHeight, width: "100%", minWidth: 0 }}>
+                <CustomTable
+                  columns={columns}
+                  data={transacciones}
+                  paginationModel={paginationModel}
+                  setPaginationModel={setPaginationModel}
+                  loading={loading}
+                  getRowId={getRowId}
+                  paginationMode="client"
+                />
+              </Box>
 
-              {/* Total Anual */}
               <Card
                 elevation={0}
                 sx={{
-                  mt: 3,
-                  // bgcolor: cardBgColor,
-                  border: (theme) => `1px solid ${theme.palette[cardBorderColor]}`,
-                  borderRadius: 2,
+                  mt: VIEW_LAYOUT.sectionGap,
+                  border: 1,
+                  borderColor: `${accentColor}.light`,
+                  borderRadius: 1.5,
                 }}
               >
-                <CardContent>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Typography variant="h6" fontWeight="bold" color={`${totalColor}.dark`}>
+                <CardContent sx={{ py: 2, "&:last-child": { pb: 2 } }}>
+                  <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    justifyContent="space-between"
+                    alignItems={{ xs: "flex-start", sm: "center" }}
+                    spacing={1}
+                  >
+                    <Typography variant="subtitle1" fontWeight={700} color={`${accentColor}.dark`}>
                       {totalLabel}
                     </Typography>
-                    <Typography variant="h5" fontWeight="800" color={`${totalColor}.main`}>
+                    <Typography variant="h6" fontWeight={800} color={`${accentColor}.main`}>
                       {formatCurrency(totalAmount)}
                     </Typography>
                   </Stack>
@@ -398,15 +373,16 @@ const EstadoCuentaPage = () => {
               </Card>
             </>
           ) : (
-            <Box sx={{ textAlign: "center", p: 4 }}>
+            <Box sx={{ textAlign: "center", py: 6 }}>
               <Typography variant="body1" color="text.secondary">
-                No se encontraron {viewMode.toLowerCase()} para el cliente seleccionado en el año {selectedYear}.
+                No se encontraron {viewMode.toLowerCase()} para el cliente seleccionado en el año{" "}
+                {selectedYear}.
               </Typography>
             </Box>
           )}
-        </Paper>
+        </MainCard>
       )}
-    </Box>
+    </PageLayout>
   );
 };
 

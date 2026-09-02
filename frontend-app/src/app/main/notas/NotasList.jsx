@@ -217,7 +217,7 @@ export default function NotasList() {
       align: "center",
       renderCell: (params) => (
         <Button
-          color="error"
+          color="primary"
           size="small"
           variant="outlined"
           onClick={() => {

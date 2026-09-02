@@ -115,7 +115,7 @@ const PagosModal = ({ tributo, onAfterSave }) => {
           mb: 1.5,
           p: 1.5,
           borderRadius: 2,
-          bgcolor: 'info.lighter',
+          // bgcolor: 'info.lighter',
           color: "text.primary",
           border: '1px solid',
           borderColor: 'divider',

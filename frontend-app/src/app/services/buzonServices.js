@@ -33,9 +33,11 @@ const buzonServices = {
         }
     },
 
-    getVerifyProgress: async () => {
+    /** @param {string} jobId - Id devuelto por verifyAll (worker HTTP). */
+    getVerifyProgress: async (jobId) => {
         try {
-            return await fetchWithAuth("/buzon/verify-progress");
+            const q = jobId ? `?jobId=${encodeURIComponent(jobId)}` : "";
+            return await fetchWithAuth(`/buzon/verify-progress${q}`);
         } catch (error) {
             console.error('Error obteniendo progreso de verificación:', error);
             throw error;

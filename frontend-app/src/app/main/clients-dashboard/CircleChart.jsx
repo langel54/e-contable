@@ -2,6 +2,7 @@
 import PropTypes from "prop-types";
 import { useTheme } from "@mui/material/styles";
 import dynamic from "next/dynamic";
+import { getApexThemeOptions, getChartSeriesColors } from "@/app/themes/chartPalette";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -10,26 +11,16 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
 export default function CircleChart({ slot, labels = [], series = [] }) {
   const theme = useTheme();
 
-  const muiColors = [
-    // theme.palette.success.main,
-    theme.palette.success.light,
-    // theme.palette.primary.main,
-    theme.palette.primary.light,
-    theme.palette.error.light,
-    // theme.palette.secondary.main,
-    theme.palette.info.light,
-    // theme.palette.error.main,
-    theme.palette.error.light,
-    // theme.palette.warning.main,
-    theme.palette.warning.light,
-  ];
+  const apexTheme = getApexThemeOptions(theme);
+  const chartColors = getChartSeriesColors(theme, labels.length || series.length);
 
   const options = {
-    chart: { type: "pie" },
-    labels: labels,
-    colors: muiColors, // 🔹 colores base
-    legend: { position: "bottom" },
-    dataLabels: { enabled: true },
+    ...apexTheme,
+    chart: { ...apexTheme.chart, type: "pie" },
+    labels,
+    colors: chartColors,
+    legend: { ...apexTheme.legend, position: "bottom" },
+    dataLabels: { ...apexTheme.dataLabels, enabled: true },
   };
 
   return (

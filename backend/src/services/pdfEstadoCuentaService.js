@@ -8,7 +8,8 @@ const pdfService = {
   async generatePDFFile(idclienteprov, year, filePath) {
     const result = await estadoCuentaService.getByClientAndYear(
       idclienteprov,
-      year
+      year,
+      "INGRESO"
     );
 
     if (!result || !result.cliente) {
@@ -307,7 +308,7 @@ const pdfService = {
       // Filas de datos - Solo ingresos según el formato del reporte
       doc.fillColor("black");
       doc.fontSize(7.5).font("Helvetica");
-      const ingresos = result.transacciones.filter((t) => t.tipo === "INGRESO");
+      const ingresos = result.transacciones;
       ingresos.forEach((transaccion, index) => {
         // Verificar si necesitamos una nueva página (ajustado para landscape)
         if (currentY + rowHeight > pageHeight - 100) {

@@ -1,5 +1,6 @@
 const sunafilService = require("../services/sunafilService");
 const { buildAutologinUrl } = require("../utils/sunatAuthHelper");
+const scraperWorkerClient = require("../services/scraperWorkerClient");
 
 // plugin = URL con #autologin para extensión; curl = login en servidor (Playwright) y retorno de URL final
 const DEFAULT_ACCESS_MODE = process.env.SUNAFIL_ACCESS_MODE || "curl";
@@ -82,25 +83,40 @@ const sunafilController = {
 
   async verifyAll(req, res) {
     try {
-      sunafilService
-        .verifyMonitoredSunafil()
-        .then((results) => {
-          console.log("Verificación masiva Sunafil completada:", results);
-        })
-        .catch((err) => {
-          console.error("Error en verificación masiva Sunafil:", err);
-        });
-
-      res.status(202).json({ message: "Verificación Sunafil iniciada en segundo plano." });
+      const data = await scraperWorkerClient.startSunafilVerify();
+      res.status(202).json({
+        message:
+          data.message ||
+          "Verificación Sunafil encolada; el worker la ejecutará con Playwright.",
+        jobId: data.jobId,
+      });
     } catch (error) {
-      console.error("Error iniciando verificación Sunafil:", error);
+      console.error("Error llamando al worker Sunafil:", error);
+      const msg = String(error.message || error);
+      if (
+        msg.includes("ECONNREFUSED") ||
+        msg.includes("fetch failed") ||
+        msg.includes("No autorizado")
+      ) {
+        return res.status(503).json({
+          error:
+            "Worker de scraping no disponible o token incorrecto. Inicie `npm run worker` o el servicio backend-worker y revise SCRAPER_WORKER_URL / SCRAPER_WORKER_SECRET.",
+          detail: msg,
+        });
+      }
       res.status(500).json({ error: "Error en el servidor." });
     }
   },
 
   async getVerifyProgress(req, res) {
     try {
-      const progress = sunafilService.getVerifyProgress();
+      const jobId = req.query.jobId;
+      if (!jobId) {
+        return res.status(400).json({
+          error: "Falta jobId. Debe venir de la respuesta de POST /verify-all.",
+        });
+      }
+      const progress = await scraperWorkerClient.getJobProgress(jobId);
       res.json(progress);
     } catch (error) {
       console.error("Error obteniendo progreso Sunafil:", error);

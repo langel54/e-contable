@@ -145,7 +145,16 @@
 }
 
 .react-datepicker-popper {
-    z-index: 99;
+    z-index: 9999 !important;
+}
+
+.app-datepicker-popper {
+    z-index: 9999 !important;
+}
+
+.react-datepicker-popper .react-datepicker {
+    z-index: 9999 !important;
+    pointer-events: auto;
 }
 
 .react-datepicker-popper[data-placement^=bottom] {

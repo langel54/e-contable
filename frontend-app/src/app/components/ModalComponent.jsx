@@ -22,6 +22,14 @@ const ModalComponent = ({
       open={open}
       aria-labelledby="modal-title"
       aria-describedby="modal-description"
+      slotProps={{
+        backdrop: {
+          sx: {
+            backdropFilter: "blur(4px)",
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+          },
+        },
+      }}
     >
       <Box
         sx={{
@@ -34,7 +42,7 @@ const ModalComponent = ({
           boxShadow: (theme) => theme.customShadows.z1,
           border: '1px solid',
           borderColor: 'divider',
-          borderRadius: 3,
+          borderRadius: 1.5,
           display: "flex",
           flexDirection: "column",
           maxHeight: "90vh",

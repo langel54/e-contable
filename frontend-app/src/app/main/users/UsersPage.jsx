@@ -19,6 +19,8 @@ import {
   Chip,
   Tooltip,
 } from "@mui/material";
+import PageLayout from "@/app/ui-components/layout/PageLayout";
+import { VIEW_LAYOUT } from "@/app/ui-components/layout/layoutConstants";
 import SearchIcon from "@mui/icons-material/Search";
 import { useDebounce } from "use-debounce";
 import {
@@ -422,28 +424,28 @@ export default function UsersPage() {
 
   return (
     <>
-      <Box sx={{ mb: 4 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 3 }}>
-          <Box>
-            <Typography variant="h4" gutterBottom>
-              Usuarios
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {total} usuarios
-            </Typography>
-          </Box>
-          <Stack direction="row" spacing={2} alignItems="center">
+      <PageLayout
+        title="Usuarios"
+        subtitle={`${total} usuarios registrados`}
+        action={
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={1.5}
+            alignItems={{ xs: "stretch", sm: "center" }}
+            sx={{ width: { xs: "100%", sm: "auto" }, minWidth: 0 }}
+          >
             <TextField
               size="small"
               placeholder="Buscar"
               value={searchTerm}
               onChange={handleSearchChange}
-              sx={{ 
-                width: 300,
-                '& .MuiOutlinedInput-root': {
-                    bgcolor: 'background.paper',
-                    borderRadius: 2
-                }
+              sx={{
+                width: { xs: "100%", sm: 280 },
+                minWidth: 0,
+                "& .MuiOutlinedInput-root": {
+                  bgcolor: "background.paper",
+                  borderRadius: 1.5,
+                },
               }}
               InputProps={{
                 endAdornment: (
@@ -461,19 +463,21 @@ export default function UsersPage() {
             />
             <Button
               aria-label="Agregar"
-              size="large"
+              size="small"
               color="primary"
               variant="contained"
               onClick={() => setAddModalOpen(true)}
               startIcon={<Add />}
-              sx={{ borderRadius: 2, textTransform: 'none', px: 3 }}
+              sx={{ width: { xs: "100%", sm: "auto" }, flexShrink: 0 }}
             >
-              Agregar Usuario
+              Agregar usuario
             </Button>
           </Stack>
-        </Stack>
-      </Box>
+        }
+      >
+      <Box sx={{ minHeight: VIEW_LAYOUT.fullTableMinHeight, display: "flex", flexDirection: "column" }}>
       <CustomTable
+        fill
         columns={columns}
         data={users}
         paginationModel={paginationModel}
@@ -482,6 +486,8 @@ export default function UsersPage() {
         loading={loading}
         getRowId={(row) => row.id_usuario}
       />
+      </Box>
+      </PageLayout>
       {modalOpen && (
         <StyledModal
           modalOpen={modalOpen}

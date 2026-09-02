@@ -1,14 +1,17 @@
-import { Grid, Typography, useTheme, TextField, Stack, FormControl, InputLabel } from "@mui/material";
+import { Grid, Typography, useTheme, Stack } from "@mui/material";
 import AuthGuard from "../menu/AuthGuard";
 import AnalyticEcommerce from "@/app/ui-components/cards/statistics/AnalyticEcommerce";
 import MainCard from "@/app/ui-components/MainCard";
+import PageHeader from "@/app/ui-components/PageHeader";
+import SectionTitle from "@/app/ui-components/SectionTitle";
+import FilterToolbar, { FilterField } from "@/app/ui-components/layout/FilterToolbar";
+import { FILTER_LAYOUT, VIEW_LAYOUT } from "@/app/ui-components/layout/layoutConstants";
 import { useEffect, useState } from "react";
 import { getDashboardTributosKPIs, getDashboardTributosGraficos } from "@/app/services/dashboardService";
 import AreaChart from "@/app/components/dashboard/AreaChart";
 import CircleChart from "../clients-dashboard/CircleChart"; 
 import { Box } from "@mui/system";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import YearPickerField from "@/app/components/YearPickerField";
 import MonthPicker from "../caja-dashboard/MonthPicker";
 import dayjs from "dayjs";
 
@@ -113,52 +116,32 @@ const TributosDashboardPage = () => {
 
   return (
     <AuthGuard ids={[1, 6]}>
-      <Grid container rowSpacing={4.5} columnSpacing={2.75}>
+      <Grid container rowSpacing={VIEW_LAYOUT.gridSpacing} columnSpacing={VIEW_LAYOUT.gridSpacing}>
         <Grid item xs={12}>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            spacing={2}
-            sx={{
-              width: "100%",
-              border: '1px solid',
-              borderColor: 'divider',
-              padding: 1.5,
-              borderRadius: 3,
-              backgroundColor: 'transparent',
-            }}
-          >
-            <Typography variant="h5" fontWeight={600}>
-              Dashboard - Tributos
-            </Typography>
+          <PageHeader
+            title="Tributos"
+            subtitle="Declaraciones, pagos y distribución por estado"
+          />
+        </Grid>
 
-            <Stack direction="row" spacing={2} alignItems="center">
-              <FormControl size="medium" sx={{ width: 150 }}>
-                  <DatePicker
-                  selected={selectedAnio ? new Date(selectedAnio, 0, 1) : null}
+        <Grid item xs={12}>
+          <MainCard contentSX={FILTER_LAYOUT.cardContent}>
+            <FilterToolbar>
+              <FilterField>
+                <YearPickerField
+                  selected={selectedAnio}
                   onChange={handleYearChange}
-                  showYearPicker
-                  dateFormat="yyyy"
                   renderYearContent={renderYearContent}
-                  customInput={
-                      <TextField
-                      label="Año"
-                      value={selectedAnio || ""}
-                      InputProps={{ readOnly: true }}
-                      size="small"
-                      />
-                  }
-                  />
-              </FormControl>
-              <FormControl fullWidth size="small" sx={{ width: 200 }}>
-                  <MonthPicker
+                />
+              </FilterField>
+              <FilterField>
+                <MonthPicker
                   value={selectedMonth}
                   onChange={(value) => setSelectedMonth(value)}
-                  />
-              </FormControl>
-            </Stack>
-          </Stack>
+                />
+              </FilterField>
+            </FilterToolbar>
+          </MainCard>
         </Grid>
 
         {/* KPIs Row 1 */}
@@ -203,12 +186,8 @@ const TributosDashboardPage = () => {
         
         {/* Monthly Evolution */}
         <Grid item xs={12} md={8}>
-          <Grid container alignItems="center" justifyContent="space-between">
-            <Grid item>
-              <Typography variant="h5">Evolución Mensual</Typography>
-            </Grid>
-          </Grid>
-          <MainCard sx={{ mt: 2 }} content={false}>
+          <SectionTitle>Evolución mensual</SectionTitle>
+          <MainCard content={false}>
             <AreaChart 
                 seriesData={chartData.monthlySeries}
                 categories={chartData.monthlyCategories}
@@ -221,18 +200,14 @@ const TributosDashboardPage = () => {
 
         {/* Status Distribution */}
         <Grid item xs={12} md={4}>
-          <Grid container alignItems="center" justifyContent="space-between">
-            <Grid item>
-              <Typography variant="h5">Estado de Tributos</Typography>
-            </Grid>
-          </Grid>
-          <MainCard sx={{ mt: 2 }} content={false}>
+          <SectionTitle>Estado de tributos</SectionTitle>
+          <MainCard content={false}>
             <Box sx={{ p: 3, pb: 0 }}>
                 <Stack spacing={2}>
                   <Typography variant="h6" color="text.secondary">
                     Distribución
                   </Typography>
-                  <Typography variant="h4" fontWeight={100}>
+                  <Typography variant="h4" fontWeight={600}>
                     Total: {kpis.totalTributos}
                   </Typography>
                 </Stack>
@@ -247,12 +222,8 @@ const TributosDashboardPage = () => {
 
 
         <Grid item xs={12}>
-            <Grid container alignItems="center" justifyContent="space-between">
-                <Grid item>
-                <Typography variant="h5">Pagos por Tipo de Tributo</Typography>
-                </Grid>
-            </Grid>
-            <MainCard sx={{ mt: 2 }} content={false}>
+            <SectionTitle>Pagos por tipo de tributo</SectionTitle>
+            <MainCard content={false}>
                 <AreaChart 
                     seriesData={chartData.byTypeSeries}
                     categories={chartData.byTypeCategories}

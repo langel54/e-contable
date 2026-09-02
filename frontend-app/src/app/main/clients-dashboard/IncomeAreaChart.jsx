@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { useTheme } from "@mui/material/styles";
 import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
+import { getApexThemeOptions, getChartSeriesColors } from "@/app/themes/chartPalette";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -25,7 +26,8 @@ export default function AreaChart({
   colors,
 }) {
   const theme = useTheme();
-  const { text, divider, primary } = theme.palette;
+  const { text, divider } = theme.palette;
+  const apexTheme = getApexThemeOptions(theme);
 
   // 🔹 Estado para evitar render antes de montar
   const [mounted, setMounted] = useState(false);
@@ -37,9 +39,12 @@ export default function AreaChart({
   if (!mounted) return null; // Esperar a que el componente se monte
 
   const options = {
+    ...apexTheme,
     ...defaultChartOptions,
-    colors: colors || [primary.main, primary[700]],
+    chart: { ...apexTheme.chart, ...defaultChartOptions.chart },
+    colors: colors?.length ? colors : getChartSeriesColors(theme, 2),
     xaxis: {
+      ...apexTheme.xaxis,
       categories,
       labels: {
         style: { colors: Array(categories.length).fill(text.secondary) },
@@ -48,9 +53,10 @@ export default function AreaChart({
       tickAmount: categories.length - 1,
     },
     yaxis: {
+      ...apexTheme.yaxis,
       labels: { style: { colors: [text.secondary] } },
     },
-    grid: { borderColor: divider },
+    grid: { ...apexTheme.grid, borderColor: divider },
   };
 
   return (

@@ -11,55 +11,49 @@ import Collapse from "@mui/material/Collapse";
 import List from "@mui/material/List";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Box from "@mui/material/Box";
 import Popper from "@mui/material/Popper";
 import Paper from "@mui/material/Paper";
 import MenuList from "@mui/material/MenuList";
 import MenuItem from "@mui/material/MenuItem";
-import ClickAwayListener from "@mui/material/ClickAwayListener";
-import { alpha, useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
+import { getMenuPaperSx } from "@/app/themes/appTokens";
 
-const DrawerListItem = ({ item, open }) => {
+const DrawerListItem = ({ item, open, isSubmenuOpen, onSetSubmenuOpen }) => {
   const theme = useTheme();
   const pathname = usePathname();
 
-  // --- Drawer ABIERTO (Collapse por clic)
-  const [submenuOpen, setSubmenuOpen] = useState(false);
+  const submenuOpen = isSubmenuOpen;
+  const setSubmenuOpen = onSetSubmenuOpen;
 
-  // --- Drawer CERRADO (Popper por hover)
   const anchorRef = useRef(null);
   const [hoverOpen, setHoverOpen] = useState(false);
-  const enterTimer = useRef();
   const leaveTimer = useRef();
 
   const isActive = pathname === item.path;
   const hasChildren = item.children && item.children.length > 0;
-  
-  // Check if any child is active to highlight parent
-  const isChildActive = hasChildren && item.children.some(child => pathname === child.path);
+  const isChildActive =
+    hasChildren && item.children.some((child) => pathname === child.path);
+  const isParentHighlighted = isActive || (open && isChildActive);
 
-  // Auto-expand if child is active and drawer is open
   useEffect(() => {
-    if (open && isChildActive) {
+    if (open && isChildActive && typeof setSubmenuOpen === "function") {
       setSubmenuOpen(true);
     }
-  }, [open, isChildActive]);
+  }, [open, isChildActive, setSubmenuOpen]);
 
-  // Collapse toggle
   const handleToggleSubmenu = () => {
-    if (hasChildren && open) setSubmenuOpen((v) => !v);
+    if (hasChildren && open && typeof setSubmenuOpen === "function") {
+      setSubmenuOpen(!submenuOpen);
+    }
   };
 
-  // Hover handlers (drawer cerrado)
   const openHover = () => {
     clearTimeout(leaveTimer.current);
-    clearTimeout(enterTimer.current); // Clear any pending open timer just in case
-    setHoverOpen(true); // Open immediately on enter for snappier feel, or use small delay
+    setHoverOpen(true);
   };
 
   const scheduleCloseHover = () => {
-    clearTimeout(enterTimer.current);
     clearTimeout(leaveTimer.current);
     leaveTimer.current = setTimeout(() => setHoverOpen(false), 100);
   };
@@ -68,37 +62,25 @@ const DrawerListItem = ({ item, open }) => {
     clearTimeout(leaveTimer.current);
   };
 
-  const activeBackgroundColor = alpha(theme.palette.primary.main, 0.12);
-  const hoverBackgroundColor = alpha(theme.palette.primary.main, 0.08);
+  const itemLayoutSx = {
+    mx: 1.25,
+    px: 2,
+    width: "auto",
+    justifyContent: open ? "initial" : "center",
+  };
 
   return (
     <>
-      <ListItem disablePadding sx={{ display: "block", mb: 0.8 }}>
+      <ListItem disablePadding sx={{ display: "block", mb: 0.5 }}>
         <ListItemButton
           ref={anchorRef}
+          selected={isParentHighlighted}
           component={hasChildren ? "div" : Link}
           href={hasChildren ? undefined : item.path}
           onClick={hasChildren && open ? handleToggleSubmenu : undefined}
           onMouseEnter={!open && hasChildren ? openHover : undefined}
           onMouseLeave={!open && hasChildren ? scheduleCloseHover : undefined}
-          sx={{
-            minHeight: 44,
-            mx: 1.5,
-            borderRadius: 2,
-            justifyContent: open ? "initial" : "center",
-            px: 2.5,
-            backgroundColor: isActive || (open && isChildActive) ? activeBackgroundColor : "transparent",
-            color: isActive || (open && isChildActive) ? "primary.main" : "text.primary",
-            width: "auto",
-            transition: theme.transitions.create(['background-color', 'color', 'transform'], {
-              duration: 200,
-            }),
-            "&:hover": {
-              backgroundColor: isActive || (open && isChildActive) ? activeBackgroundColor : hoverBackgroundColor,
-              color: isActive || (open && isChildActive) ? "primary.main" : "text.primary",
-              transform: !isActive ? 'translateX(4px)' : 'none'
-            },
-          }}
+          sx={itemLayoutSx}
         >
           <ListItemIcon
             sx={{
@@ -106,9 +88,7 @@ const DrawerListItem = ({ item, open }) => {
               mr: open ? 2 : "auto",
               justifyContent: "center",
               color: "inherit",
-              "& .MuiSvgIcon-root": {
-                 fontSize: '1.25rem'
-              }
+              "& .MuiSvgIcon-root": { fontSize: "1.25rem" },
             }}
           >
             {item.icon}
@@ -118,28 +98,24 @@ const DrawerListItem = ({ item, open }) => {
             primary={item.text}
             sx={{
               opacity: open ? 1 : 0,
-              display: open ? 'block' : 'none', // Hide completely when closed to avoid layout shifts if opacity animates
+              display: open ? "block" : "none",
               m: 0,
-              "& .MuiTypography-root": {
-                fontWeight: isActive || (open && isChildActive) ? 600 : 400,
-                fontSize: '0.875rem',
-              }
+            }}
+            primaryTypographyProps={{
+              variant: "body2",
+              fontWeight: isParentHighlighted ? 600 : 500,
+              fontSize: "0.875rem",
             }}
           />
 
           {hasChildren && open && (
-            <Box sx={{ ml: "auto", display: 'flex', alignItems: 'center', color: 'text.disabled' }}>
-              {submenuOpen ? (
-                <ExpandLess fontSize="small" />
-              ) : (
-                <ExpandMore fontSize="small" />
-              )}
+            <Box sx={{ ml: "auto", display: "flex", color: "text.disabled" }}>
+              {submenuOpen ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
             </Box>
           )}
         </ListItemButton>
       </ListItem>
 
-      {/* Drawer ABIERTO → Collapse */}
       {hasChildren && open && (
         <Collapse in={submenuOpen} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
@@ -148,23 +124,15 @@ const DrawerListItem = ({ item, open }) => {
               return (
                 <ListItemButton
                   key={subItem.path}
+                  selected={isSubActive}
                   component={Link}
                   href={subItem.path}
                   sx={{
-                    pl: 9, // Indent: 2.5(pad) + 2(icon) + 2(space) + extra
+                    pl: 9,
                     mx: 1,
-                    borderRadius: 1.5,
                     mb: 0.5,
                     minHeight: 40,
-                    width: 'auto',
-                    backgroundColor: isSubActive
-                      ? activeBackgroundColor
-                      : "transparent",
-                    color: isSubActive ? "primary.main" : "text.primary",
-                    "&:hover": {
-                      backgroundColor: isSubActive ? activeBackgroundColor : hoverBackgroundColor,
-                      color: isSubActive ? "primary.main" : "text.primary",
-                    },
+                    width: "auto",
                   }}
                 >
                   <ListItemText
@@ -172,8 +140,8 @@ const DrawerListItem = ({ item, open }) => {
                     sx={{ m: 0 }}
                     primaryTypographyProps={{
                       variant: "body2",
-                      fontWeight: isSubActive ? 500 : 400,
-                      fontSize: '0.85rem'
+                      fontWeight: isSubActive ? 600 : 400,
+                      fontSize: "0.85rem",
                     }}
                   />
                 </ListItemButton>
@@ -183,77 +151,47 @@ const DrawerListItem = ({ item, open }) => {
         </Collapse>
       )}
 
-      {/* Drawer CERRADO → Popper por hover */}
       {!open && hasChildren && (
         <Popper
           open={hoverOpen}
           anchorEl={anchorRef.current}
-          placement="right-start" 
+          placement="right-start"
           modifiers={[
-            {
-              name: "offset",
-              options: {
-                offset: [0, 12], // Vertical offset to align better with parent
-              },
-            },
-            {
-              name: 'preventOverflow',
-              options: {
-                boundary: 'viewport',
-                padding: 8,
-              },
-            },
+            { name: "offset", options: { offset: [0, 12] } },
+            { name: "preventOverflow", options: { boundary: "viewport", padding: 8 } },
           ]}
           sx={{ zIndex: 1300 }}
         >
           <Paper
-            elevation={4}
             onMouseEnter={cancelCloseHover}
             onMouseLeave={scheduleCloseHover}
-            sx={{
-              mt: 0.5,
-              ml: 1, // Add space between drawer and menu
-              minWidth: 180,
-              overflow: 'hidden',
-              borderRadius: 2,
-              backgroundImage: 'none',
-              backgroundColor: 'background.paper',
-              border: '1px solid',
-              borderColor: 'divider',
-              boxShadow: theme.shadows[8]
-            }}
+            sx={{ mt: 0.5, ml: 1, minWidth: 200, ...getMenuPaperSx(theme) }}
           >
-            <MenuList disablePadding>
-              {/* Optional: Show parent title in popup for context */}
-              <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider', bgcolor: alpha(theme.palette.background.default, 0.5) }}>
-                <ListItemText 
-                    primary={item.text} 
-                    primaryTypographyProps={{ variant: 'subtitle2', fontWeight: 600 }}
+            <MenuList disablePadding sx={{ py: 0.75, px: 0.5 }}>
+              <Box
+                sx={{
+                  px: 2,
+                  py: 1.25,
+                  mb: 0.5,
+                  borderBottom: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
+                <ListItemText
+                  primary={item.text}
+                  primaryTypographyProps={{ variant: "subtitle2", fontWeight: 600 }}
                 />
               </Box>
-            
+
               {item.children.map((subItem) => {
                 const isSubActive = pathname === subItem.path;
                 return (
                   <MenuItem
                     key={subItem.path}
+                    selected={isSubActive}
                     component={Link}
                     href={subItem.path}
                     onClick={() => setHoverOpen(false)}
-                    sx={{
-                        mx: 1,
-                        my: 0.5,
-                        borderRadius: 1,
-                      backgroundColor: isSubActive
-                        ? activeBackgroundColor
-                        : "transparent",
-                      color: isSubActive ? "primary.main" : "text.primary",
-                      "&:hover": {
-                        backgroundColor: isSubActive ? activeBackgroundColor : hoverBackgroundColor,
-                        color: isSubActive ? "primary.main" : "text.primary",
-                      },
-                      fontSize: '0.875rem'
-                    }}
                   >
                     {subItem.text}
                   </MenuItem>

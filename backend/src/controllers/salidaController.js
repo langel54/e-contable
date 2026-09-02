@@ -13,6 +13,7 @@ const salidaController = {
         period,
         year,
         status,
+        cliente,
       } = req.query;
       const skip = (page - 1) * limit;
       const { salidas, total } = await salidaService.getAll(
@@ -23,7 +24,8 @@ const salidaController = {
         Number(concept),
         Number(period),
         Number(year),
-        Number(status)
+        Number(status),
+        cliente
       );
       res.json({
         salidas,

@@ -4,7 +4,7 @@ import { fetchWithAuth } from "@/app/services/apiClient";
 export const getExpenses = async (
   page = 1,
   limit = 10,
-  search,
+  cliente,
   status,
   startDate,
   endDate,
@@ -13,7 +13,7 @@ export const getExpenses = async (
   year
 ) => {
   return fetchWithAuth(
-    `/egreso?page=${page}&limit=${limit}&search=${search}&status=${status}&startDate=${startDate}&endDate=${endDate}&concept=${concept}&period=${period}&year=${year}`
+    `/egreso?page=${page}&limit=${limit}&cliente=${cliente || ""}&status=${status}&startDate=${startDate}&endDate=${endDate}&concept=${concept}&period=${period}&year=${year}`
   );
 };
 

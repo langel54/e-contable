@@ -9,19 +9,24 @@ function getVerifyProgress() {
     return { ...verifyProgress };
 }
 
-async function verifyMonitoredBuzones() {
+/**
+ * Verificación masiva Buzón SOL (Playwright vía accessSunatMenu).
+ * @param {function(object): void} [reportProgress] - Opcional; { total, done, inProgress } (p. ej. worker).
+ */
+async function verifyMonitoredBuzones(reportProgress) {
+    const notify = () => reportProgress?.({ ...verifyProgress });
+
     console.log("Iniciando verificación masiva de Buzón SOL (Decoupled)...");
 
-    // 1. Obtener los IDs de clientes a monitorear
     const monitoringEntries = await prisma.monitoreo_buzon.findMany();
     const clientIds = monitoringEntries.map(e => e.idclienteprov);
 
     if (clientIds.length === 0) {
         verifyProgress = { total: 0, done: 0, inProgress: false };
+        notify();
         return [];
     }
 
-    // 2. Obtener los datos de esos clientes desde clienteProv
     const clients = await prisma.clienteProv.findMany({
         where: { idclienteprov: { in: clientIds } },
         select: {
@@ -34,6 +39,7 @@ async function verifyMonitoredBuzones() {
     });
 
     verifyProgress = { total: clients.length, done: 0, inProgress: true };
+    notify();
     console.log(`Se procesarán ${clients.length} clientes.`);
 
     const results = [];
@@ -43,6 +49,8 @@ async function verifyMonitoredBuzones() {
 
         if (!client.ruc || !client.c_usuario || !client.c_passw) {
             results.push({ idclienteprov: client.idclienteprov, success: false, error: "Credenciales incompletas" });
+            verifyProgress.done += 1;
+            notify();
             continue;
         }
 
@@ -78,7 +86,6 @@ async function verifyMonitoredBuzones() {
                     }
                 }
 
-                // 3. Actualizar el conteo de no leídos (desde la DB para ser precisos)
                 const unreadCountInDb = await prisma.monitoreo_mensaje.count({
                     where: { idclienteprov: client.idclienteprov, leido: false }
                 });
@@ -100,9 +107,11 @@ async function verifyMonitoredBuzones() {
             results.push({ idclienteprov: client.idclienteprov, success: false, error: error.message });
         }
         verifyProgress.done += 1;
+        notify();
     }
 
     verifyProgress.inProgress = false;
+    notify();
     return results;
 }
 

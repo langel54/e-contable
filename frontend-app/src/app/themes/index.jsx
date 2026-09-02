@@ -11,6 +11,7 @@ import Palette from "./palette";
 import Typography from "./typography";
 import CustomShadows from "./shadows";
 import componentsOverride from "./overrides";
+import { getAppTokens } from "./appTokens";
 import { useAuth } from "../provider";
 
 // ==============================|| DEFAULT THEME - MAIN  ||============================== //
@@ -20,8 +21,9 @@ export default function ThemeCustomization({ children }) {
   const theme = Palette(mode, "default");
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const themeTypography = Typography(`'Outfit', sans-serif`);
+  const themeTypography = Typography(`'Plus Jakarta Sans', 'Outfit', system-ui, sans-serif`);
   const themeCustomShadows = useMemo(() => CustomShadows(theme), [theme]);
+  const appTokens = useMemo(() => getAppTokens(theme), [theme]);
 
   const themeOptions = useMemo(
     () => ({
@@ -42,11 +44,15 @@ export default function ThemeCustomization({ children }) {
           paddingBottom: 8,
         },
       },
+      shape: {
+        borderRadius: 8,
+      },
       palette: theme.palette,
       customShadows: themeCustomShadows,
       typography: themeTypography,
+      app: appTokens,
     }),
-    [theme, themeTypography, themeCustomShadows]
+    [theme, themeTypography, themeCustomShadows, appTokens]
   );
 
   const themes = createTheme(themeOptions);

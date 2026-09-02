@@ -15,24 +15,21 @@ import { Box } from "@mui/material";
 export default function Login() {
   return (
     <AuthWrapper>
-      <Stack spacing={3}>
+      <Stack spacing={4}>
         <Box>
           <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="baseline"
+            direction="column"
+            justifyContent="center"
+            alignItems="flex-start"
+            spacing={1}
             sx={{ mb: { xs: -0.5, sm: 0.5 } }}
           >
-            <Typography variant="h3">Iniciar sesión</Typography>
-            {/* <Typography
-              // component={Link}
-              to="/register"
-              variant="body1"
-              sx={{ textDecoration: "none" }}
-              color="primary"
-            >
-              Crear cuenta
-            </Typography> */}
+            <Typography variant="h3" fontWeight={700}>
+              Iniciar sesión
+            </Typography>
+            <Typography variant="body1" color="textSecondary">
+              Bienvenido de vuelta, ingresa tus credenciales para continuar.
+            </Typography>
           </Stack>
         </Box>
         <Box>

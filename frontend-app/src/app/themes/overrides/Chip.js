@@ -1,6 +1,7 @@
 // project import
 
 import getColors from "@/app/utils/getColors";
+import { getInteractionTransition, getSubtleHover } from "../appTokens";
 
 // ==============================|| CHIP - COLORS ||============================== //
 
@@ -26,9 +27,6 @@ function getColorStyle({ color, theme }) {
     borderColor: light,
     "& .MuiChip-deleteIcon": {
       color: main,
-      "&:hover": {
-        color: light,
-      },
     },
   };
 }
@@ -41,7 +39,9 @@ export default function Chip(theme) {
     MuiChip: {
       styleOverrides: {
         root: {
-          borderRadius: 4,
+          borderRadius: 6,
+          ...getInteractionTransition(),
+          "&:hover": getSubtleHover(theme, "primary"),
           "&:active": {
             boxShadow: "none",
           },

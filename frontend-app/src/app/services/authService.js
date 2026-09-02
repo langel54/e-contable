@@ -1,7 +1,6 @@
 import Cookies from "js-cookie";
 import { notifyNetworkError, NETWORK_ERROR_MESSAGE } from "./networkErrorHandler";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { API_BASE } from "./apiConfig";
 
 export const authService = {
   getToken: () => {
@@ -9,7 +8,7 @@ export const authService = {
   },
   login: async (email, password) => {
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const response = await fetch(`${API_BASE}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -25,7 +24,9 @@ export const authService = {
       Cookies.set("token", data.token, {
         path: "/",
         sameSite: "Strict",
-        secure: true,
+        secure:
+          typeof window !== "undefined" &&
+          window.location.protocol === "https:",
       });
 
       return data;

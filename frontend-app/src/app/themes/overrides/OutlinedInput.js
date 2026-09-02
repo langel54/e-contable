@@ -14,14 +14,20 @@ export default function OutlinedInput(theme) {
           borderColor: theme.palette.grey[300]
         },
         root: {
-          borderRadius: "12px",
+          borderRadius: 8,
+          transition: "all 0.2s ease-in-out",
+          backgroundColor: alpha(theme.palette.background.paper, 0.4),
+          '&:hover': {
+            backgroundColor: alpha(theme.palette.background.paper, 0.8),
+          },
           '&:hover .MuiOutlinedInput-notchedOutline': {
             borderColor: theme.palette.primary.light
           },
           '&.Mui-focused': {
-            boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`,
+            backgroundColor: theme.palette.background.paper,
+            boxShadow: `0 0 0 4px ${alpha(theme.palette.primary.main, 0.15)}`,
             '& .MuiOutlinedInput-notchedOutline': {
-              border: `1px solid ${theme.palette.primary.light}`
+              border: `1px solid ${theme.palette.primary.main}`
             }
           },
           '&.Mui-error': {

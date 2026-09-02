@@ -15,6 +15,9 @@ import CustomTable from "@/app/components/CustonTable";
 import ModalComponent from "@/app/components/ModalComponent";
 import { getAllVencimientos, deleteVencimiento } from "@/app/services/vencimientosService";
 import VencimientoForm from "./VencimientoForm";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
 
 const VencimientosPage = () => {
   const [data, setData] = useState([]);
@@ -82,14 +85,20 @@ const VencimientosPage = () => {
   };
 
   const columns = [
-    { field: "anio_v", headerName: "Año", width: 90 },
-    { field: "mes_v", headerName: "Mes", width: 90 },
-    // Optionally visualize all dates? Too wide. 
-    // Maybe just actions.
+    { field: "anio_v", headerName: "Año", width: 80 },
+    { field: "mes_v", headerName: "Mes", width: 80 },
+    ...[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => ({
+      field: `d${digit}`,
+      headerName: `D${digit}`,
+      width: 90,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => params.value ? dayjs(params.value).utc(true).format("DD/MM/YYYY") : "-",
+    })),
     {
       field: "actions",
       headerName: "Acciones",
-      width: 150,
+      width: 120,
       renderCell: (params) => (
         <Stack direction="row" spacing={1}>
           <Tooltip title="Editar">

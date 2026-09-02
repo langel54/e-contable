@@ -5,7 +5,11 @@ export default function Paper(theme) {
         MuiPaper: {
             styleOverrides: {
                 root: {
-                    backgroundImage: 'none', // Remove elevation overlay in dark mode
+                    backgroundImage: 'none',
+                    backgroundColor: theme.palette.background.paper,
+                    boxShadow: 'none',
+                    borderRadius: theme.shape.borderRadius,
+                    border: `1px solid ${theme.palette.divider}`,
                 }
             }
         }

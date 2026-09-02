@@ -8,7 +8,10 @@ import {
   DeleteOutline,
   // RestartAlt,
 } from "@mui/icons-material";
-import { Box, Button, Divider, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import PageLayout from "@/app/ui-components/layout/PageLayout";
+import MainCard from "@/app/ui-components/MainCard";
+import { FILTER_LAYOUT, VIEW_LAYOUT } from "@/app/ui-components/layout/layoutConstants";
 import React, { useEffect, useState } from "react";
 import IncomeForm from "./IncomesForm";
 import ModalComponent from "@/app/components/ModalComponent";
@@ -26,6 +29,7 @@ import { getEstados } from "@/app/services/estadoDocServices";
 // import excelExport from "@/app/components/excelReport";
 import { getColumns } from "./components/TableColumns";
 import IncomesFilters from "./components/IncomesFilters";
+import NotasClienteAutocomplete from "../notas/components/NotasClienteAutocomplete";
 import IncomesActionsPopover from "./components/IncomesActionsPopover";
 import { handleGenerateExcel, handleGeneratePDF } from "./utils";
 import { useIncomesData } from "./hooks/useIncomesData";
@@ -97,6 +101,7 @@ const IncomesPage = () => {
   const [openFormModal, setOpenFormModal] = useState(false);
   const [editIncomeData, setEditIncomeData] = useState(null);
   const [periodosList, setPeriodosList] = useState([]);
+  const [clienteFilter, setClienteFilter] = useState("");
   const [conceptFilter, setConceptFilter] = useState("");
   const [conceptos, setConceptos] = useState([]);
   const [periodo, setPeriodo] = useState("");
@@ -144,7 +149,8 @@ const IncomesPage = () => {
         conceptFilter,
         periodo,
         selectedAnio,
-        selectedEstado
+        selectedEstado,
+        clienteFilter
       );
     }
   }, [
@@ -156,6 +162,7 @@ const IncomesPage = () => {
     periodo,
     selectedAnio,
     selectedEstado,
+    clienteFilter,
   ]);
 
   useEffect(() => {
@@ -167,6 +174,7 @@ const IncomesPage = () => {
     periodo,
     selectedAnio,
     selectedEstado,
+    clienteFilter,
   ]);
 
   const refreshTable = () => {
@@ -182,7 +190,8 @@ const IncomesPage = () => {
       conceptFilter,
       periodo,
       selectedAnio,
-      selectedEstado
+      selectedEstado,
+      clienteFilter
     );
   };
 
@@ -197,6 +206,7 @@ const IncomesPage = () => {
   };
   const handleResetFilter = () => {
     setDateRange([null, null]);
+    setClienteFilter("");
     setConceptFilter("");
     setPeriodo("");
     setSelectedAnio("");
@@ -219,34 +229,36 @@ const IncomesPage = () => {
   };
 
   return (
-    <Box>
-      <Stack
-        sx={{ pb: 2 }}
-        direction="row"
-        spacing={2}
-        justifyContent={"space-between"}
-      >
-        <Stack>
-          <Typography variant="h4" gutterBottom>
-            Ingresos
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Registra y consulta ingresos
-          </Typography>
-        </Stack>
-        <Button
-          size="medium"
-          color="success"
-          variant="contained"
-          onClick={() => {
-            setOpenFormModal(true);
-          }}
-          startIcon={<PostAdd fontSize="inherit" />}
+    <PageLayout
+      title="Ingresos"
+      subtitle="Registra y consulta ingresos"
+      action={
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1.5}
+          alignItems={{ xs: "stretch", sm: "center" }}
+          sx={{ width: { xs: "100%", sm: "auto" }, minWidth: 0 }}
         >
-          Registrar Ingreso
-        </Button>
-      </Stack>
-      <Divider></Divider>
+          <NotasClienteAutocomplete
+            size="small"
+            value={clienteFilter}
+            onChange={(val) => setClienteFilter(val)}
+            sx={{ width: { xs: "100%", sm: 280 }, minWidth: 0 }}
+          />
+          <Button
+            size="small"
+            color="success"
+            variant="contained"
+            onClick={() => setOpenFormModal(true)}
+            startIcon={<PostAdd />}
+            sx={{ width: { xs: "100%", sm: "auto" }, flexShrink: 0 }}
+          >
+            Registrar ingreso
+          </Button>
+        </Stack>
+      }
+    >
+      <MainCard contentSX={FILTER_LAYOUT.cardContent}>
       <IncomesFilters
         conceptos={conceptos}
         conceptFilter={conceptFilter}
@@ -267,6 +279,8 @@ const IncomesPage = () => {
         handleResetFilter={handleResetFilter}
         handleClickPop={handleClickPop}
       />
+      </MainCard>
+      <Box sx={{ mt: VIEW_LAYOUT.sectionGap, minHeight: VIEW_LAYOUT.fullTableMinHeight, display: "flex", flexDirection: "column" }}>
       <IncomesActionsPopover
         anchorElPop={anchorElPop}
         handleActionOpen={handleActionOpen}
@@ -297,6 +311,7 @@ const IncomesPage = () => {
         handleClosePop={handleActionOpen}
       />
       <CustomTable
+        fill
         columns={getColumns({
           setEditIncomeData,
           setOpenFormModal,
@@ -379,7 +394,8 @@ const IncomesPage = () => {
         handleClose={handleClosePDFModal}
         data={selectedPDFData}
       />
-    </Box>
+      </Box>
+    </PageLayout>
   );
 };
 

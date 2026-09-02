@@ -13,6 +13,7 @@ const ingresoController = {
         period,
         year,
         status,
+        cliente,
       } = req.query;
 
       const skip = (page - 1) * limit;
@@ -25,7 +26,8 @@ const ingresoController = {
         Number(concept),
         Number(period),
         Number(year),
-        Number(status)
+        Number(status),
+        cliente
       );
 
       res.json({

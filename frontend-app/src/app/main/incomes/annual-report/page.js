@@ -12,17 +12,16 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    TextField,
     Typography,
-    Paper,
-    Divider,
-    GlobalStyles,
     Skeleton,
     LinearProgress
 } from "@mui/material";
-import { Search as SearchIcon, FileDownload as FileDownloadIcon } from "@mui/icons-material";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import PageLayout from "@/app/ui-components/layout/PageLayout";
+import MainCard from "@/app/ui-components/MainCard";
+import FilterToolbar, { FilterField } from "@/app/ui-components/layout/FilterToolbar";
+import { FILTER_LAYOUT, VIEW_LAYOUT } from "@/app/ui-components/layout/layoutConstants";
+import { FileDownload as FileDownloadIcon } from "@mui/icons-material";
+import YearPickerField from "@/app/components/YearPickerField";
 import { getAnnualReport } from "@/app/services/incomesServices";
 import dayjs from "dayjs";
 import * as XLSX from "exceljs";
@@ -142,76 +141,61 @@ const AnnualReportPage = () => {
     };
 
     return (
-        <Box sx={{ p: { xs: 2, md: 3 }, bgcolor: 'background.default', minHeight: '100vh' }}>
-            <GlobalStyles styles={{ '.react-datepicker-popper': { zIndex: '9999 !important' } }} />
-            {/* Header Section */}
-            <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
-                <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" alignItems="center" spacing={2}>
-                    <Box>
-                        <Typography variant="h5" fontWeight="700" color="primary.main">
-                            Reporte Anual de Ingresos
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            Vista general de pagos por cliente mensualizados
-                        </Typography>
-                    </Box>
-
-                    <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
-                        <Card elevation={0} sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 2, minWidth: 120 }}>
-                            <CardContent sx={{ py: 1, px: 2, '&:last-child': { pb: 1 } }}>
-                                <Typography variant="caption" color="text.secondary" fontWeight="bold">
-                                    CLIENTES
+        <PageLayout
+            title="Reporte anual de ingresos"
+            subtitle="Vista general de pagos por cliente mensualizados"
+        >
+            <MainCard contentSX={FILTER_LAYOUT.cardContent}>
+                <FilterToolbar>
+                    <FilterField>
+                        <Card elevation={0} variant="outlined" sx={{ borderRadius: 1.5 }}>
+                            <CardContent sx={{ py: 1, px: 2, "&:last-child": { pb: 1 } }}>
+                                <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                                    Clientes
                                 </Typography>
-                                <Typography variant="h6" color="text.primary" fontWeight="800">
-                                    {loading ? '...' : reportData.length}
+                                <Typography variant="h6" fontWeight={800}>
+                                    {loading ? "…" : reportData.length}
                                 </Typography>
                             </CardContent>
                         </Card>
-
-                        <Card elevation={0} sx={{ bgcolor: 'primary.lighter', border: '1px solid', borderColor: 'primary.light', borderRadius: 2, minWidth: 200, display: { xs: 'none', md: 'block' } }}>
-                            <CardContent sx={{ py: 1, px: 2, '&:last-child': { pb: 1 } }}>
-                                <Typography variant="caption" color="primary.dark" fontWeight="bold">
-                                    TOTAL
+                    </FilterField>
+                    <FilterField>
+                        <Card elevation={0} variant="outlined" sx={{ borderRadius: 1.5, bgcolor: "primary.lighter", borderColor: "primary.light" }}>
+                            <CardContent sx={{ py: 1, px: 2, "&:last-child": { pb: 1 } }}>
+                                <Typography variant="caption" color="primary.dark" fontWeight={700}>
+                                    Total anual
                                 </Typography>
-                                <Typography variant="h6" color="primary.main" fontWeight="800">
-                                    {loading ? '...' : formatCurrency(totalAnnual)}
+                                <Typography variant="h6" color="primary.main" fontWeight={800}>
+                                    {loading ? "…" : formatCurrency(totalAnnual)}
                                 </Typography>
                             </CardContent>
                         </Card>
-
-                        <DatePicker
-                            selected={new Date(selectedYear, 0, 1)}
+                    </FilterField>
+                    <FilterField>
+                        <YearPickerField
+                            selected={selectedYear}
                             onChange={handleYearChange}
-                            showYearPicker
-                            dateFormat="yyyy"
-                            customInput={
-                                <TextField
-                                    size="small"
-                                    label="Año"
-                                    InputProps={{
-                                        startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />
-                                    }}
-                                    sx={{ width: 120, bgcolor: 'background.paper' }}
-                                />
-                            }
                         />
-
+                    </FilterField>
+                    <FilterField>
                         <Button
+                            fullWidth
                             variant="outlined"
                             color="success"
                             startIcon={<FileDownloadIcon />}
                             onClick={handleExportExcel}
                             disabled={loading || reportData.length === 0}
-                            sx={{ height: 40 }}
                         >
                             Exportar
                         </Button>
-                    </Stack>
-                </Stack>
-            </Paper>
+                    </FilterField>
+                </FilterToolbar>
+            </MainCard>
 
-            {/* Table Section */}
-            <Card elevation={0} sx={{ borderRadius: 2, overflow: 'hidden', border: '1px solid', borderColor: 'divider', position: 'relative' }}>
+            <MainCard
+                content={false}
+                sx={{ mt: VIEW_LAYOUT.sectionGap, overflow: "hidden", position: "relative" }}
+            >
                 {loading && (
                     <LinearProgress
                         sx={{
@@ -228,15 +212,15 @@ const AnnualReportPage = () => {
                     <Table stickyHeader size="small">
                         <TableHead>
                             <TableRow>
-                                <TableCell sx={{ backgroundColor: 'primary.main', color: 'primary.contrastText', fontWeight: 'bold' }}>ID</TableCell>
-                                <TableCell sx={{ backgroundColor: 'primary.main', color: 'primary.contrastText', fontWeight: 'bold', minWidth: 200 }}>Razon Social</TableCell>
-                                <TableCell sx={{ backgroundColor: 'primary.main', color: 'primary.contrastText', fontWeight: 'bold', whiteSpace: 'nowrap', textAlign: 'center' }}>Cant. Pagos</TableCell>
+                                <TableCell sx={{ backgroundColor: 'primary.main', color: (theme) => theme.palette.primary.contrastText, fontWeight: 700, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 0.5, borderBottom: 'none' }}>ID</TableCell>
+                                <TableCell sx={{ backgroundColor: 'primary.main', color: (theme) => theme.palette.primary.contrastText, fontWeight: 700, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 0.5, minWidth: 200, borderBottom: 'none' }}>Razon Social</TableCell>
+                                <TableCell sx={{ backgroundColor: 'primary.main', color: (theme) => theme.palette.primary.contrastText, fontWeight: 700, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 0.5, whiteSpace: 'nowrap', textAlign: 'center', borderBottom: 'none' }}>Cant. Pagos</TableCell>
                                 {months.map((m) => (
-                                    <TableCell key={m} sx={{ backgroundColor: 'primary.dark', color: 'primary.contrastText', textAlign: 'center', fontWeight: '600', minWidth: 60 }}>
+                                    <TableCell key={m} sx={{ backgroundColor: 'primary.main', color: (theme) => theme.palette.primary.contrastText, fontWeight: 700, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 0.5, textAlign: 'center', minWidth: 60, borderBottom: 'none' }}>
                                         {m}
                                     </TableCell>
                                 ))}
-                                <TableCell sx={{ backgroundColor: 'primary.darker', color: 'primary.contrastText', textAlign: 'center', fontWeight: 'bold', minWidth: 100 }}>TOTAL</TableCell>
+                                <TableCell sx={{ backgroundColor: 'primary.main', color: (theme) => theme.palette.primary.contrastText, fontWeight: 700, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 0.5, textAlign: 'center', minWidth: 100, borderBottom: 'none' }}>TOTAL</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -281,8 +265,8 @@ const AnnualReportPage = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-            </Card>
-        </Box>
+            </MainCard>
+        </PageLayout>
     );
 };
 

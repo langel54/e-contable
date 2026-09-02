@@ -2,13 +2,11 @@
 
 import Cookies from "js-cookie";
 import { notifyNetworkError, NETWORK_ERROR_MESSAGE } from "./networkErrorHandler";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+import { API_BASE } from "./apiConfig";
 
 // Función reutilizable para hacer peticiones a la API con autenticación
 export const fetchWithAuth = async (endpoint, options = {}) => {
   const token = Cookies.get("token");
-
   const defaultOptions = {
     headers: {
       "Content-Type": "application/json",
@@ -17,7 +15,7 @@ export const fetchWithAuth = async (endpoint, options = {}) => {
   };
 
   try {
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const response = await fetch(`${API_BASE}${endpoint}`, {
       ...defaultOptions,
       ...options,
       headers: {

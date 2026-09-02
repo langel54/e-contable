@@ -4,12 +4,13 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
   Box,
   Button,
-  Divider,
   Stack,
   Typography,
   IconButton,
   Tooltip,
 } from "@mui/material";
+import PageLayout from "@/app/ui-components/layout/PageLayout";
+import { VIEW_LAYOUT } from "@/app/ui-components/layout/layoutConstants";
 import { PostAdd, Edit, DeleteOutline } from "@mui/icons-material";
 import CustomTable from "@/app/components/CustonTable";
 import ModalComponent from "@/app/components/ModalComponent";
@@ -102,31 +103,32 @@ const ConceptosPage = () => {
   ];
 
   return (
-    <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Stack>
-          <Typography variant="h4" gutterBottom>Conceptos</Typography>
-          <Typography variant="body2" color="text.secondary">Gestiona los conceptos de ingresos y egresos</Typography>
-        </Stack>
+    <PageLayout
+      title="Conceptos"
+      subtitle="Gestión de conceptos de ingresos y egresos"
+      action={
         <Button
           variant="contained"
+          size="small"
           startIcon={<PostAdd />}
           onClick={() => handleOpenForm()}
         >
-          Nuevo Concepto
+          Nuevo concepto
         </Button>
-      </Stack>
-      <Divider sx={{ mb: 2 }} />
-      
-      <CustomTable
-        columns={columns}
-        data={data}
-        paginationModel={pagination}
-        setPaginationModel={setPagination}
-        rowCount={total}
-        loading={loading}
-        getRowId={(row) => row.idconcepto}
-      />
+      }
+    >
+      <Box sx={{ minHeight: VIEW_LAYOUT.fullTableMinHeight, display: "flex", flexDirection: "column" }}>
+        <CustomTable
+          fill
+          columns={columns}
+          data={data}
+          paginationModel={pagination}
+          setPaginationModel={setPagination}
+          rowCount={total}
+          loading={loading}
+          getRowId={(row) => row.idconcepto}
+        />
+      </Box>
 
       <ModalComponent
         open={openFormModal}
@@ -151,7 +153,7 @@ const ConceptosPage = () => {
           </Box>
         }
       />
-    </Box>
+    </PageLayout>
   );
 };
 

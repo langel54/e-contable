@@ -1,13 +1,6 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: var(--app-bg, #f1f5f9);
+  --foreground: var(--app-text, #1e293b);
 }
 
 html,
@@ -19,7 +12,6 @@ body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -35,62 +27,26 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-}
-
-
 .swal2-shown {
   z-index: 9999 !important;
 }
 
 .swal2-container {
   position: fixed !important;
-  /* Asegura que se coloque de forma fija */
   z-index: 9999 !important;
-  /* Ajusta el z-index a un valor alto */
 }
 
 body.swal2-shown {
   padding-right: 0 !important;
-  /* Quita el padding-right */
 }
 
-
-/* --- Scroll suave --- */
-html {
-  scroll-behavior: smooth;
+/* ApexCharts: tooltip en modo oscuro */
+.apexcharts-tooltip.apexcharts-theme-dark {
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
 }
 
-/* --- Scrollbar (para navegadores basados en WebKit: Chrome, Edge, Safari) --- */
-::-webkit-scrollbar {
-  width: 8px;
-  /* ancho de la barra */
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-  /* fondo transparente */
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: #999999;
-  /* color rojo para el "pulgar" */
-  border-radius: 10px;
-  /* bordes redondeados */
-}
-
-/* --- Scrollbar para Firefox --- */
-* {
-  scrollbar-width: thin;
-  /* delgada */
-  scrollbar-color: #999999 transparent;
-  /* barra roja, fondo transparente */
-}
-
-/* Override Next.js dev portal position (persisted from browser preview) */
+/* Override Next.js dev portal position */
 nextjs-portal {
   left: unset;
   top: unset;

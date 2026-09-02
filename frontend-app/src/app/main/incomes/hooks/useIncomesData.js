@@ -16,14 +16,15 @@ export function useIncomesData() {
       conceptFilter,
       periodo,
       selectedAnio,
-      selectedEstado
+      selectedEstado,
+      clienteFilter
     ) => {
       setLoading(true);
       try {
         const data = await getIngresos(
           page,
           pageSize,
-          "",
+          clienteFilter || "",
           selectedEstado,
           startDate,
           endDate,
