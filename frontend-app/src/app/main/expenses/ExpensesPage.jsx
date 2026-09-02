@@ -1,48 +1,29 @@
 import CustomTable from "@/app/components/CustonTable";
 import { getExpenses } from "@/app/services/expensesServices";
 import {
-  Clear,
-  MoreVert,
   PostAdd,
   DriveFileRenameOutline,
-  RestartAlt,
   DeleteOutline,
 } from "@mui/icons-material";
 import {
   Box,
   Button,
-  Divider,
-  FormControl,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  MenuItem,
-  OutlinedInput,
-  Popover,
-  PopoverPaper,
-  Select,
   Stack,
-  TextField,
-  Tooltip,
   Typography,
-  CircularProgress,
 } from "@mui/material";
+import PageLayout from "@/app/ui-components/layout/PageLayout";
+import MainCard from "@/app/ui-components/MainCard";
+import { FILTER_LAYOUT, VIEW_LAYOUT } from "@/app/ui-components/layout/layoutConstants";
+import ExpensesFilters from "./components/ExpensesFilters";
 import React, { useEffect, useState } from "react";
 import ExpensesForm from "./ExpensesForm";
 import ModalComponent from "@/app/components/ModalComponent";
 import PDFPreviewModal from "./components/PDFPreviewModal";
 import "../../components/date-picker/date-picker.css";
-import DatePicker from "react-datepicker";
 import NotasClienteAutocomplete from "../notas/components/NotasClienteAutocomplete";
 import { getConceptos } from "@/app/services/conceptoServices";
 import { getPeriodos } from "@/app/services/periodoServices";
-import EstadoChip from "@/app/components/EstadoChip";
 import { getEstados } from "@/app/services/estadoDocServices";
-import { FileExcelFilled, FilePdfFilled } from "@ant-design/icons";
 import { getColumns } from "./components/TableColumns";
 import { useExpensesData } from "./hooks/useExpensesData";
 // Helper to get formatted start/end dates
@@ -230,249 +211,98 @@ const ExpensesPage = () => {
     setSelectedPDFData(null);
   };
 
+  const onResetFilters = () => {
+    handleResetFilter({
+      setDateRange,
+      setConceptFilter,
+      setPeriodo,
+      setSelectedAnio,
+      setSelectedEstado,
+    });
+    setClienteFilter("");
+  };
+
   return (
-    <Box>
-      <Stack
-        sx={{ pb: 2 }}
-        direction="row"
-        spacing={2}
-        justifyContent={"space-between"}
-      >
-        <Stack>
-          <Typography variant="h4" gutterBottom>
-            Egresos
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Registra y consulta egresos
-          </Typography>
-        </Stack>
-        <Stack direction="row" spacing={2} alignItems="center">
+    <PageLayout
+      title="Egresos"
+      subtitle="Registra y consulta egresos"
+      action={
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1.5}
+          alignItems={{ xs: "stretch", sm: "center" }}
+          sx={{ width: { xs: "100%", sm: "auto" }, minWidth: 0 }}
+        >
           <NotasClienteAutocomplete
             size="small"
             value={clienteFilter}
             onChange={(val) => setClienteFilter(val)}
-            sx={{ minWidth: 250 }}
+            sx={{ width: { xs: "100%", sm: 280 }, minWidth: 0 }}
           />
           <Button
-            size="medium"
+            size="small"
             color="error"
             variant="contained"
             onClick={() => setOpenFormModal(true)}
-            startIcon={<PostAdd fontSize="inherit" />}
+            startIcon={<PostAdd />}
+            sx={{ width: { xs: "100%", sm: "auto" }, flexShrink: 0 }}
           >
-            Registrar Egreso
+            Registrar egreso
           </Button>
         </Stack>
-      </Stack>
-      <Divider></Divider>
-      <Stack
-        direction="row"
-        spacing={2}
-        sx={{
-          mb: 1,
-          mt: 1,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-        width={"100%"}
-      >
-        <Stack direction={"row"} justifyContent={"start"} spacing={2}>
-          <FormControl sx={{ width: 250 }}>
-            <InputLabel>Concepto</InputLabel>
-            <Select
-              sx={{ pr: 3 }}
-              value={conceptFilter}
-              onChange={(e) => setConceptFilter(e.target.value)}
-              displayEmpty
-              label="Selecciona un concepto"
-              input={
-                <OutlinedInput
-                  endAdornment={
-                    <InputAdornment position="end">
-                      {conceptFilter && (
-                        <IconButton
-                          size="small"
-                          edge="end"
-                          onClick={() => setConceptFilter("")}
-                          sx={{ borderRadius: "50%" }}
-                        >
-                          <Clear sx={{ height: 14 }} />
-                        </IconButton>
-                      )}
-                    </InputAdornment>
-                  }
-                />
-              }
-            >
-              {conceptos.map((c) => (
-                <MenuItem key={c.idconcepto} value={c.idconcepto}>
-                  {c.nombre_concepto}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl>
-            <DatePicker
-              locale={"es"}
-              dateFormat="dd/MM/yyyy "
-              selectsRange={true}
-              startDate={startDate}
-              endDate={endDate}
-              onChange={(update) => setDateRange(update)}
-              customInput={
-                <TextField
-                  label="Fecha de pago"
-                  autoComplete={false}
-                  slotProps={{
-                    input: {
-                      endAdornment: (startDate || endDate) && (
-                        <InputAdornment position="end">
-                          <IconButton
-                            sx={{ borderRadius: "50%" }}
-                            onClick={() => setDateRange([null, null])}
-                            size="small"
-                          >
-                            <Clear sx={{ height: 14 }} />
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                />
-              }
-            />
-          </FormControl>
-          <FormControl size="medium" sx={{ width: 100 }}>
-            <InputLabel>Periodo</InputLabel>
-            <Select
-              value={periodo}
-              name="idperiodo"
-              onChange={(e) => setPeriodo(e.target.value)}
-            >
-              <MenuItem value="">Todos</MenuItem>
-              {periodosList.map((period) => (
-                <MenuItem key={period.idperiodo} value={period.idperiodo}>
-                  {period.nom_periodo}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl size="medium" sx={{ width: 150 }}>
-            <DatePicker
-              selected={selectedAnio ? new Date(selectedAnio, 0, 1) : null}
-              onChange={(date) => handleYearChange(date, setSelectedAnio)}
-              showYearPicker
-              dateFormat="yyyy"
-              renderYearContent={renderYearContent}
-              customInput={
-                <TextField
-                  label="Seleccionar Año"
-                  value={selectedAnio || ""}
-                  InputProps={{ readOnly: true }}
-                />
-              }
-            />
-          </FormControl>
-          <FormControl size="medium" sx={{ width: 150 }}>
-            <InputLabel>Estado</InputLabel>
-            <Select
-              value={selectedEstado}
-              onChange={(e) => setSelectedEstado(e.target.value)}
-            >
-              <MenuItem value="">Todos</MenuItem>
-              {estados.map((estatus) => (
-                <MenuItem key={estatus.idestado} value={estatus.idestado}>
-                  {estatus.nom_estado}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Stack>
-        <Stack direction={"row"} spacing={1}>
-          <Tooltip arrow title="Quitar Filtros" placement="left">
-            <IconButton
-              onClick={() => {
-                handleResetFilter({
-                  setDateRange,
-                  setConceptFilter,
-                  setPeriodo,
-                  setSelectedAnio,
-                  setSelectedEstado,
-                });
-                setClienteFilter("");
-              }}
-            >
-              <RestartAlt />
-            </IconButton>
-          </Tooltip>
-          <IconButton onClick={handleClickPop}>
-            <MoreVert />
-          </IconButton>
-          <Popover
-            open={Boolean(anchorElPop)}
-            anchorEl={anchorElPop}
-            onClose={handleActionOpen}
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          >
-            <List>
-              <ListItem
-                sx={{ cursor: "pointer" }}
-                onClick={() =>
-                  handleGenerateExcel({
-                    startDate,
-                    endDate,
-                    conceptFilter,
-                    periodo,
-                    selectedAnio,
-                    selectedEstado,
-                    setExportingExcel,
-                    handleActionOpen,
-                  })
-                }
-                disabled={exportingExcel}
-              >
-                <ListItemIcon
-                  sx={(theme) => ({ color: theme.palette.success.main })}
-                >
-                  {exportingExcel ? (
-                    <CircularProgress size={20} color="success" />
-                  ) : (
-                    <FileExcelFilled />
-                  )}
-                </ListItemIcon>
-                <ListItemText
-                  primary={exportingExcel ? "Exportando..." : "Exportar Excel"}
-                />
-              </ListItem>
-              <Divider />
-              <ListItem
-                sx={{ cursor: "pointer" }}
-                onClick={() => {
-                  // Acción PDF, igual que IncomesPage
-                  handleGeneratePDF({
-                    startDate,
-                    endDate,
-                    conceptFilter,
-                    periodo,
-                    selectedAnio,
-                    selectedEstado,
-                    handleActionOpen,
-                  });
-                }}
-              >
-                <ListItemIcon
-                  sx={(theme) => ({ color: theme.palette.error.main })}
-                >
-                  <FilePdfFilled />
-                </ListItemIcon>
-                <ListItemText primary="Imprimir PDF" />
-              </ListItem>
-            </List>
-          </Popover>
-        </Stack>
-      </Stack>
+      }
+    >
+      <MainCard contentSX={FILTER_LAYOUT.cardContent}>
+        <ExpensesFilters
+          conceptos={conceptos}
+          conceptFilter={conceptFilter}
+          setConceptFilter={setConceptFilter}
+          startDate={startDate}
+          endDate={endDate}
+          setDateRange={setDateRange}
+          periodosList={periodosList}
+          periodo={periodo}
+          setPeriodo={setPeriodo}
+          selectedAnio={selectedAnio}
+          setSelectedAnio={setSelectedAnio}
+          estados={estados}
+          selectedEstado={selectedEstado}
+          setSelectedEstado={setSelectedEstado}
+          handleYearChange={handleYearChange}
+          renderYearContent={renderYearContent}
+          handleResetFilter={onResetFilters}
+          handleClickPop={handleClickPop}
+          anchorElPop={anchorElPop}
+          handleActionOpen={handleActionOpen}
+          exportingExcel={exportingExcel}
+          handleGenerateExcel={() =>
+            handleGenerateExcel({
+              startDate,
+              endDate,
+              conceptFilter,
+              periodo,
+              selectedAnio,
+              selectedEstado,
+              setExportingExcel,
+              handleActionOpen,
+            })
+          }
+          handleGeneratePDF={() =>
+            handleGeneratePDF({
+              startDate,
+              endDate,
+              conceptFilter,
+              periodo,
+              selectedAnio,
+              selectedEstado,
+              handleActionOpen,
+            })
+          }
+        />
+      </MainCard>
+      <Box sx={{ mt: VIEW_LAYOUT.sectionGap, minHeight: VIEW_LAYOUT.fullTableMinHeight, display: "flex", flexDirection: "column" }}>
       <CustomTable
+        fill
         columns={getColumns({
           setEditSalidaData,
           setOpenFormModal,
@@ -558,7 +388,8 @@ const ExpensesPage = () => {
           data={selectedPDFData}
         />
       )}
-    </Box>
+      </Box>
+    </PageLayout>
   );
 };
 

@@ -16,15 +16,15 @@ const MONTHS = [
   { value: 12, label: "Diciembre" },
 ];
 
-const MonthSelect = ({ value, onChange }) => {
+const MonthSelect = ({ value, onChange, sx = {} }) => {
   return (
-    <FormControl fullWidth size="small" sx={{ maxWidth: 200 }}>
-      <InputLabel>Mes</InputLabel>
+    <FormControl fullWidth size="small" sx={{ minWidth: 0, ...sx }}>
+      <InputLabel id="month-picker-label">Mes</InputLabel>
       <Select
+        labelId="month-picker-label"
         label="Mes"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        size="small"
       >
         {MONTHS.map((m) => (
           <MenuItem key={m.value} value={m.value}>

@@ -48,7 +48,7 @@ export function getKpiCardSx(theme, accent) {
       ? `linear-gradient(180deg, ${alpha("#fff", 0.03)} 0%, transparent 28%)`
       : `linear-gradient(180deg, ${alpha("#fff", 0.55)} 0%, transparent 32%)`,
     boxShadow: theme.app?.surface?.cardGlow || theme.customShadows?.z1,
-    transition: "box-shadow 0.2s ease, border-color 0.2s ease",
+    transition: "box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s ease, transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
     "&::before": {
       content: '""',
       position: "absolute",
@@ -64,6 +64,7 @@ export function getKpiCardSx(theme, accent) {
     "&:hover": {
       boxShadow: theme.customShadows?.z2,
       borderColor: alpha(accent, theme.palette.mode === "dark" ? 0.55 : 0.45),
+      transform: "translateY(-4px)",
     },
   };
 }

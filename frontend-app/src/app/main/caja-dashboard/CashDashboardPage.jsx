@@ -6,9 +6,6 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  Stack,
-  TextField,
-  Typography,
   useTheme,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -19,12 +16,12 @@ import AnalyticEcommerce from "@/app/ui-components/cards/statistics/AnalyticEcom
 import MainCard from "@/app/ui-components/MainCard";
 import PageHeader from "@/app/ui-components/PageHeader";
 import SectionTitle from "@/app/ui-components/SectionTitle";
-import { VIEW_LAYOUT } from "@/app/ui-components/layout/layoutConstants";
+import FilterToolbar, { FilterField } from "@/app/ui-components/layout/FilterToolbar";
+import { FILTER_LAYOUT, VIEW_LAYOUT } from "@/app/ui-components/layout/layoutConstants";
 import AreaChart from "@/app/components/dashboard/AreaChart";
 import CircleChart from "@/app/components/dashboard/CircleChart";
 import dayjs from "dayjs";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import YearPickerField from "@/app/components/YearPickerField";
 import MonthPicker from "./MonthPicker";
 import {
   getDashboardCajaGraficos,
@@ -42,7 +39,7 @@ const CashDashboardPage = () => {
   const theme = useTheme();
   const [mode, setMode] = useState("fecha");
   const [selectedAnio, setSelectedAnio] = useState(dayjs().year());
-  const [selectedMonth, setSelectedMonth] = useState("10");
+  const [selectedMonth, setSelectedMonth] = useState(10);
   const [kpis, setKpis] = useState({});
 
   const [chartData, setChartData] = useState({});
@@ -140,38 +137,41 @@ const CashDashboardPage = () => {
           <PageHeader
             title="Caja"
             subtitle="Ingresos, egresos y saldos en tiempo real"
-            action={
-              <Stack direction="row" spacing={1.5} flexWrap="wrap" alignItems="center">
-                <FormControl fullWidth size="small" sx={{ maxWidth: 160 }}>
-                  <InputLabel>Según</InputLabel>
-                  <Select value={mode} label="Según" onChange={(e) => setMode(e.target.value)}>
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <MainCard contentSX={FILTER_LAYOUT.cardContent}>
+            <FilterToolbar>
+              <FilterField>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="caja-mode-label">Según</InputLabel>
+                  <Select
+                    labelId="caja-mode-label"
+                    value={mode}
+                    label="Según"
+                    onChange={(e) => setMode(e.target.value)}
+                  >
                     <MenuItem value="fecha">Fecha</MenuItem>
                     <MenuItem value="periodo">Periodo</MenuItem>
                   </Select>
                 </FormControl>
-                <FormControl size="small" sx={{ width: 140 }}>
-                  <DatePicker
-                    selected={selectedAnio ? new Date(selectedAnio, 0, 1) : null}
-                    onChange={handleYearChange}
-                    showYearPicker
-                    dateFormat="yyyy"
-                    renderYearContent={renderYearContent}
-                    customInput={
-                      <TextField
-                        label="Año"
-                        size="small"
-                        value={selectedAnio || ""}
-                        InputProps={{ readOnly: true }}
-                      />
-                    }
-                  />
-                </FormControl>
-                <FormControl size="small" sx={{ maxWidth: 180 }}>
-                  <MonthPicker value={selectedMonth} onChange={(value) => setSelectedMonth(value)} />
-                </FormControl>
-              </Stack>
-            }
-          />
+              </FilterField>
+              <FilterField>
+                <YearPickerField
+                  selected={selectedAnio}
+                  onChange={handleYearChange}
+                  renderYearContent={renderYearContent}
+                />
+              </FilterField>
+              <FilterField>
+                <MonthPicker
+                  value={selectedMonth}
+                  onChange={(value) => setSelectedMonth(value)}
+                />
+              </FilterField>
+            </FilterToolbar>
+          </MainCard>
         </Grid>
         {selectedMonth && kpis?.totalesMes && (
           <>
@@ -291,7 +291,7 @@ const CashDashboardPage = () => {
                 categories={categoriesMesSaldo || []}
                 height={350}
                 type="line"
-                colors={["red"]}
+                colors={[theme.palette.primary.main]}
                 horizontalLineAtZero={true}
               />
             </MainCard>

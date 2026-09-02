@@ -8,7 +8,10 @@ import {
   DeleteOutline,
   // RestartAlt,
 } from "@mui/icons-material";
-import { Box, Button, Divider, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import PageLayout from "@/app/ui-components/layout/PageLayout";
+import MainCard from "@/app/ui-components/MainCard";
+import { FILTER_LAYOUT, VIEW_LAYOUT } from "@/app/ui-components/layout/layoutConstants";
 import React, { useEffect, useState } from "react";
 import IncomeForm from "./IncomesForm";
 import ModalComponent from "@/app/components/ModalComponent";
@@ -226,45 +229,37 @@ const IncomesPage = () => {
   };
 
   return (
-    <Box>
-      <Stack
-        sx={{ pb: 2 }}
-        direction="row"
-        spacing={2}
-        justifyContent={"space-between"}
-      >
-        <Stack>
-          <Typography variant="h4" gutterBottom>
-            Ingresos
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Registra y consulta ingresos
-          </Typography>
-        </Stack>
-        <Stack direction="row" spacing={2} alignItems="center">
+    <PageLayout
+      title="Ingresos"
+      subtitle="Registra y consulta ingresos"
+      action={
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1.5}
+          alignItems={{ xs: "stretch", sm: "center" }}
+          sx={{ width: { xs: "100%", sm: "auto" }, minWidth: 0 }}
+        >
           <NotasClienteAutocomplete
             size="small"
             value={clienteFilter}
             onChange={(val) => setClienteFilter(val)}
-            sx={{ minWidth: 250 }}
+            sx={{ width: { xs: "100%", sm: 280 }, minWidth: 0 }}
           />
           <Button
-            size="medium"
+            size="small"
             color="success"
             variant="contained"
-            onClick={() => {
-              setOpenFormModal(true);
-            }}
-            startIcon={<PostAdd fontSize="inherit" />}
+            onClick={() => setOpenFormModal(true)}
+            startIcon={<PostAdd />}
+            sx={{ width: { xs: "100%", sm: "auto" }, flexShrink: 0 }}
           >
-            Registrar Ingreso
+            Registrar ingreso
           </Button>
         </Stack>
-      </Stack>
-      <Divider></Divider>
+      }
+    >
+      <MainCard contentSX={FILTER_LAYOUT.cardContent}>
       <IncomesFilters
-        clienteFilter={clienteFilter}
-        setClienteFilter={setClienteFilter}
         conceptos={conceptos}
         conceptFilter={conceptFilter}
         setConceptFilter={setConceptFilter}
@@ -284,6 +279,8 @@ const IncomesPage = () => {
         handleResetFilter={handleResetFilter}
         handleClickPop={handleClickPop}
       />
+      </MainCard>
+      <Box sx={{ mt: VIEW_LAYOUT.sectionGap, minHeight: VIEW_LAYOUT.fullTableMinHeight, display: "flex", flexDirection: "column" }}>
       <IncomesActionsPopover
         anchorElPop={anchorElPop}
         handleActionOpen={handleActionOpen}
@@ -314,6 +311,7 @@ const IncomesPage = () => {
         handleClosePop={handleActionOpen}
       />
       <CustomTable
+        fill
         columns={getColumns({
           setEditIncomeData,
           setOpenFormModal,
@@ -396,7 +394,8 @@ const IncomesPage = () => {
         handleClose={handleClosePDFModal}
         data={selectedPDFData}
       />
-    </Box>
+      </Box>
+    </PageLayout>
   );
 };
 

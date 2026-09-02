@@ -4,7 +4,15 @@ const estadoCuentaController = {
   // Obtener estado de cuenta por cliente y año
   async getByClientAndYear(req, res) {
     try {
-      const { idclienteprov, year } = req.query;
+      const { idclienteprov, year, tipo } = req.query;
+
+      const tipoValido =
+        tipo === "INGRESO" || tipo === "SALIDA" ? tipo : undefined;
+      if (tipo && !tipoValido) {
+        return res.status(400).json({
+          message: "El parámetro 'tipo' debe ser INGRESO o SALIDA.",
+        });
+      }
 
       if (!idclienteprov) {
         return res
@@ -20,7 +28,8 @@ const estadoCuentaController = {
 
       const result = await estadoCuentaService.getByClientAndYear(
         idclienteprov,
-        Number(year)
+        Number(year),
+        tipoValido
       );
 
       res.json(result);

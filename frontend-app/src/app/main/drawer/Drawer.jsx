@@ -16,6 +16,7 @@ import { DrawerHeader } from "./DrawerHeader";
 import DrawerListItem from "../menu/DrawerListItem";
 import { getMenuForRole } from "../menu/menuConfig";
 import { useAuth } from "@/app/provider";
+import Logo from "@/app/ui-components/logo/LogoMain";
 import SidebarFooter from "./SidebarFooter";
 
 export default function MiniDrawer({ children }) {
@@ -24,12 +25,6 @@ export default function MiniDrawer({ children }) {
   const theme = useTheme();
   const { userType, user } = useAuth();
   const isDark = theme.palette.mode === "dark";
-  // Logo: en oscuro intentamos logo-dark.png; si no existe, fallback a logo.png
-  const [logoFallback, setLogoFallback] = useState(false);
-  const logoSrc = isDark && !logoFallback ? "/images/logo-dark.png" : "/images/logo.png";
-  useEffect(() => {
-    if (!isDark) setLogoFallback(false);
-  }, [isDark]);
 
   const pathname = usePathname();
   const router = useRouter();
@@ -67,19 +62,9 @@ export default function MiniDrawer({ children }) {
             sx={{ px: open ? 2 : 0 }}
           >
             {open && (
-              <Box
-                component="img"
-                src={logoSrc}
-                alt="Logo"
-                sx={{
-                  height: 32,
-                  maxWidth: "140px",
-                  objectFit: "contain",
-                }}
-                onError={() => {
-                  if (isDark) setLogoFallback(true);
-                }}
-              />
+              <Box sx={{ height: 26, width: 'auto', '& svg': { height: '100%', width: 'auto' } }}>
+                <Logo />
+              </Box>
             )}
             <IconButton
                 onClick={handleDrawerToggle}

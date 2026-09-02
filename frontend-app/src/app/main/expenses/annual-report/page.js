@@ -5,23 +5,22 @@ import {
     Button,
     Card,
     CardContent,
-    Stack,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
     TableRow,
-    TextField,
     Typography,
-    Paper,
-    GlobalStyles,
     Skeleton,
     LinearProgress
 } from "@mui/material";
-import { Search as SearchIcon, FileDownload as FileDownloadIcon } from "@mui/icons-material";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import PageLayout from "@/app/ui-components/layout/PageLayout";
+import MainCard from "@/app/ui-components/MainCard";
+import FilterToolbar, { FilterField } from "@/app/ui-components/layout/FilterToolbar";
+import { FILTER_LAYOUT, VIEW_LAYOUT } from "@/app/ui-components/layout/layoutConstants";
+import { FileDownload as FileDownloadIcon } from "@mui/icons-material";
+import YearPickerField from "@/app/components/YearPickerField";
 import { getAnnualExpenseReport } from "@/app/services/egresosClienteService"; // Imported new service
 import { saveAs } from "file-saver";
 
@@ -141,76 +140,61 @@ const AnnualExpenseReportPage = () => {
     };
 
     return (
-        <Box sx={{ p: { xs: 2, md: 3 }, bgcolor: 'background.default', minHeight: '100vh' }}>
-            <GlobalStyles styles={{ '.react-datepicker-popper': { zIndex: '9999 !important' } }} />
-            {/* Header Section */}
-            <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
-                <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" alignItems="center" spacing={2}>
-                    <Box>
-                        <Typography variant="h5" fontWeight="700" color="error.main"> {/* Error color for expenses */}
-                            Reporte Anual de Egresos
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            Vista general de egresos por cliente mensualizados
-                        </Typography>
-                    </Box>
-
-                    <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
-                        <Card elevation={0} sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 2, minWidth: 120 }}>
-                            <CardContent sx={{ py: 1, px: 2, '&:last-child': { pb: 1 } }}>
-                                <Typography variant="caption" color="text.secondary" fontWeight="bold">
-                                    CLIENTES
+        <PageLayout
+            title="Reporte anual de egresos"
+            subtitle="Vista general de egresos por cliente mensualizados"
+        >
+            <MainCard contentSX={FILTER_LAYOUT.cardContent}>
+                <FilterToolbar>
+                    <FilterField>
+                        <Card elevation={0} variant="outlined" sx={{ borderRadius: 1.5 }}>
+                            <CardContent sx={{ py: 1, px: 2, "&:last-child": { pb: 1 } }}>
+                                <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                                    Clientes
                                 </Typography>
-                                <Typography variant="h6" color="text.primary" fontWeight="800">
-                                    {loading ? '...' : reportData.length}
+                                <Typography variant="h6" fontWeight={800}>
+                                    {loading ? "…" : reportData.length}
                                 </Typography>
                             </CardContent>
                         </Card>
-
-                        <Card elevation={0} sx={{ bgcolor: 'error.lighter', border: '1px solid', borderColor: 'error.light', borderRadius: 2, minWidth: 200, display: { xs: 'none', md: 'block' } }}>
-                            <CardContent sx={{ py: 1, px: 2, '&:last-child': { pb: 1 } }}>
-                                <Typography variant="caption" color="error.dark" fontWeight="bold">
-                                    TOTAL EGRESOS
+                    </FilterField>
+                    <FilterField>
+                        <Card elevation={0} variant="outlined" sx={{ borderRadius: 1.5, bgcolor: "error.lighter", borderColor: "error.light" }}>
+                            <CardContent sx={{ py: 1, px: 2, "&:last-child": { pb: 1 } }}>
+                                <Typography variant="caption" color="error.dark" fontWeight={700}>
+                                    Total egresos
                                 </Typography>
-                                <Typography variant="h6" color="error.main" fontWeight="800">
-                                    {loading ? '...' : formatCurrency(totalAnnual)}
+                                <Typography variant="h6" color="error.main" fontWeight={800}>
+                                    {loading ? "…" : formatCurrency(totalAnnual)}
                                 </Typography>
                             </CardContent>
                         </Card>
-
-                        <DatePicker
-                            selected={new Date(selectedYear, 0, 1)}
+                    </FilterField>
+                    <FilterField>
+                        <YearPickerField
+                            selected={selectedYear}
                             onChange={handleYearChange}
-                            showYearPicker
-                            dateFormat="yyyy"
-                            customInput={
-                                <TextField
-                                    size="small"
-                                    label="Año"
-                                    InputProps={{
-                                        startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />
-                                    }}
-                                    sx={{ width: 120, bgcolor: 'background.paper' }}
-                                />
-                            }
                         />
-
+                    </FilterField>
+                    <FilterField>
                         <Button
+                            fullWidth
                             variant="outlined"
-                            color="error" // Error color for export button
+                            color="error"
                             startIcon={<FileDownloadIcon />}
                             onClick={handleExportExcel}
                             disabled={loading || reportData.length === 0}
-                            sx={{ height: 40 }}
                         >
                             Exportar
                         </Button>
-                    </Stack>
-                </Stack>
-            </Paper>
+                    </FilterField>
+                </FilterToolbar>
+            </MainCard>
 
-            {/* Table Section */}
-            <Card elevation={0} sx={{ borderRadius: 2, overflow: 'hidden', border: '1px solid', borderColor: 'divider', position: 'relative' }}>
+            <MainCard
+                content={false}
+                sx={{ mt: VIEW_LAYOUT.sectionGap, overflow: "hidden", position: "relative" }}
+            >
                 {loading && (
                     <LinearProgress
                         color="error"
@@ -281,8 +265,8 @@ const AnnualExpenseReportPage = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-            </Card>
-        </Box>
+            </MainCard>
+        </PageLayout>
     );
 };
 

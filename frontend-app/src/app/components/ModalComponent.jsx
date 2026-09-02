@@ -22,6 +22,14 @@ const ModalComponent = ({
       open={open}
       aria-labelledby="modal-title"
       aria-describedby="modal-description"
+      slotProps={{
+        backdrop: {
+          sx: {
+            backdropFilter: "blur(4px)",
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+          },
+        },
+      }}
     >
       <Box
         sx={{

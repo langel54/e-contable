@@ -30,7 +30,7 @@ export default function Main() {
         <>
           <Tabs value={safeIndex} onChange={(_, i) => setTabIndex(i)} centered size="small">
             {visibleTabs.map((t) => (
-              <Tab key={t.id} label={t.label} />
+              <Tab key={t.id} label={t.label} icon={t.icon} iconPosition="start" />
             ))}
           </Tabs>
           <Box sx={{ p: 2 }}>

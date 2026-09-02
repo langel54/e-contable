@@ -190,7 +190,7 @@ const ClientsDashboardPage = () => {
                   <Typography variant="h6" color="text.secondary">
                     Distribución
                   </Typography>
-                  <Typography variant="h4" fontWeight={100}>
+                  <Typography variant="h4" fontWeight={600}>
                     Total: {totalClients || 0}{" "}
                   </Typography>
                 </Stack>
